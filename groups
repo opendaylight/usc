@@ -1,0 +1,7 @@
+# UUID                                  	Group Name
+#
+2c1082352db513c14f958da17a7387e4763a83e9	Non-Interactive usc users
+global:Anonymous-Users                  	Anonymous Users
+global:Registered-Users                 	Registered Users
+ldap:cn=gerrit-aaa-committers,ou=Groups,dc=opendaylight,dc=org	ldap/gerrit-aaa-committers
+ldap:cn=gerrit-usc-committers,ou=Groups,dc=opendaylight,dc=org	ldap/gerrit-usc-committers
