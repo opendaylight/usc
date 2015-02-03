@@ -1,0 +1,9 @@
+module usc {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:usc";
+    prefix "usc";
+
+    revision "2015-01-05" {
+        description "Initial revision of usc model";
+    }
+}
