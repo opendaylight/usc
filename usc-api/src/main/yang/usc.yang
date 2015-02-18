@@ -1,9 +1,192 @@
 module usc {
+    
     yang-version 1;
+    
     namespace "urn:opendaylight:params:xml:ns:yang:usc";
+    
     prefix "usc";
 
-    revision "2015-01-05" {
-        description "Initial revision of usc model";
+    description "This module defines a model for unified secure channels.";
+
+    revision "2015-01-01" {
+        description "Initial revision of usc model.";
     }
+
+    typedef topology-id {
+        type string;
+        description
+            "An identifier for a topology.";
+    }
+
+    typedef node-id {
+        type string;
+        description
+            "An identifier for a node in a topology.";
+    }
+
+    typedef link-id {
+        type string;
+        description
+            "An identifier for a link in a topology.";
+    }
+
+    grouping node-attributes {
+        
+        description
+            "The attibutes of a node.";
+
+        leaf node-id {
+            type node-id;
+            description
+                "The identifier of a node in the topology.";
+        }
+        
+        leaf node-type {
+            type string;
+            description
+                "The identifier of a node type.";
+        }
+        
+    }
+
+    grouping link-attributes {
+        
+        description
+            "The attributes of a link.";
+            
+        leaf link-id {
+            type link-id;
+            description
+                "The identifier of a link in the topology.";
+        }
+        
+        leaf link-type {
+            type string;
+            description
+                "The identifier of a link type.";
+        }
+        
+        container source {
+                
+            description
+                "The logical source of a particular link.";
+                
+            leaf source-node {
+                type node-id;
+                description
+                    "Source node identifier.";
+            }
+            
+        }
+        
+        container destination {
+        
+            description
+                "The logical destination of a particular link.";
+                
+            leaf dest-node {
+                type node-id;
+                description
+                    "Destination node identifier.";
+            }
+
+        }
+        
+        leaf sessions {
+            type uint32;
+            description
+                "Number of sessions.";
+        }
+        
+        leaf bytes-in {
+            type uint32;
+            description
+                "Volume of bytes in.";
+        }
+        
+        leaf bytes-out {
+            type uint32;
+            description
+                "Volume of bytes out.";
+        }
+        
+        leaf call-home {
+            type string;
+            description
+                "Call home attribute.";
+        }
+        
+    }
+
+    grouping usc-topology {
+    
+        description
+            "A model of the unified secure channel topology.";
+                    
+        list topology {
+        
+            description 
+                "A model of an abstract topology.";
+                
+            key "topology-id";
+    
+            leaf topology-id {
+                type topology-id;
+                description
+                    "An identifier for a topology.";
+            }
+
+            list node {
+                
+                description 
+                    "The list of nodes defined for the topology.";
+                    
+                key "node-id";
+                
+                uses node-attributes;
+                
+            }
+
+            list link {
+            
+                description
+                    "The list of links defined for the topology.";
+                    
+                key "link-id";
+    
+                uses link-attributes;
+
+            }
+            
+        }
+        
+    }
+
+    rpc usc-topology {
+    
+        description
+            "View model of the unified secure channel topology.";
+                            
+        input {
+            
+            leaf topology-id {
+                type topology-id;
+                description
+                    "An identifier for a topology.";
+            }
+        
+        }
+        
+        output {
+
+            container usc-topology {
+                uses usc-topology;
+                description
+                    "A model of the unified secure channel topology.";
+            }
+            
+        }
+        
+    }
+
 }
