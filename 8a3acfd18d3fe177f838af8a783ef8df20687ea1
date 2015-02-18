@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_f29d370b",
+        "filename": "usc-impl/src/main/java/org/opendaylight/usc/UscServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 3361
+      },
+      "writtenOn": "2015-02-18T21:56:05Z",
+      "side": 1,
+      "message": "Could you please add some comments for this class and for each method for what you\u0027d like to achieve in each method?",
+      "revId": "8a3acfd18d3fe177f838af8a783ef8df20687ea1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
