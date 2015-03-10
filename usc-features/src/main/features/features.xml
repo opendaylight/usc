@@ -32,5 +32,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <feature version="${mdsal.version}">odl-mdsal-apidocs</feature>
     <feature version="${mdsal.version}">odl-mdsal-xsql</feature>
   </feature>
-
+  <feature name='odl-usc-all' version='${project.version}' description='OpenDaylight :: usc :: all'>
+    <feature version="${project.version}">odl-usc-impl-ui</feature>
+  </feature>
 </features>
