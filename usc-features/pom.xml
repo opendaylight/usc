@@ -67,6 +67,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     </dependency>
     <dependency>
       <groupId>${groupId}</groupId>
+      <artifactId>usc-impl</artifactId>
+      <version>${project.version}</version>
+      <classifier>config</classifier>
+      <type>xml</type>
+    </dependency>
+    <dependency>
+      <groupId>${groupId}</groupId>
       <artifactId>usc-api</artifactId>
       <version>${project.version}</version>
     </dependency>
