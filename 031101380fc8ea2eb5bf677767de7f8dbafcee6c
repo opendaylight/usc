@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_b5515464",
+        "filename": "usc-features/src/main/features/features.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 3361
+      },
+      "writtenOn": "2015-03-17T23:05:04Z",
+      "side": 1,
+      "message": "Please follow the name convention in your description since it will be used by public, such as: \"OpenDaylight :: USC :: Channe\"",
+      "range": {
+        "startLine": 26,
+        "startChar": 76,
+        "endLine": 26,
+        "endChar": 106
+      },
+      "revId": "031101380fc8ea2eb5bf677767de7f8dbafcee6c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
