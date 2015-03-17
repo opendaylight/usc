@@ -23,16 +23,19 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <bundle>mvn:org.opendaylight.usc/usc-impl/${project.version}</bundle>
     <configfile finalname="usc-impl-default-config.xml">mvn:org.opendaylight.usc/usc-impl/${project.version}/xml/config</configfile>
   </feature>
-  <feature name='odl-usc-impl-rest' version='${project.version}' description='OpenDaylight :: usc :: impl :: REST '>
+  <feature name='odl-usc-channel' version='${project.version}' description='OpenDaylight :: usc :: channel'>
     <feature version="${project.version}">odl-usc-impl</feature>
+  </feature>
+  <feature name='odl-usc-channel-rest' version='${project.version}' description='OpenDaylight :: usc :: channel :: rest'>
+    <feature version="${project.version}">odl-usc-channel</feature>
     <feature version="${mdsal.version}">odl-restconf</feature>
   </feature>
-  <feature name='odl-usc-impl-ui' version='${project.version}' description='OpenDaylight :: usc :: impl :: UI'>
-    <feature version="${project.version}">odl-usc-impl-rest</feature>
+  <feature name='odl-usc-channel-ui' version='${project.version}' description='OpenDaylight :: usc :: channel :: UI'>
+    <feature version="${project.version}">odl-usc-channel-rest</feature>
     <feature version="${mdsal.version}">odl-mdsal-apidocs</feature>
     <feature version="${mdsal.version}">odl-mdsal-xsql</feature>
   </feature>
   <feature name='odl-usc-all' version='${project.version}' description='OpenDaylight :: usc :: all'>
-    <feature version="${project.version}">odl-usc-impl-ui</feature>
+    <feature version="${project.version}">odl-usc-channel-ui</feature>
   </feature>
 </features>
