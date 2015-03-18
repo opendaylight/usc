@@ -17,6 +17,12 @@ module usc {
         description
             "An identifier for a topology.";
     }
+    
+    typedef alarm-id {
+        type string;
+        description
+            "An identifier for an error in a topology.";
+    }
 
     typedef node-id {
         type string;
@@ -29,11 +35,48 @@ module usc {
         description
             "An identifier for a link in a topology.";
     }
+    
+    typedef session-id {
+        type string;
+        description
+            "An identifier for a session in a link.";
+    }
+    
+    typedef terminal-point-id {
+        type string;
+        description
+            "An identifier for a terminal-point in a session.";
+    }
+    
+    grouping alarm-attributes {
+        
+        description
+            "The attributes of an alarm message.";
+
+        leaf alarm-id {
+            type alarm-id;
+            description
+                "The identifier of an alarm message.";
+        }
+        
+        leaf alarm-code {
+            type string;
+            description
+                "The code of an alarm message.";
+        }
+        
+        leaf alarm-message {
+            type string;
+            description
+                "The text of an alarm message.";
+        }
+        
+    }
 
     grouping node-attributes {
         
         description
-            "The attibutes of a node.";
+            "The attributes of a node.";
 
         leaf node-id {
             type node-id;
@@ -52,7 +95,7 @@ module usc {
     grouping link-attributes {
         
         description
-            "The attributes of a link.";
+            "The attributes of a link .";
             
         leaf link-id {
             type link-id;
@@ -92,12 +135,6 @@ module usc {
 
         }
         
-        leaf sessions {
-            type uint32;
-            description
-                "Number of sessions.";
-        }
-        
         leaf bytes-in {
             type uint32;
             description
@@ -116,6 +153,103 @@ module usc {
                 "Call home attribute.";
         }
         
+        leaf alarms {
+            type uint32;
+            description
+                "Number of errors.";
+        }
+        
+        list alarm {
+                
+            description 
+                "The list of alarms for the link.";
+                
+            key "alarm-id";
+            
+            uses alarm-attributes;
+            
+        }
+        
+        leaf sessions {
+            type uint32;
+            description
+                "Number of sessions.";
+        }
+        
+        list session {
+                
+            description
+                "The list of sessions defined for the link.";
+                
+            key "session-id";
+
+            uses session-attributes;
+
+        }
+        
+    }
+    
+    grouping session-attributes {
+        
+        description
+            "The attributes of a session.";
+            
+        leaf session-id {
+            type session-id;
+            description
+                "The identifier of a session in an USC Channel.";
+        }    
+        
+        container terminal-point {
+                
+            description
+                "The logical terminal point of a particular session.";
+            
+            uses terminal-point-attributes;
+            
+        }
+        
+        leaf bytes-in {
+            type uint32;
+            description
+                "Volume of bytes in.";
+        }
+        
+        leaf bytes-out {
+            type uint32;
+            description
+                "Volume of bytes out.";
+        }
+        
+        leaf alarms {
+            type uint32;
+            description
+                "Number of alarms.";
+        }
+        
+        list alarm {
+                
+            description 
+                "The list of alarms for the session.";
+                
+            key "alarm-id";
+            
+            uses alarm-attributes;
+            
+        }
+        
+    }
+    
+    grouping terminal-point-attributes {
+        
+        description
+            "The attributes of a terminal point.";
+            
+        leaf terminal-point-id {
+            type terminal-point-id;
+            description
+                "The identifier of a terminal point in the session.";
+        }      
     }
 
     grouping usc-topology {
@@ -153,7 +287,7 @@ module usc {
                     "The list of links defined for the topology.";
                     
                 key "link-id";
-    
+            
                 uses link-attributes;
 
             }
