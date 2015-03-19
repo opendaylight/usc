@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_8df52885",
+        "filename": "usc-impl/src/main/java/org/opendaylight/usc/manager/UscManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 3361
+      },
+      "writtenOn": "2015-03-19T00:04:43Z",
+      "side": 1,
+      "message": "In general, I prefer it throws exception, which allow caller instance to handle it automatically if it can, instead of only logging the error.",
+      "revId": "689e83e18389825ae07f400b310165d644a9ca07",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_4def20b1",
+        "filename": "usc-impl/src/main/java/org/opendaylight/usc/manager/UscSecurityManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 3361
+      },
+      "writtenOn": "2015-03-19T00:04:43Z",
+      "side": 1,
+      "message": "Is the filename fixed?",
+      "revId": "689e83e18389825ae07f400b310165d644a9ca07",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_ad358447",
+        "filename": "usc-impl/src/main/java/org/opendaylight/usc/manager/UscTopologyManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 549,
+      "author": {
+        "id": 3361
+      },
+      "writtenOn": "2015-03-19T00:04:43Z",
+      "side": 1,
+      "message": "1. Alarm should not be put in the memory\n2. The admin will definitely want to know ALL alarm instead of only partial of it, which is misleading.",
+      "revId": "689e83e18389825ae07f400b310165d644a9ca07",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
