@@ -1,0 +1,378 @@
+module usc-channel {
+
+    yang-version 1;
+
+    namespace "urn:opendaylight:params:xml:ns:yang:usc:channel";
+
+    prefix "usc-channel";
+
+    description "This module defines the model for USC channels.";
+
+    revision "2015-01-01" {
+        description "Initial revision of USC channels.";
+    }
+
+    typedef alarm-id {
+        type string;
+        description
+            "An identifier for an alarm.";
+    }
+
+    typedef session-id {
+        type string;
+        description
+            "An identifier for a session in a channel.";
+    }
+
+    typedef termination-point-id {
+        type string;
+        description
+            "An identifier for a termination point in a session.";
+    }
+
+    typedef node-id {
+        type string;
+        description
+            "An identifier for a node in a topology.";
+    }
+
+    typedef channel-id {
+        type string;
+        description
+            "An identifier for a channel in a topology.";
+    }
+
+    typedef topology-id {
+        type string;
+        description
+            "An identifier for a topology.";
+    }
+
+    grouping alarm-attributes {
+
+        description
+            "The attributes of an alarm message.";
+
+        leaf alarm-id {
+            type alarm-id;
+            description
+                "The identifier of an alarm message.";
+        }
+
+        leaf alarm-code {
+            type string;
+            description
+                "The code of an alarm message.";
+        }
+
+        leaf alarm-message {
+            type string;
+            description
+                "The text of an alarm message.";
+        }
+
+    }
+
+    grouping termination-point-attributes {
+
+        description
+            "The attributes of a termination point.";
+
+        leaf termination-point-id {
+            type termination-point-id;
+            description
+                "The identifier of a termination point in the session.";
+        }
+
+    }
+
+    grouping session-attributes {
+
+        description
+            "The attributes of a session.";
+
+        leaf session-id {
+            type session-id;
+            description
+                "The identifier of a session in an USC channel.";
+        }    
+
+        container termination-point {
+
+            description
+                "The logical termination point of a particular session.";
+
+            uses termination-point-attributes;
+
+        }
+
+        leaf bytes-in {
+            type uint32;
+            description
+                "Volume of bytes in.";
+        }
+
+        leaf bytes-out {
+            type uint32;
+            description
+                "Volume of bytes out.";
+        }
+
+        leaf session-alarms {
+            type uint32;
+            description
+                "Number of alarms.";
+        }
+
+        list session-alarm {
+
+            description 
+                "The list of alarms for the session.";
+
+            key "alarm-id";
+
+            uses alarm-attributes;
+
+        }
+
+    }
+
+    grouping node-attributes {
+
+        description
+            "The attributes of a node.";
+
+        leaf node-id {
+            type node-id;
+            description
+                "The identifier of a node in the topology.";
+        }
+
+        leaf node-type {
+            type string;
+            description
+                "The identifier of a node type.";
+        }
+
+    }
+
+    grouping channel-attributes {
+
+        description
+            "The attributes of a channel.";
+
+        leaf channel-id {
+            type channel-id;
+            description
+                "The identifier of a channel in the topology.";
+        }
+
+        leaf channel-type {
+            type string;
+            description
+                "The identifier of a channel type.";
+        }
+
+        container source {
+
+            description
+                "The logical source of a particular channel.";
+
+            leaf source-node {
+                type node-id;
+                description
+                    "Source node identifier.";
+            }
+
+        }
+
+        container destination {
+
+            description
+                "The logical destination of a particular channel.";
+
+            leaf dest-node {
+                type node-id;
+                description
+                    "Destination node identifier.";
+            }
+
+        }
+
+        leaf bytes-in {
+            type uint32;
+            description
+                "Volume of bytes in.";
+        }
+
+        leaf bytes-out {
+            type uint32;
+            description
+                "Volume of bytes out.";
+        }
+
+        leaf call-home {
+            type string;
+            description
+                "Call home attribute.";
+        }
+
+        leaf channel-alarms {
+            type uint32;
+            description
+                "Number of errors.";
+        }
+
+        list channel-alarm {
+
+            description 
+                "The list of alarms for the channel.";
+
+            key "alarm-id";
+
+            uses alarm-attributes;
+
+        }
+
+        leaf sessions {
+            type uint32;
+            description
+                "Number of sessions.";
+        }
+
+        list session {
+
+            description
+                "The list of sessions defined for the channel.";
+
+            key "session-id";
+
+            uses session-attributes;
+
+        }
+
+    }
+
+    grouping topology-attributes {
+
+        description
+            "The attributes of a topology.";
+
+        leaf topology-id {
+            type topology-id;
+            description
+                "An identifier for a topology.";
+        }
+
+        list node {
+
+            description 
+                "The list of nodes defined for the topology.";
+
+            key "node-id";
+
+            uses node-attributes;
+
+        }
+
+        list channel {
+
+            description
+                "The list of channels defined for the topology.";
+
+            key "channel-id";
+
+            uses channel-attributes;
+
+        }
+
+    }
+
+    container usc-topology {
+
+        description
+            "A model of the unified secure channel topology.";
+
+        list topology {
+
+            description
+                "The list of channels defined for the topology.";
+
+            key "topology-id";
+
+            uses topology-attributes;
+
+        }
+
+    }
+
+    rpc view-channel {
+
+        description
+            "View all channels in a USC topology.";
+
+        input {
+
+            leaf topology-id {
+                type topology-id;
+                description
+                    "An identifier for a topology.";
+            }
+
+        }
+
+        output {
+
+	        list topology {
+
+	            description
+	                "The list of channels defined for the topology.";
+
+	            key "topology-id";
+
+	            uses topology-attributes;
+
+	        }
+
+        }
+
+    }
+
+    rpc add-channel {
+
+        description
+            "Add a channel to the USC topology.";
+             
+        input {
+
+            container channel {
+
+            	description
+                    "The channel to be added.";
+
+            	uses channel-attributes;
+
+            }
+
+        }
+
+    }
+
+    rpc delete-channel {
+
+        description
+            "Remove a channel from the USC topology.";
+           
+        input {
+
+			leaf channel-id {
+                type channel-id;
+                description
+                    "An identifier for a channel.";
+            }
+
+        }
+
+    }
+
+}

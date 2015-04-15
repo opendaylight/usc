@@ -1,0 +1,3 @@
+feature:install odl-mdsal-apidocs
+feature:install odl-usc-impl
+feature:install odl-netconf-connector-all

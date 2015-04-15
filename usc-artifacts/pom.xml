@@ -1,30 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-Copyright (c) 2015 Huawei, Inc and others.  All rights reserved.
-
-This program and the accompanying materials are made available under the
-terms of the Eclipse Public License v1.0 which accompanies this distribution,
-and is available at http://www.eclipse.org/legal/epl-v10.html
+  Copyright (c) 2015 Huawei, Inc and others. All rights reserved.
+  This program and the accompanying materials are made available under the
+  terms of the Eclipse Public License v1.0 which accompanies this distribution,
+  and is available at http://www.eclipse.org/legal/epl-v10.html
 -->
-
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.usc</groupId>
   <artifactId>usc-artifacts</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
-
+  <name>${project.artifactId}</name>
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>usc-api</artifactId>
+        <artifactId>usc-agent</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>usc-impl</artifactId>
+        <artifactId>usc-channel-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>usc-channel-impl</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>usc-netconf-client-dispatcher</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -36,4 +44,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       </dependency>
     </dependencies>
   </dependencyManagement>
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/usc.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/usc.git</developerConnection>
+    <url>https://wiki.opendaylight.org/view/USC:Main</url>
+    <tag>HEAD</tag>
+  </scm>
 </project>
