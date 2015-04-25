@@ -26,9 +26,6 @@ public class UscChannelListener implements UscMonitorListener {
 
     /**
      * create a Channel monitor listener using given monitor manager
-     * 
-     * @param monitorManager
-     *            monitor manager
      */
     public UscChannelListener() {
         monitorService = UscServiceUtils.getService(UscMonitorService.class);

@@ -172,7 +172,7 @@ public class UscHeader {
     /**
      * Constructs an USC header from a byte stream
      * 
-     * @param buf
+     * @param bytes buffer
      * @return the USC header
      */
     public static UscHeader getFromBytes(final byte[] bytes) {

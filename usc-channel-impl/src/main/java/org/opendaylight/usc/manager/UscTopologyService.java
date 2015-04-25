@@ -92,9 +92,6 @@ public class UscTopologyService {
 
     /**
      * create topology manager of USC using a given shard data manger
-     * 
-     * @param shardManager
-     *            shard data manger
      */
     public void init() {
         shardService = UscServiceUtils.getService(UscShardService.class);
@@ -214,7 +211,6 @@ public class UscTopologyService {
     
     /**
      * get the whole USC topology from shard data
-     * @param shardService UscShardService for shard data operations
      * @return the whole USC topology
      */
     @SuppressWarnings({ "unchecked" })
@@ -441,7 +437,7 @@ public class UscTopologyService {
      * 
      * @param destinationId
      *            destination id
-     * @param session
+     * @param sessionId
      *            the removing session
      */
     public Session removeSession(String destinationId, String sessionId) {
@@ -490,7 +486,7 @@ public class UscTopologyService {
     /**
      * update session of the link
      * 
-     * @param Link
+     * @param link
      *            updating target link
      * @param session
      *            the updating session

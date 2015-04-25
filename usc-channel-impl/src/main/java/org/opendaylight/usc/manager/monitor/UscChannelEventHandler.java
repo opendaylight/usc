@@ -30,9 +30,6 @@ public class UscChannelEventHandler implements UscEventHandler {
 
     /**
      * create a channel event handler using given topology manager
-     * 
-     * @param topoService
-     *            topology manager
      */
     public UscChannelEventHandler() {
         topoService = UscServiceUtils.getService(UscTopologyService.class);

@@ -30,9 +30,6 @@ public class UscSessionEventHandler implements UscEventHandler {
 
     /**
      * create a session event handler using given topology manager
-     * 
-     * @param topoService
-     *            topology manager
      */
     public UscSessionEventHandler() {
         topoService = UscServiceUtils.getService(UscTopologyService.class);

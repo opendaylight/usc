@@ -70,7 +70,6 @@ public class UscNetconfClientDispatcherImpl implements NetconfClientDispatcher, 
      * @param bossGroup
      * @param workerGroup
      * @param timer
-     * @param manager
      */
     public UscNetconfClientDispatcherImpl(final EventLoopGroup bossGroup, final EventLoopGroup workerGroup,
             final Timer timer) {

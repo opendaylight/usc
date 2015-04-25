@@ -27,7 +27,7 @@ public class UscServiceUtils {
      *
      * @param clazz
      *            The target class
-     * @param instance
+     * @param service
      *            of the object exporting the service
      * @param properties
      *            The properties to be attached to the service registration

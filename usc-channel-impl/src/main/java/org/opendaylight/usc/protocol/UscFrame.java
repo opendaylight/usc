@@ -54,8 +54,7 @@ public abstract class UscFrame {
     /**
      * To be implemented by subclasses to return the payload as a ByteBuf.
      * 
-     * @param out
-     *            the buffer to write to
+     * @return payload as a buffer
      */
     public abstract ByteBuf getPayload();
 

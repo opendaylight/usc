@@ -136,7 +136,7 @@ public class UscTopologyFactory {
     /**
      * convert String to boolean of call home
      * 
-     * @param CallHome
+     * @param callHome
      *            String value of call home
      * @return the boolean value of call home
      */
