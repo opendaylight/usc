@@ -19,6 +19,10 @@
   <version>1.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
+  <properties>
+    <akka.version>2.3.9</akka.version>
+    <scala.version>2.10</scala.version>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -42,12 +46,62 @@
       <artifactId>bcprov-jdk15on</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.typesafe.akka</groupId>
+      <artifactId>akka-actor_${scala.version}</artifactId>
+      <version>${akka.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.typesafe.akka</groupId>
+      <artifactId>akka-cluster_${scala.version}</artifactId>
+      <version>${akka.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.typesafe.akka</groupId>
+      <artifactId>akka-persistence-experimental_${scala.version}</artifactId>
+      <version>${akka.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.typesafe.akka</groupId>
+      <artifactId>akka-remote_${scala.version}</artifactId>
+      <version>${akka.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.typesafe.akka</groupId>
+      <artifactId>akka-testkit_${scala.version}</artifactId>
+      <version>${akka.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.typesafe.akka</groupId>
+      <artifactId>akka-osgi_${scala.version}</artifactId>
+      <version>${akka.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.typesafe.akka</groupId>
+      <artifactId>akka-slf4j_${scala.version}</artifactId>
+      <version>${akka.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-clustering-commons</artifactId>
+      <version>${mdsal.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>features-netconf-connector</artifactId>
       <version>${mdsal.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+      </testResource>
+    </testResources>
     <plugins>
       <plugin>
         <groupId>org.opendaylight.yangtools</groupId>
@@ -81,6 +135,53 @@
             <type>jar</type>
           </dependency>
         </dependencies>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-artifacts</id>
+            <goals>
+              <goal>attach-artifact</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <artifacts>
+                <artifact>
+                  <file>${project.build.directory}/classes/etc/opendaylight/karaf/config.xml</file>
+                  <type>xml</type>
+                  <classifier>config</classifier>
+                </artifact>
+                <artifact>
+                  <file>${project.build.directory}/classes/etc/usc/certificates/client.key.pem</file>
+                  <type>pem</type>
+                  <classifier>clientkey</classifier>
+                </artifact>
+                <artifact>
+                  <file>${project.build.directory}/classes/etc/usc/certificates/client.pem</file>
+                  <type>pem</type>
+                  <classifier>client</classifier>
+                </artifact>
+                <artifact>
+                  <file>${project.build.directory}/classes/etc/usc/certificates/rootCA.pem</file>
+                  <type>pem</type>
+                  <classifier>rootCA</classifier>
+                </artifact>
+                <artifact>
+                  <file>${project.build.directory}/classes/etc/usc/usc.properties</file>
+                  <type>properties</type>
+                  <classifier>usc</classifier>
+                </artifact>
+                <artifact>
+                  <file>${project.build.directory}/classes/etc/usc/akka.conf</file>
+                  <type>conf</type>
+                  <classifier>akka</classifier>
+                </artifact>
+              </artifacts>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

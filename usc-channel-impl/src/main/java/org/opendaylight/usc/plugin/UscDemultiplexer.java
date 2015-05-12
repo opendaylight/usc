@@ -40,7 +40,7 @@ import com.google.common.util.concurrent.SettableFuture;
 public class UscDemultiplexer extends SimpleChannelInboundHandler<UscFrame> {
 
     private static final Logger LOG = LoggerFactory.getLogger(UscDemultiplexer.class);
-
+    public final SettableFuture<Throwable> promise = SettableFuture.create();
     private final UscPlugin plugin;
 
     /**
@@ -58,10 +58,17 @@ public class UscDemultiplexer extends SimpleChannelInboundHandler<UscFrame> {
     protected void channelRead0(ChannelHandlerContext ctx, UscFrame frame) throws Exception {
     	LOG.trace("UscDemultiplexer.channelRead: " + frame);
 
+    	if(frame instanceof UscControl) {
+        	UscControl controlMsg = (UscControl)frame;
+        	if(controlMsg.getControlCode() == UscControl.ControlCode.ECHO) {
+        		LOG.trace("UscDemultiplexer: set ECHO promise to Success");
+        		promise.set(new Throwable("Success"));
+        		return;
+        	}
+        }
+    	
         final UscHeader header = frame.getHeader();
-
         final int sessionId = header.getSessionId();
-
         final UscChannelImpl connection = ctx.channel().attr(UscPlugin.CHANNEL).get();
 
         final UscSessionImpl session = connection.getSession(sessionId);
@@ -117,7 +124,6 @@ public class UscDemultiplexer extends SimpleChannelInboundHandler<UscFrame> {
         }
     }
 
-    
 	@Override
 	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 		LOG.trace("UscDemultiplexer channelInactive()");
@@ -130,6 +136,7 @@ public class UscDemultiplexer extends SimpleChannelInboundHandler<UscFrame> {
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
 			throws Exception {
+		promise.set(cause);
 		
 		if (cause instanceof UscChannelException) {
 			LOG.trace("UscDemultiplexer exceptionCaught()");

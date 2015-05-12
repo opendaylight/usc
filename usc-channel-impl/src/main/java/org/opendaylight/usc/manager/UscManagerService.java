@@ -14,7 +14,6 @@ import org.opendaylight.usc.manager.api.UscShardService;
 import org.opendaylight.usc.plugin.UscPluginTcp;
 import org.opendaylight.usc.plugin.UscPluginUdp;
 import org.opendaylight.usc.util.UscServiceUtils;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.impl.rev150101.UscImplModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,8 +22,7 @@ import org.slf4j.LoggerFactory;
  */
 public class UscManagerService {
 
-    private static final Logger LOG = LoggerFactory
-            .getLogger(UscManagerService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UscManagerService.class);
     private static UscManagerService manager = new UscManagerService();
 
     private UscConfigurationService configService;
@@ -32,9 +30,11 @@ public class UscManagerService {
     private UscShardServiceImpl shardService;
     private UscTopologyService topoService;
     private UscMonitorService monitorService;
+    private UscRouteBrokerService brokerService;
 
     private UscPluginTcp pluginTcp;
     private UscPluginUdp pluginUdp;
+    private boolean initFlag = false;
 
     private UscManagerService() {
 
@@ -56,66 +56,50 @@ public class UscManagerService {
      *            DataBroker Service instance
      */
     public void init(DataBroker dataService) {
-        // configuration service must init at first
-        configService = UscConfigurationServiceImpl.getInstance();
-        // register configure service first, all other services depend on it
-        UscServiceUtils.registerService(this, UscConfigurationService.class,
-                configService, null);
-
-        securityService = UscSecureServiceImpl.getInstance();
-        UscServiceUtils.registerService(this, UscSecureService.class,
-                securityService, null);
-        LOG.info("Configuration service and Secure service is initilzated!");
+        if (!initFlag) {
+            init();
+        }
         if (dataService != null) {
             UscShardServiceImpl.getInstance().init(dataService);
             shardService = UscShardServiceImpl.getInstance();
-            UscServiceUtils.registerService(this, UscShardService.class,
-                    shardService, null);
+            UscServiceUtils.registerService(this, UscShardService.class, shardService, null);
 
             // topology service depend on shard service
             topoService = UscTopologyService.getInstance();
             topoService.init();
-            UscServiceUtils.registerService(this, UscTopologyService.class,
-                    topoService, null);
+            UscServiceUtils.registerService(this, UscTopologyService.class, topoService, null);
 
             // monitor service depend on topology service
             monitorService = UscMonitorService.getInstance();
-            UscServiceUtils.registerService(this, UscMonitorService.class,
-                    monitorService, null);
-            LOG.info("Shard service ,Topology Service and Monitor service is initilzated!");
+            UscServiceUtils.registerService(this, UscMonitorService.class, monitorService, null);
+            LOG.info("Shard service ,Topology Service and Monitor service are initilzated!");
         } else {
-            LOG.error("Since dataBroker is null,Shard service ,Topology Service and Monitor service is not initilzated!");
+            LOG.error("Since dataBroker is null,Shard service ,Topology Service and Monitor service are not initilzated!");
         }
     }
 
     /**
-     * initialize Usc Manager without parameter,only for Netconf client dispatcher UscPluin
+     * initialize Usc Manager without parameter,only for Netconf client
+     * dispatcher UscPluin
      * 
      */
     public void init() {
+        if (initFlag)
+            return;
         // configuration service must init at first
         configService = UscConfigurationServiceImpl.getInstance();
         // register configure service first, all other services depend on it
-        UscServiceUtils.registerService(this, UscConfigurationService.class,
-                configService, null);
+        UscServiceUtils.registerService(this, UscConfigurationService.class, configService, null);
 
         securityService = UscSecureServiceImpl.getInstance();
-        UscServiceUtils.registerService(this, UscSecureService.class,
-                securityService, null);
-        shardService = UscShardServiceImpl.getInstance();
-        UscServiceUtils.registerService(this, UscShardService.class,
-                shardService, null);
+        UscServiceUtils.registerService(this, UscSecureService.class, securityService, null);
 
-        // topology service depend on shard service
-        topoService = UscTopologyService.getInstance();
-        topoService.init();
-        UscServiceUtils.registerService(this, UscTopologyService.class,
-                topoService, null);
-
-        // monitor service depend on topology service
-        monitorService = UscMonitorService.getInstance();
-        UscServiceUtils.registerService(this, UscMonitorService.class,
-                monitorService, null);
+        // initialize broker service
+        brokerService = UscRouteBrokerService.getInstance();
+        brokerService.init();
+        UscServiceUtils.registerService(this, UscRouteBrokerService.class, UscRouteBrokerService.getInstance(), null);
+        initFlag = true;
+        LOG.info("Configuration service ,Secure service and Route broker Service are initilzated for UscPlugin! ");
     }
 
     /**
@@ -125,13 +109,17 @@ public class UscManagerService {
         if (topoService != null) {
             topoService.destory();
         }
+        if (brokerService != null) {
+            brokerService.destroy();
+        }
     }
 
     public UscPluginTcp getPluginTcp() {
         if (pluginTcp == null) {
             pluginTcp = new UscPluginTcp();
-            pluginTcp.addMonitorEventListener(monitorService
-                    .getChannelListener());
+            if (monitorService == null) {
+                monitorService = UscMonitorService.getInstance();
+            }
         }
         return pluginTcp;
     }
@@ -139,8 +127,6 @@ public class UscManagerService {
     public UscPluginUdp getPluginUdp() {
         if (pluginUdp == null) {
             pluginUdp = new UscPluginUdp();
-            pluginUdp.addMonitorEventListener(monitorService
-                    .getChannelListener());
         }
         return pluginUdp;
     }

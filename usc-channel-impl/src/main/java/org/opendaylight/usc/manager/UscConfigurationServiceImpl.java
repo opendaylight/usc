@@ -7,6 +7,8 @@
  */
 package org.opendaylight.usc.manager;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
@@ -23,27 +25,18 @@ public class UscConfigurationServiceImpl implements UscConfigurationService {
 
     private static final Logger LOG = LoggerFactory
             .getLogger(UscConfigurationServiceImpl.class);
-    private static UscConfigurationServiceImpl manager = new UscConfigurationServiceImpl();
+    private static UscConfigurationServiceImpl manager;
+
+    private static String defaultPropertyFilePath;
+
+    public static void setDefaultPropertyFilePath(String path) {
+        defaultPropertyFilePath = path;
+    }
 
     private Hashtable<String, Object> configData = new Hashtable<String, Object>();
 
     private UscConfigurationServiceImpl() {
-        // default value
-        initProperty(UscConfigurationService.USC_AGENT_PORT, 1068);
-        initProperty(UscConfigurationService.USC_PLUGIN_PORT, 1069);
-        initProperty(UscConfigurationService.USC_MAX_ERROR_NUMER, 100);
-        initProperty(UscConfigurationService.USC_MAX_THREAD_NUMBER, 100);
-        initProperty(UscConfigurationService.USC_LOG_ERROR_EVENT, true);
-        initProperty(UscConfigurationService.SECURITY_FILES_ROOT,
-                "src/main/certificates");
-        initProperty(UscConfigurationService.PRIVATE_KEY_FILE, "client.key.pem");
-        initProperty(UscConfigurationService.PUBLIC_CERTIFICATE_CHAIN_FILE,
-                "client.pem");
-        initProperty(UscConfigurationService.TRUST_CERTIFICATE_CHAIN_FILE,
-                "rootCA.pem");
-        initProperty(UscConfigurationService.PROPERTY_FILE,
-                "src/main/config/usc.properties");
-        initFromPropertyFile();
+        loadFromPropertyFile();
     }
 
     /**
@@ -52,17 +45,23 @@ public class UscConfigurationServiceImpl implements UscConfigurationService {
      * @return UscConfigurationManager instance object
      */
     public final static UscConfigurationServiceImpl getInstance() {
+        if (manager == null) {
+            manager = new UscConfigurationServiceImpl();
+        }
         return manager;
     }
 
-    private void initFromPropertyFile() {
-        String filename = getConfigStringValue(UscConfigurationService.PROPERTY_FILE);
+    private void loadFromPropertyFile() {
         Properties prop = new Properties();
-        InputStream inputStream = getClass().getClassLoader()
-                .getResourceAsStream(filename);
-
-        if (inputStream != null) {
-            LOG.info("Found the USC properties file, initializing configuration service.");
+        // InputStream inputStream = getClass().getClassLoader()
+        // .getResourceAsStream(filename);
+        InputStream inputStream;
+        try {
+            if (defaultPropertyFilePath == null) {
+                defaultPropertyFilePath = UscConfigurationService.PROPERTY_FILE_PATH;
+            }
+            inputStream = new FileInputStream(defaultPropertyFilePath);
+            LOG.debug("Found the USC properties file, initializing configuration service.");
             try {
                 prop.load(inputStream);
                 // initialize configuration properties
@@ -84,13 +83,16 @@ public class UscConfigurationServiceImpl implements UscConfigurationService {
                         UscConfigurationService.PUBLIC_CERTIFICATE_CHAIN_FILE);
                 setStringPropertyFromFile(prop,
                         UscConfigurationService.TRUST_CERTIFICATE_CHAIN_FILE);
+                setStringPropertyFromFile(prop,
+                        UscConfigurationService.AKKA_CLUSTER_FILE);
             } catch (IOException e) {
                 LOG.warn("Failed to load properties from USC properties file, using the default data. Error message is "
                         + e.getMessage());
             }
-        } else {
-            LOG.info("Don't found the USC properties file, using the default data.filename is "
-                    + filename);
+        } catch (FileNotFoundException e1) {
+            LOG.info("Didn't find the USC properties file, using the default data.filename is "
+                    + UscConfigurationService.PROPERTY_FILE_PATH
+                    + ", error message is " + e1.getMessage());
         }
     }
 

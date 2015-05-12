@@ -10,9 +10,13 @@ package org.opendaylight.usc.test.manager;
 import javax.net.ssl.SSLException;
 
 import org.junit.Test;
+import org.opendaylight.usc.test.AbstractUscTest;
 import org.opendaylight.usc.util.UscDtoUtils;
 
-public class UscManagerTest {
+/**
+ * Test suite for USC manager.
+ */
+public class UscManagerTest extends AbstractUscTest {
     @Test
     public void testID() throws SSLException {
         log("Usc=" + UscDtoUtils.getUscTopologyIdentifier());

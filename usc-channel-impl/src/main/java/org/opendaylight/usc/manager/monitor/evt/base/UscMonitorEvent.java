@@ -15,6 +15,7 @@ import org.opendaylight.usc.manager.api.UscEvent;
 public class UscMonitorEvent implements UscEvent {
 
     private String deviceId;
+    private String type;
 
     /**
      * create a monitor event
@@ -22,8 +23,14 @@ public class UscMonitorEvent implements UscEvent {
      * @param deviceId
      *            device id which can identify a channel error happens
      */
-    public UscMonitorEvent(String deviceId) {
-        this.deviceId = deviceId;
+    public UscMonitorEvent(String deviceId, String type) {
+        // InetAddress includes a forward slash default
+        if (deviceId.indexOf('/') == 0) {
+            this.deviceId = deviceId.substring(1, deviceId.length());
+        } else {
+            this.deviceId = deviceId;
+        }
+        this.type = type;
     }
 
     /**
@@ -35,4 +42,12 @@ public class UscMonitorEvent implements UscEvent {
         return deviceId;
     }
 
+    @Override
+    public String toString() {
+        return "Device Id is " + deviceId + ",type is " + type;
+    }
+
+    public String getType() {
+        return type;
+    }
 }

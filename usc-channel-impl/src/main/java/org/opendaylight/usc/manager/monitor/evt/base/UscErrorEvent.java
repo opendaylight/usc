@@ -24,6 +24,8 @@ public class UscErrorEvent extends UscMonitorEvent {
      * 
      * @param deviceId
      *            device id which can identify the channel which error happens
+     * @param type
+     *            channel type
      * @param errorCode
      *            error code
      * @param level
@@ -31,8 +33,8 @@ public class UscErrorEvent extends UscMonitorEvent {
      * @param message
      *            error message
      */
-    public UscErrorEvent(String deviceId, int errorCode, UscErrorLevel level, String message) {
-        super(deviceId);
+    public UscErrorEvent(String deviceId, String type, int errorCode, UscErrorLevel level, String message) {
+        super(deviceId, type);
         errorId = UUID.randomUUID().toString();
         this.errorCode = errorCode;
         this.level = level;
@@ -75,4 +77,9 @@ public class UscErrorEvent extends UscMonitorEvent {
         return level;
     }
 
+    @Override
+    public String toString() {
+        return super.toString() + ",Error info is [id:" + errorId + "][Code:" + errorCode + "][level:" + level
+                + "][message:" + message + "]";
+    }
 }

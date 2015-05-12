@@ -22,8 +22,9 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.codehaus.jettison.json.JSONTokener;
 import org.junit.Test;
+import org.opendaylight.usc.test.AbstractTest;
 
-public class UscServiceTest {
+public class UscServiceTest extends AbstractTest {
     // @Test
     public void test() {
         // creating a new URL with the request
@@ -135,7 +136,7 @@ public class UscServiceTest {
             // Assert.assertEquals("", json.getString("@subnet"));
         } catch (JSONException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            // e.printStackTrace();
             return;
         }
     }
@@ -197,5 +198,4 @@ public class UscServiceTest {
         }
         return sb.toString();
     }
-
 }

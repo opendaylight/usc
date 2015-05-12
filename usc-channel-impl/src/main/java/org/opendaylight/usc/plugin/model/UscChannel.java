@@ -7,6 +7,8 @@
  */
 package org.opendaylight.usc.plugin.model;
 
+import java.io.Serializable;
+
 /**
  * Representation of a physical USC channel.
  */
@@ -15,7 +17,7 @@ public interface UscChannel {
     /**
      * Enumerated Types of Channels
      */
-    public enum ChannelType {
+    public enum ChannelType implements Serializable {
         TCP, UDP, TLS, DTLS;
     }
 

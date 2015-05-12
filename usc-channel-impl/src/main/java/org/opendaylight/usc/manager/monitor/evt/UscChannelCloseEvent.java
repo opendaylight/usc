@@ -18,11 +18,13 @@ public class UscChannelCloseEvent extends UscMonitorEvent {
     /**
      * create a channel close event using the device id
      * 
+     * @param type
+     *            channel type
      * @param deviceId
      *            device id which can identify a particular channel
      */
-    public UscChannelCloseEvent(String deviceId) {
-        super(deviceId);
+    public UscChannelCloseEvent(String deviceId, String type) {
+        super(deviceId, type);
     }
 
     /**
@@ -32,7 +34,11 @@ public class UscChannelCloseEvent extends UscMonitorEvent {
      *            closing USC channel
      */
     public UscChannelCloseEvent(UscChannel channel) {
-        this(channel.getDevice().toString());
+        this(channel.getDevice().toString(), channel.getType().name());
     }
 
+    @Override
+    public String toString() {
+        return "UscChannelCloseEvent:" + super.toString();
+    }
 }

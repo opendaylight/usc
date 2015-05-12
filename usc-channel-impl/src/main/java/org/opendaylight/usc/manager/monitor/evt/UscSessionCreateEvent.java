@@ -20,6 +20,8 @@ public class UscSessionCreateEvent extends UscSessionEvent {
     /**
      * create session create event
      * 
+     * @param type
+     *            channel type
      * @param deviceId
      *            device id which identify a channel which contains the session
      * @param sessionId
@@ -28,8 +30,8 @@ public class UscSessionCreateEvent extends UscSessionEvent {
      *            terminal point port,like the port of the lister port of the
      *            apps of agent sides
      */
-    public UscSessionCreateEvent(String deviceId, String sessionId, int port) {
-        super(deviceId, sessionId);
+    public UscSessionCreateEvent(String deviceId, String type, String sessionId, int port) {
+        super(deviceId, type, sessionId);
         this.port = port;
     }
 
@@ -40,7 +42,8 @@ public class UscSessionCreateEvent extends UscSessionEvent {
      *            session created
      */
     public UscSessionCreateEvent(UscSession session) {
-        this(session.getChannel().getDevice().toString(), Integer.toString(session.getSessionId()), session.getPort());
+        this(session.getChannel().getDevice().toString(), session.getChannel().getType().name(), Integer
+                .toString(session.getSessionId()), session.getPort());
     }
 
     /**
@@ -50,6 +53,11 @@ public class UscSessionCreateEvent extends UscSessionEvent {
      */
     public int getPort() {
         return port;
+    }
+
+    @Override
+    public String toString() {
+        return "UscSessionCreateEvent:" + super.toString() + ",terminal point port is " + port;
     }
 
 }

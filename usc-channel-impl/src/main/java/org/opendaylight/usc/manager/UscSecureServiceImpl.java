@@ -53,7 +53,7 @@ public class UscSecureServiceImpl implements UscSecureService {
                 .getService(UscConfigurationService.class);
         if (configService == null) {
             LOG.error("The configuration service is not initialized!Using the default data to initialize");
-            File rootPath = new File("src/main/certificates");
+            File rootPath = new File("etc/usc/certificates");
             privateKeyFile = new File(rootPath, "client.key.pem");
             publicCertChainFile = new File(rootPath, "client.pem");
             trustCertChainFile = new File(rootPath, "rootCA.pem");

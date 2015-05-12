@@ -27,6 +27,7 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.opendaylight.usc.manager.UscConfigurationServiceImpl;
 import org.opendaylight.usc.manager.api.UscSecureService;
 import org.opendaylight.usc.plugin.UscFrameDecoderUdp;
 import org.opendaylight.usc.plugin.UscFrameEncoderUdp;
@@ -51,10 +52,11 @@ public class UscAgentUdp implements Runnable, AutoCloseable {
 
 	private Channel agentServerChannel = null;
 	private ConcurrentMap<Integer, SettableFuture<Boolean>> closeFuture = new ConcurrentHashMap<>();
-	private final UscSecureService secureService = UscServiceUtils
-			.getService(UscSecureService.class);
+	private UscSecureService secureService = null;
 
 	public UscAgentUdp(boolean callHome) {
+        UscConfigurationServiceImpl.setDefaultPropertyFilePath("src/test/resources/etc/usc/usc.properties");
+        secureService = UscServiceUtils.getService(UscSecureService.class);
 		final UscAgentUdp agent = this;
 		b.group(bossGroup);
 		b.channel(NioDatagramChannel.class);
@@ -86,15 +88,15 @@ public class UscAgentUdp implements Runnable, AutoCloseable {
 					LOG.error("UscSecureService is not initialized!");
 					return;
 				}
-				p.addLast(new LoggingHandler("LOG5", LogLevel.TRACE));
+				p.addLast(new LoggingHandler("UscAgnet Handler 5", LogLevel.TRACE));
 				p.addLast(secureService.getUdpServerHandler(ch));
-				p.addLast(new LoggingHandler("LOG4", LogLevel.TRACE));
+				p.addLast(new LoggingHandler("UscAgnet Handler 4", LogLevel.TRACE));
 				p.addLast(new UscFrameEncoderUdp());
-				p.addLast(new LoggingHandler("LOG3", LogLevel.TRACE));
+				p.addLast(new LoggingHandler("UscAgnet Handler 3", LogLevel.TRACE));
 				p.addLast(new UscFrameDecoderUdp());
-				p.addLast(new LoggingHandler("LOG2", LogLevel.TRACE));
+				p.addLast(new LoggingHandler("UscAgnet Handler 2", LogLevel.TRACE));
 				p.addLast(new UscAgentUdpHandler(agent, ch));
-				p.addLast(new LoggingHandler("LOG1", LogLevel.TRACE));
+				p.addLast(new LoggingHandler("UscAgnet Handler 1", LogLevel.TRACE));
 
 			}
 		});

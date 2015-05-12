@@ -15,16 +15,21 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.usc.manager.UscTopologyService;
 import org.opendaylight.usc.manager.topology.UscTopologyFactory;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.TopologyId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.link.attributes.Alarm;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.link.attributes.Session;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.topologies.Topology;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.topologies.TopologyBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.topologies.TopologyKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.topologies.topology.Link;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.topologies.topology.Node;
+import org.opendaylight.usc.test.AbstractUscTest;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.TopologyId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.channel.attributes.ChannelAlarm;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.channel.attributes.Session;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.session.attributes.SessionAlarm;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.topology.attributes.Channel;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.topology.attributes.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.usc.topology.Topology;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.usc.topology.TopologyBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.usc.topology.TopologyKey;
 
-public class UscTopologyFactoryTest {
+/**
+ * Test suite for USC topology factory.
+ */
+public class UscTopologyFactoryTest extends AbstractUscTest {
     private UscTopologyService topoManager = UscTopologyService.getInstance();
 
     @Before
@@ -39,28 +44,24 @@ public class UscTopologyFactoryTest {
 
     public Topology createTopology(int controllerNumber, int deviceNumber) {
         List<Node> nodeList = new CopyOnWriteArrayList<Node>();
-        List<Link> linkList = new CopyOnWriteArrayList<Link>();
+        List<Channel> ChannelList = new CopyOnWriteArrayList<Channel>();
         TopologyId topoId = new TopologyId("usc");
-        Topology topo = (new TopologyBuilder()).setTopologyId(topoId)
-                .setKey(new TopologyKey(topoId)).setNode(nodeList)
-                .setLink(linkList).build();
+        Topology topo = (new TopologyBuilder()).setTopologyId(topoId).setKey(new TopologyKey(topoId)).setNode(nodeList)
+                .setChannel(ChannelList).build();
 
         String deviceName = "device";
-        String contollerName = topoManager.getLocalController().getNodeId()
-                .getValue();
+        String contollerName = topoManager.getLocalController().getNodeId().getValue();
         Node deviceNode = null;
         Node controllerNode = null;
-        Link link = null;
+        Channel Channel = null;
         for (int i = 0; i < controllerNumber; i++) {
             contollerName = "Controller" + getRandomInt();
             for (int j = 0; j < deviceNumber; j++) {
                 deviceName = "Device" + getRandomInt();
-                link = createRandomLink(contollerName, deviceName);
-                controllerNode = createNode(contollerName,
-                        UscTopologyService.NODE_TYPE_CONTROLLER);
-                deviceNode = createNode(deviceName,
-                        UscTopologyService.NODE_TYPE_NETWORK_DEVICE);
-                linkList.add(link);
+                Channel = createRandomChannel(contollerName, deviceName);
+                controllerNode = createNode(contollerName, UscTopologyService.NODE_TYPE_CONTROLLER);
+                deviceNode = createNode(deviceName, UscTopologyService.NODE_TYPE_NETWORK_DEVICE);
+                ChannelList.add(Channel);
                 addNode(nodeList, controllerNode);
                 addNode(nodeList, deviceNode);
             }
@@ -73,8 +74,7 @@ public class UscTopologyFactoryTest {
             String id = node.getNodeId().getValue();
             for (Node n : nodeList) {
                 if (id.equals(n.getNodeId().getValue())) {
-                    UscManagerTest.log("When add node, it already exists.id = "
-                            + id);
+                    UscManagerTest.log("When add node, it already exists.id = " + id);
                     return;
                 }
             }
@@ -116,52 +116,42 @@ public class UscTopologyFactoryTest {
     }
 
     @Test
-    public void createLink() {
-        Link link = createRandomLink(topoManager.getLocalController()
-                .getNodeId().getValue(), "device1", "Usc Channel", true);
-        UscManagerUtils.checkLink("device1", "Usc Channel", true, link);
+    public void createChannel() {
+        Channel Channel = createRandomChannel(topoManager.getLocalController().getNodeId().getValue(), "device1",
+                "Usc Channel", true);
+        UscManagerUtils.checkChannel("device1", "Usc Channel", true, Channel);
     }
 
-    public Link createRandomLink() {
+    public Channel createRandomChannel() {
         String deviceId = "Device" + getRandomInt();
-        Node controllerNode = UscTopologyFactory.createNode("Controller"
-                + getRandomInt(), UscTopologyService.NODE_TYPE_CONTROLLER);
-        Node deviceNode = UscTopologyFactory.createNode("Controller"
-                + getRandomInt(), UscTopologyService.NODE_TYPE_NETWORK_DEVICE);
-        String key = UscTopologyService.NODE_TYPE_CONTROLLER + ":"
-                + controllerNode.getNodeId().getValue() + "-"
+        Node controllerNode = UscTopologyFactory.createNode("Controller" + getRandomInt(),
+                UscTopologyService.NODE_TYPE_CONTROLLER);
+        Node deviceNode = UscTopologyFactory.createNode("Controller" + getRandomInt(),
+                UscTopologyService.NODE_TYPE_NETWORK_DEVICE);
+        String key = UscTopologyService.NODE_TYPE_CONTROLLER + ":" + controllerNode.getNodeId().getValue() + "-"
                 + UscTopologyService.NODE_TYPE_NETWORK_DEVICE + ":" + deviceId;
-        Link channel = UscTopologyFactory.createLink(controllerNode,
-                deviceNode, key, getRandomChannelType(), getRandomCallHome());
+        Channel channel = UscTopologyFactory.createChannel(controllerNode, deviceNode, key, getRandomChannelType(),
+                getRandomCallHome());
         return channel;
     }
 
-    public Link createRandomLink(String contollerId, String deviceId) {
-        Node controllerNode = UscTopologyFactory.createNode(contollerId,
-                UscTopologyService.NODE_TYPE_CONTROLLER);
-        Node deviceNode = UscTopologyFactory.createNode(deviceId,
-                UscTopologyService.NODE_TYPE_NETWORK_DEVICE);
-        String key = UscTopologyService.NODE_TYPE_CONTROLLER + ":"
-                + controllerNode.getNodeId().getValue() + "-"
+    public Channel createRandomChannel(String contollerId, String deviceId) {
+        Node controllerNode = UscTopologyFactory.createNode(contollerId, UscTopologyService.NODE_TYPE_CONTROLLER);
+        Node deviceNode = UscTopologyFactory.createNode(deviceId, UscTopologyService.NODE_TYPE_NETWORK_DEVICE);
+        String key = UscTopologyService.NODE_TYPE_CONTROLLER + ":" + controllerNode.getNodeId().getValue() + "-"
                 + UscTopologyService.NODE_TYPE_NETWORK_DEVICE + ":" + deviceId;
-        Link channel = UscTopologyFactory.createLink(controllerNode,
-                deviceNode, key, getRandomChannelType(), getRandomCallHome());
+        Channel channel = UscTopologyFactory.createChannel(controllerNode, deviceNode, key, getRandomChannelType(),
+                getRandomCallHome());
         return channel;
     }
 
-    public Link createRandomLink(String contollerId, String deviceId,
-            String type, boolean isCallHome) {
-        Node controllerNode = UscTopologyFactory.createNode(contollerId,
-                UscTopologyService.NODE_TYPE_CONTROLLER);
-        Node deviceNode = UscTopologyFactory.createNode(deviceId,
-                UscTopologyService.NODE_TYPE_NETWORK_DEVICE);
-        String key = UscTopologyService.NODE_TYPE_CONTROLLER + ":"
-                + controllerNode.getNodeId().getValue() + "-"
+    public Channel createRandomChannel(String contollerId, String deviceId, String type, boolean isCallHome) {
+        Node controllerNode = UscTopologyFactory.createNode(contollerId, UscTopologyService.NODE_TYPE_CONTROLLER);
+        Node deviceNode = UscTopologyFactory.createNode(deviceId, UscTopologyService.NODE_TYPE_NETWORK_DEVICE);
+        String key = UscTopologyService.NODE_TYPE_CONTROLLER + ":" + controllerNode.getNodeId().getValue() + "-"
                 + UscTopologyService.NODE_TYPE_NETWORK_DEVICE + ":" + deviceId;
-        Link channel = UscTopologyFactory.createLink(controllerNode,
-                deviceNode, key, type, isCallHome, getRandomInt(),
-                getRandomInt(),
-                createRandomChannelAlarmList(getRandomInt() % 3),
+        Channel channel = UscTopologyFactory.createChannel(controllerNode, deviceNode, key, type, isCallHome,
+                getRandomInt(), getRandomInt(), createRandomChannelAlarmList(getRandomInt() % 3),
                 createRandomSessionList(getRandomInt() % 3));
         return channel;
     }
@@ -171,7 +161,7 @@ public class UscTopologyFactoryTest {
         String id = UUID.randomUUID().toString();
         String code = 32 + "";
         String message = "this is a channel test alarm";
-        Alarm alarm = UscTopologyFactory.createLinkAlram(id, code, message);
+        ChannelAlarm alarm = UscTopologyFactory.createChannelAlram(id, code, message);
         UscManagerUtils.checkChannelAlarm(id, code, message, alarm);
     }
 
@@ -180,15 +170,13 @@ public class UscTopologyFactoryTest {
         String id = UUID.randomUUID().toString();
         String code = 30 + "";
         String message = "this is a session test alarm";
-        org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.session.attributes.Alarm alarm = UscTopologyFactory
-                .createSessionAlram(id, code, message);
+        SessionAlarm alarm = UscTopologyFactory.createSessionAlram(id, code, message);
         UscManagerUtils.checkSessionAlarm(id, code, message, alarm);
     }
 
     public Session createRandomSession() {
-        return UscTopologyFactory.createSession(getRandomInt() + "",
-                getRandomInt() + "", getRandomInt(), getRandomInt(),
-                createRandomSessionAlarmList(getRandomInt() % 3));
+        return UscTopologyFactory.createSession(getRandomInt() + "", getRandomInt() + "", getRandomInt(),
+                getRandomInt(), createRandomSessionAlarmList(getRandomInt() % 3));
     }
 
     public List<Session> createRandomSessionList(int number) {
@@ -199,23 +187,20 @@ public class UscTopologyFactoryTest {
         return list;
     }
 
-    public List<org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.session.attributes.Alarm> createRandomSessionAlarmList(
-            int number) {
-        List<org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.session.attributes.Alarm> alarmList = new CopyOnWriteArrayList<org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.session.attributes.Alarm>();
+    public List<SessionAlarm> createRandomSessionAlarmList(int number) {
+        List<SessionAlarm> alarmList = new CopyOnWriteArrayList<SessionAlarm>();
         for (int i = 0; i < number; i++) {
-            alarmList.add(UscTopologyFactory.createSessionAlram(UUID
-                    .randomUUID().toString(), getRandomInt() + "",
+            alarmList.add(UscTopologyFactory.createSessionAlram(UUID.randomUUID().toString(), getRandomInt() + "",
                     "this a session alarm " + getRandomInt()));
         }
         return alarmList;
     }
 
-    public List<Alarm> createRandomChannelAlarmList(int number) {
-        List<Alarm> alarmList = new CopyOnWriteArrayList<Alarm>();
+    public List<ChannelAlarm> createRandomChannelAlarmList(int number) {
+        List<ChannelAlarm> alarmList = new CopyOnWriteArrayList<ChannelAlarm>();
         for (int i = 0; i < number; i++) {
-            alarmList.add(UscTopologyFactory.createLinkAlram(UUID.randomUUID()
-                    .toString(), getRandomInt() + "", "this a channel alarm "
-                    + getRandomInt()));
+            alarmList.add(UscTopologyFactory.createChannelAlram(UUID.randomUUID().toString(), getRandomInt() + "",
+                    "this a channel alarm " + getRandomInt()));
         }
         return alarmList;
     }
@@ -232,8 +217,7 @@ public class UscTopologyFactoryTest {
     }
 
     public Node createRandomNode() {
-        Node node = UscTopologyFactory.createNode("Device" + getRandomInt(),
-                "Device Type" + getRandomInt());
+        Node node = UscTopologyFactory.createNode("Device" + getRandomInt(), "Device Type" + getRandomInt());
         return node;
     }
 }

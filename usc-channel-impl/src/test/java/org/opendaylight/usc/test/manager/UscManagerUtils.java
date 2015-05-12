@@ -9,24 +9,25 @@ package org.opendaylight.usc.test.manager;
 
 import org.junit.Assert;
 import org.opendaylight.usc.manager.topology.UscTopologyFactory;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.link.attributes.Alarm;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.link.attributes.Session;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.topologies.Topology;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.topologies.topology.Link;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.topologies.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.channel.attributes.ChannelAlarm;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.channel.attributes.Session;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.session.attributes.SessionAlarm;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.topology.attributes.Channel;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.topology.attributes.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.usc.topology.Topology;
 
+/**
+ * Utility functions for testing the USC manager.
+ */
 public class UscManagerUtils {
-    public static void checkLink(String deviceId, String type,
-            boolean isCallHome, Link link) {
-        outputLink(link);
-        Assert.assertEquals(deviceId, link.getDestination().getDestNode()
-                .getValue());
-        Assert.assertEquals(type, link.getLinkType());
+    public static void checkChannel(String deviceId, String type, boolean isCallHome, Channel Channel) {
+        outputChannel(Channel);
+        Assert.assertEquals(deviceId, Channel.getDestination().getDestNode().getValue());
+        Assert.assertEquals(type, Channel.getChannelType());
         if (isCallHome) {
-            Assert.assertEquals(UscTopologyFactory.CALL_HOME_DISPLAY_STRING,
-                    link.getCallHome());
+            Assert.assertEquals(UscTopologyFactory.CALL_HOME_DISPLAY_STRING, Channel.getCallHome());
         } else {
-            Assert.assertEquals("", link.getCallHome());
+            Assert.assertEquals("", Channel.getCallHome());
         }
 
     }
@@ -38,8 +39,7 @@ public class UscManagerUtils {
         Assert.assertEquals(type, node.getNodeType());
     }
 
-    public static void checkChannelAlarm(String id, String code,
-            String message, Alarm alarm) {
+    public static void checkChannelAlarm(String id, String code, String message, ChannelAlarm alarm) {
         outputChannelAlarm(alarm);
         Assert.assertEquals(id, alarm.getKey().getAlarmId().getValue());
         Assert.assertEquals(id, alarm.getAlarmId().getValue());
@@ -47,11 +47,7 @@ public class UscManagerUtils {
         Assert.assertEquals(message, alarm.getAlarmMessage());
     }
 
-    public static void checkSessionAlarm(
-            String id,
-            String code,
-            String message,
-            org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.session.attributes.Alarm alarm) {
+    public static void checkSessionAlarm(String id, String code, String message, SessionAlarm alarm) {
         outputSessionAlarm(alarm);
         Assert.assertEquals(id, alarm.getKey().getAlarmId().getValue());
         Assert.assertEquals(id, alarm.getAlarmId().getValue());
@@ -60,91 +56,76 @@ public class UscManagerUtils {
     }
 
     public static void outputNode(Node node) {
-        UscManagerTest
-                .log(" ++++++++++++++++++++++++++node output start++++++++++++++++++");
+        UscManagerTest.log(" ++++++++++++++++++++++++++node output start++++++++++++++++++");
         UscManagerTest.log(" key id = " + node.getKey().getNodeId().getValue());
         UscManagerTest.log(" id = " + node.getNodeId().getValue());
         UscManagerTest.log("type = " + node.getNodeType());
-        UscManagerTest
-                .log(" ++++++++++++++++++++++++++node output end++++++++++++++++++++");
+        UscManagerTest.log(" ++++++++++++++++++++++++++node output end++++++++++++++++++++");
     }
 
-    public static void outputLink(Link link) {
-        UscManagerTest
-                .log(" -------------------------link output start------------------");
-        UscManagerTest.log(" key id = " + link.getKey().getLinkId().getValue());
-        UscManagerTest.log(" id = " + link.getLinkId().getValue());
-        UscManagerTest.log(" type = " + link.getLinkType());
-        UscManagerTest.log(" CallHome = " + link.getCallHome());
-        UscManagerTest.log(" Bytes In = " + link.getBytesIn());
-        UscManagerTest.log(" Bytes Out = " + link.getBytesOut());
-        UscManagerTest.log(" Source Controller Id = "
-                + link.getSource().getSourceNode().getValue());
-        UscManagerTest.log(" Destination Device Id = "
-                + link.getDestination().getDestNode().getValue());
-        UscManagerTest.log(" Channel Alarm number = " + link.getAlarms());
+    public static void outputChannel(Channel Channel) {
+        UscManagerTest.log(" -------------------------Channel output start------------------");
+        UscManagerTest.log(" key id = " + Channel.getKey().getChannelId().getValue());
+        UscManagerTest.log(" id = " + Channel.getChannelId().getValue());
+        UscManagerTest.log(" type = " + Channel.getChannelType());
+        UscManagerTest.log(" CallHome = " + Channel.getCallHome());
+        UscManagerTest.log(" Bytes In = " + Channel.getBytesIn());
+        UscManagerTest.log(" Bytes Out = " + Channel.getBytesOut());
+        UscManagerTest.log(" Source Controller Id = " + Channel.getSource().getSourceNode().getValue());
+        UscManagerTest.log(" Destination Device Id = " + Channel.getDestination().getDestNode().getValue());
+        UscManagerTest.log(" Channel Alarm number = " + Channel.getChannelAlarms());
         int i = 1;
-        if (link.getAlarms() > 0) {
-            for (Alarm alarm : link.getAlarm()) {
+        if (Channel.getChannelAlarms() > 0) {
+            for (ChannelAlarm alarm : Channel.getChannelAlarm()) {
                 UscManagerTest.log(" Channel Alarm :" + i);
                 i++;
                 outputChannelAlarm(alarm);
             }
         }
-        UscManagerTest.log(" Session number = " + link.getSessions());
+        UscManagerTest.log(" Session number = " + Channel.getSessions());
         i = 1;
-        if (link.getSessions() > 0) {
-            for (Session session : link.getSession()) {
+        if (Channel.getSessions() > 0) {
+            for (Session session : Channel.getSession()) {
                 UscManagerTest.log(" Session :" + i);
                 i++;
                 outputSession(session);
             }
         }
-        UscManagerTest
-                .log(" -------------------------link output end--------------------");
+        UscManagerTest.log(" -------------------------Channel output end--------------------");
     }
 
     public static void outputSession(Session session) {
-        UscManagerTest
-                .log(" ********************Session output start********************");
-        UscManagerTest.log(" Key Id = "
-                + session.getKey().getSessionId().getValue());
+        UscManagerTest.log(" ********************Session output start********************");
+        UscManagerTest.log(" Key Id = " + session.getKey().getSessionId().getValue());
         UscManagerTest.log(" Id = " + session.getSessionId().getValue());
-        UscManagerTest.log(" Terminal Point Port = "
-                + session.getTerminalPoint().getTerminalPointId().getValue());
+        UscManagerTest
+                .log(" Terminal Point Port = " + session.getTerminationPoint().getTerminationPointId().getValue());
         UscManagerTest.log(" Bytes In = " + session.getBytesIn());
         UscManagerTest.log(" Bytes Out = " + session.getBytesOut());
-        UscManagerTest.log(" Session Alarm number = " + session.getAlarms());
+        UscManagerTest.log(" Session Alarm number = " + session.getSessionAlarms());
         int i = 1;
-        if (session.getAlarms() > 0) {
-            for (org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.session.attributes.Alarm alarm : session
-                    .getAlarm()) {
+        if (session.getSessionAlarms() > 0) {
+            for (SessionAlarm alarm : session.getSessionAlarm()) {
                 UscManagerTest.log(" Session Alarm :" + i);
                 i++;
                 outputSessionAlarm(alarm);
             }
         }
-        UscManagerTest
-                .log(" ********************Session output end********************");
+        UscManagerTest.log(" ********************Session output end********************");
     }
 
-    public static void outputChannelAlarm(Alarm alarm) {
-        UscManagerTest
-                .log(" ##########################Alarm output start###############");
-        UscManagerTest.log(" Key Id = "
-                + alarm.getKey().getAlarmId().getValue());
+    public static void outputChannelAlarm(ChannelAlarm alarm) {
+        UscManagerTest.log(" ##########################Alarm output start###############");
+        UscManagerTest.log(" Key Id = " + alarm.getKey().getAlarmId().getValue());
         UscManagerTest.log(" Id = " + alarm.getAlarmId().getValue());
         UscManagerTest.log(" Code = " + alarm.getAlarmCode());
         UscManagerTest.log(" Message = " + alarm.getAlarmMessage());
-        UscManagerTest
-                .log(" ##########################Alarm output end##/###############");
+        UscManagerTest.log(" ##########################Alarm output end##/###############");
     }
 
-    public static void outputSessionAlarm(
-            org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.session.attributes.Alarm alarm) {
+    public static void outputSessionAlarm(SessionAlarm alarm) {
         UscManagerTest.log(" #############Alarm output start###########");
-        UscManagerTest.log(" Key Id = "
-                + alarm.getKey().getAlarmId().getValue());
+        UscManagerTest.log(" Key Id = " + alarm.getKey().getAlarmId().getValue());
         UscManagerTest.log(" Id = " + alarm.getAlarmId().getValue());
         UscManagerTest.log(" Code = " + alarm.getAlarmCode());
         UscManagerTest.log(" Message = " + alarm.getAlarmMessage());
@@ -153,10 +134,8 @@ public class UscManagerUtils {
     }
 
     public static void outputTopology(Topology topo) {
-        UscManagerTest
-                .log(" =======================Topology output start================");
-        UscManagerTest.log(" key id = "
-                + topo.getKey().getTopologyId().getValue());
+        UscManagerTest.log(" =======================Topology output start================");
+        UscManagerTest.log(" key id = " + topo.getKey().getTopologyId().getValue());
         UscManagerTest.log(" id = " + topo.getTopologyId().getValue());
         UscManagerTest.log(" Node Number = " + topo.getNode().size());
         int i = 1;
@@ -166,13 +145,12 @@ public class UscManagerUtils {
             outputNode(node);
         }
         i = 1;
-        UscManagerTest.log(" Link Number = " + topo.getLink().size());
-        for (Link link : topo.getLink()) {
-            UscManagerTest.log(" Link : " + i);
+        UscManagerTest.log(" Channel Number = " + topo.getChannel().size());
+        for (Channel Channel : topo.getChannel()) {
+            UscManagerTest.log(" Channel : " + i);
             i++;
-            outputLink(link);
+            outputChannel(Channel);
         }
-        UscManagerTest
-                .log(" ======================Topology output end==================");
+        UscManagerTest.log(" ======================Topology output end==================");
     }
 }

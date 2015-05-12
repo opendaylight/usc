@@ -25,6 +25,7 @@ import java.net.InetAddress;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.opendaylight.usc.manager.UscConfigurationServiceImpl;
 import org.opendaylight.usc.manager.api.UscSecureService;
 import org.opendaylight.usc.plugin.UscFrameDecoderTcp;
 import org.opendaylight.usc.plugin.UscFrameEncoderTcp;
@@ -51,14 +52,15 @@ public class UscAgentTcp implements Runnable, AutoCloseable {
 
 	private Channel agentServerChannel = null;
 	private ConcurrentMap<Integer, SettableFuture<Boolean>> closeFuture = new ConcurrentHashMap<>();
-	private final UscSecureService secureService = UscServiceUtils
-			.getService(UscSecureService.class);
+	private UscSecureService secureService = null;
 
 	public UscAgentTcp(boolean callHome) {
 		final UscAgentTcp agent = this;
+        UscConfigurationServiceImpl.setDefaultPropertyFilePath("src/test/resources/etc/usc/usc.properties");
+        secureService = UscServiceUtils.getService(UscSecureService.class);
 		b.group(bossGroup, workerGroup);
 		b.channel(NioServerSocketChannel.class);
-		b.handler(new LoggingHandler(LogLevel.INFO));
+		b.handler(new LoggingHandler("UscAgentTcp server handler", LogLevel.TRACE));
 		b.childHandler(new ChannelInitializer<NioSocketChannel>() {
 			@Override
 			public void initChannel(NioSocketChannel ch) throws Exception {
@@ -68,15 +70,15 @@ public class UscAgentTcp implements Runnable, AutoCloseable {
 				}
 				ChannelPipeline p = ch.pipeline();
 				agentServerChannel = ch;
-				p.addLast(new LoggingHandler("UscAgentTcp PLUGIN5", LogLevel.INFO));
+				p.addLast(new LoggingHandler("UscAgentTcp PLUGIN5", LogLevel.TRACE));
 				p.addLast(secureService.getTcpServerHandler(ch));
-				p.addLast(new LoggingHandler("UscAgentTcp PLUGIN4", LogLevel.INFO));
+				p.addLast(new LoggingHandler("UscAgentTcp PLUGIN4", LogLevel.TRACE));
 				p.addLast(new UscFrameEncoderTcp());
-				p.addLast(new LoggingHandler("UscAgentTcp PLUGIN3", LogLevel.INFO));
+				p.addLast(new LoggingHandler("UscAgentTcp PLUGIN3", LogLevel.TRACE));
 				p.addLast(new UscFrameDecoderTcp());
-				p.addLast(new LoggingHandler("UscAgentTcp PLUGIN2", LogLevel.INFO));
+				p.addLast(new LoggingHandler("UscAgentTcp PLUGIN2", LogLevel.TRACE));
 				p.addLast(new UscAgentTcpHandler(agent, ch));
-				p.addLast(new LoggingHandler("UscAgentTcp PLUGIN1", LogLevel.INFO));
+				p.addLast(new LoggingHandler("UscAgentTcp PLUGIN1", LogLevel.TRACE));
 			}
 		});
 
@@ -92,15 +94,15 @@ public class UscAgentTcp implements Runnable, AutoCloseable {
 					}
 					ChannelPipeline p = ch.pipeline();
 					agentServerChannel = ch;
-					p.addLast(new LoggingHandler("UscAgentTcp PLUGIN5", LogLevel.INFO));
+					p.addLast(new LoggingHandler("UscAgentTcp PLUGIN5", LogLevel.TRACE));
 					p.addLast(secureService.getTcpClientHandler(ch));
-					p.addLast(new LoggingHandler("UscAgentTcp PLUGIN4", LogLevel.INFO));
+					p.addLast(new LoggingHandler("UscAgentTcp PLUGIN4", LogLevel.TRACE));
 					p.addLast(new UscFrameEncoderTcp());
-					p.addLast(new LoggingHandler("UscAgentTcp PLUGIN3", LogLevel.INFO));
+					p.addLast(new LoggingHandler("UscAgentTcp PLUGIN3", LogLevel.TRACE));
 					p.addLast(new UscFrameDecoderTcp());
-					p.addLast(new LoggingHandler("UscAgentTcp PLUGIN2", LogLevel.INFO));
+					p.addLast(new LoggingHandler("UscAgentTcp PLUGIN2", LogLevel.TRACE));
 					p.addLast(new UscAgentTcpHandler(agent, ch));
-					p.addLast(new LoggingHandler("UscAgentTcp PLUGIN1", LogLevel.INFO));
+					p.addLast(new LoggingHandler("UscAgentTcp PLUGIN1", LogLevel.TRACE));
 				}
 			});
 
@@ -108,7 +110,9 @@ public class UscAgentTcp implements Runnable, AutoCloseable {
 				cb.connect(InetAddress.getLoopbackAddress(), 1069).sync();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+			    
+			    System.err.println("USC Plugin call home port not available; call home disabled");
+				// e.printStackTrace();
 			}
 		}
 	}
@@ -146,6 +150,8 @@ public class UscAgentTcp implements Runnable, AutoCloseable {
 		// Start the server.
 		try {
 			ChannelFuture f = b.bind(PORT).sync();
+			System.out.println("UscAgentTcp initialized");
+			
 			// Wait until the server socket is closed.
 			f.channel().closeFuture().sync();
 		} catch (InterruptedException e) {
@@ -163,7 +169,7 @@ public class UscAgentTcp implements Runnable, AutoCloseable {
 	}
 
 	public static void main(String[] args) throws Exception {
-		try (UscAgentTcp agent = new UscAgentTcp(true)) {
+		try (UscAgentTcp agent = new UscAgentTcp(false)) {
 			agent.run();
 		}
 	}

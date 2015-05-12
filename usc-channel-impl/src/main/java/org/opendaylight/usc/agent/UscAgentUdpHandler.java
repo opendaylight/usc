@@ -102,10 +102,11 @@ public class UscAgentUdpHandler extends SimpleChannelInboundHandler<UscFrame> {
 
             @Override
             protected void initChannel(NioDatagramChannel ch) throws Exception {
+            	LOG.trace("initChannel: clientHandler connects to EchoServer.");
                 ChannelPipeline p = ch.pipeline();
-                p.addLast(new LoggingHandler(LogLevel.INFO));
+                p.addLast(new LoggingHandler("UscAgentUdpHandler 2", LogLevel.TRACE));
                 p.addLast(new ClientHandler());
-                p.addLast(new LoggingHandler(LogLevel.INFO));
+                p.addLast(new LoggingHandler("UscAgentUdpHandler 2", LogLevel.TRACE));
             }
         });
     }
@@ -156,7 +157,7 @@ public class UscAgentUdpHandler extends SimpleChannelInboundHandler<UscFrame> {
         		}
         		
         		// send back the response
-            	UscControl data = new UscControl(port, sessionId, 2);
+            	UscControl data = new UscControl(port, sessionId, UscControl.ControlCode.TERMINATION_RESPONSE.getCode());
             	plugin.writeAndFlush(data);
             	LOG.trace("UscAgentUdpHandler send TERMINATION_RESPONSE");
         	}
@@ -171,7 +172,12 @@ public class UscAgentUdpHandler extends SimpleChannelInboundHandler<UscFrame> {
         			;
         		}
         	}
-        	
+        	else if(control.getControlCode() == UscControl.ControlCode.ECHO) {
+        		// send back the response
+            	UscControl data = new UscControl(port, sessionId, UscControl.ControlCode.ECHO.getCode());
+            	plugin.writeAndFlush(data);
+            	LOG.trace("UscAgentUdpHandler send ECHO back.");
+        	}
         }
 
     }

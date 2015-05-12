@@ -17,14 +17,16 @@ public class UscSessionEvent extends UscMonitorEvent {
     /**
      * create a session event
      * 
+     * @param type
+     *            channel type
      * @param deviceId
      *            device id which can identify a channel which contains this
      *            session
      * @param sessionId
      *            session id
      */
-    public UscSessionEvent(String deviceId, String sessionId) {
-        super(deviceId);
+    public UscSessionEvent(String deviceId, String type, String sessionId) {
+        super(deviceId, type);
         this.sessionId = sessionId;
     }
 
@@ -37,4 +39,8 @@ public class UscSessionEvent extends UscMonitorEvent {
         return sessionId;
     }
 
+    @Override
+    public String toString() {
+        return super.toString() + ",session Id is " + sessionId;
+    }
 }

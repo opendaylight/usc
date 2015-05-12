@@ -22,6 +22,8 @@ public class UscSessionErrorEvent extends UscErrorEvent {
     /**
      * create a channel error event
      * 
+     * @param type
+     *            channel type
      * @param deviceId
      *            device id which can identify a particular channel
      * @param sessionId
@@ -33,8 +35,9 @@ public class UscSessionErrorEvent extends UscErrorEvent {
      * @param message
      *            error message
      */
-    public UscSessionErrorEvent(String deviceId, String sessionId, int errorCode, UscErrorLevel level, String message) {
-        super(deviceId, errorCode, level, message);
+    public UscSessionErrorEvent(String deviceId, String type, String sessionId, int errorCode, UscErrorLevel level,
+            String message) {
+        super(deviceId, type, errorCode, level, message);
         this.sessionId = sessionId;
     }
 
@@ -47,8 +50,8 @@ public class UscSessionErrorEvent extends UscErrorEvent {
      *            the exception class of error
      */
     public UscSessionErrorEvent(UscSession session, UscSessionException ex) {
-        this(session.getChannel().getDevice().toString(), Integer.toString(session.getSessionId()), ex.getErrorCode()
-                .getCode(), UscErrorLevel.ERROR, ex.getErrorCode().name());
+        this(session.getChannel().getDevice().toString(), session.getChannel().getType().name(), Integer
+                .toString(session.getSessionId()), ex.getErrorCode().getCode(), UscErrorLevel.ERROR, ex.getMessage());
     }
 
     /**
@@ -60,4 +63,8 @@ public class UscSessionErrorEvent extends UscErrorEvent {
         return sessionId;
     }
 
+    @Override
+    public String toString() {
+        return "UscSessionErrorEvent:Session id is " + sessionId + "," + super.toString();
+    }
 }

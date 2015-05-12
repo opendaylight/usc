@@ -21,6 +21,8 @@ public class UscSessionTransactionEvent extends UscTransactionEvent {
     /**
      * create session transaction event
      * 
+     * @param type
+     *            channel type
      * @param deviceId
      *            device id which can identify the channel which contains the
      *            session
@@ -31,9 +33,8 @@ public class UscSessionTransactionEvent extends UscTransactionEvent {
      * @param bytesOut
      *            bytes out number
      */
-    public UscSessionTransactionEvent(String deviceId, String sessionId,
-            long bytesIn, long bytesOut) {
-        super(deviceId, bytesIn, bytesOut);
+    public UscSessionTransactionEvent(String deviceId, String type, String sessionId, long bytesIn, long bytesOut) {
+        super(deviceId, type, bytesIn, bytesOut);
         this.sessionId = sessionId;
     }
 
@@ -47,10 +48,9 @@ public class UscSessionTransactionEvent extends UscTransactionEvent {
      * @param bytesOut
      *            bytes out number
      */
-    public UscSessionTransactionEvent(UscSession session, long bytesIn,
-            long bytesOut) {
-        this(session.getChannel().getDevice().toString(), session
-                .getSessionId() + "", bytesIn, bytesOut);
+    public UscSessionTransactionEvent(UscSession session, long bytesIn, long bytesOut) {
+        this(session.getChannel().getDevice().toString(), session.getChannel().getType().name(), session.getSessionId()
+                + "", bytesIn, bytesOut);
     }
 
     /**
@@ -62,4 +62,8 @@ public class UscSessionTransactionEvent extends UscTransactionEvent {
         return sessionId;
     }
 
+    @Override
+    public String toString() {
+        return "UscSessionTransactionEvent:session id is " + sessionId + "," + super.toString();
+    }
 }

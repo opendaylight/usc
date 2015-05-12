@@ -32,6 +32,11 @@
       </dependency>
       <dependency>
         <groupId>${project.groupId}</groupId>
+        <artifactId>usc-channel-ui</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
         <artifactId>usc-netconf-client-dispatcher</artifactId>
         <version>${project.version}</version>
       </dependency>

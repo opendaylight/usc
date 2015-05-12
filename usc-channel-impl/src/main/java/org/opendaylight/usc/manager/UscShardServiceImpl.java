@@ -18,6 +18,8 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 
@@ -58,7 +60,7 @@ public class UscShardServiceImpl implements UscShardService<DataObject, Object> 
         if (dp != null) {
             dataProvider = dp;
         } else {
-            LOG.error("Data service is null!");
+            LOG.error("Data Service is not initialized!");
         }
     }
 
@@ -66,9 +68,21 @@ public class UscShardServiceImpl implements UscShardService<DataObject, Object> 
     public DataObject read(LogicalDatastoreType type,
             InstanceIdentifier<DataObject> id) {
         DataObject ret = null;
+        if (dataProvider == null) {
+            LOG.error("Data Service is not initialized!");
+            return null;
+        }
         readTransaction = dataProvider.newReadOnlyTransaction();
         try {
-            ret = readTransaction.read(type, id).checkedGet().get();
+            CheckedFuture<Optional<DataObject>, ReadFailedException> tmp = readTransaction
+                    .read(type, id);
+            if (tmp != null) {
+                Optional<DataObject> tmp2 = readTransaction.read(type, id)
+                        .checkedGet();
+                if (tmp2.isPresent()) {
+                    ret = tmp2.get();
+                }
+            }
         } catch (ReadFailedException e) {
             if (LOG.isDebugEnabled()) {
                 e.printStackTrace();
@@ -82,6 +96,10 @@ public class UscShardServiceImpl implements UscShardService<DataObject, Object> 
     @Override
     public void write(LogicalDatastoreType type,
             final InstanceIdentifier<DataObject> id, final DataObject data) {
+        if (dataProvider == null) {
+            LOG.error("Data Service is not initialized!");
+            return;
+        }
         writeTransaction = dataProvider.newWriteOnlyTransaction();
         writeTransaction.put(type, id, data);
 
@@ -105,6 +123,10 @@ public class UscShardServiceImpl implements UscShardService<DataObject, Object> 
     public void write(LogicalDatastoreType type,
             InstanceIdentifier<DataObject> id, DataObject data,
             FutureCallback<Object> callback) {
+        if (dataProvider == null) {
+            LOG.error("Data Service is not initialized!");
+            return;
+        }
         writeTransaction = dataProvider.newWriteOnlyTransaction();
         writeTransaction.put(type, id, data);
         Futures.addCallback(writeTransaction.submit(), callback);
@@ -113,6 +135,10 @@ public class UscShardServiceImpl implements UscShardService<DataObject, Object> 
     @Override
     public void merge(LogicalDatastoreType type,
             final InstanceIdentifier<DataObject> id, final DataObject data) {
+        if (dataProvider == null) {
+            LOG.error("Data Service is not initialized!");
+            return;
+        }
         writeTransaction = dataProvider.newWriteOnlyTransaction();
         writeTransaction.merge(type, id, data);
         Futures.addCallback(writeTransaction.submit(),
@@ -135,6 +161,10 @@ public class UscShardServiceImpl implements UscShardService<DataObject, Object> 
     public void merge(LogicalDatastoreType type,
             InstanceIdentifier<DataObject> id, DataObject data,
             FutureCallback<Object> callback) {
+        if (dataProvider == null) {
+            LOG.error("Data Service is not initialized!");
+            return;
+        }
         writeTransaction = dataProvider.newWriteOnlyTransaction();
         writeTransaction.merge(type, id, data);
         Futures.addCallback(writeTransaction.submit(), callback);
@@ -143,6 +173,10 @@ public class UscShardServiceImpl implements UscShardService<DataObject, Object> 
     @Override
     public void delete(LogicalDatastoreType type,
             final InstanceIdentifier<DataObject> id) {
+        if (dataProvider == null) {
+            LOG.error("Data Service is not initialized!");
+            return;
+        }
         writeTransaction = dataProvider.newWriteOnlyTransaction();
         writeTransaction.delete(type, id);
         Futures.addCallback(writeTransaction.submit(),

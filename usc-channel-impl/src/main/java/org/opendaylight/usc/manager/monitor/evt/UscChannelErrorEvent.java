@@ -20,6 +20,8 @@ public class UscChannelErrorEvent extends UscErrorEvent {
     /**
      * create a channel error event
      * 
+     * @param type
+     *            channel type
      * @param deviceId
      *            device id which can identify a particular channel
      * @param errorCode
@@ -29,8 +31,8 @@ public class UscChannelErrorEvent extends UscErrorEvent {
      * @param message
      *            error message
      */
-    public UscChannelErrorEvent(String deviceId, int errorCode, UscErrorLevel level, String message) {
-        super(deviceId, errorCode, level, message);
+    public UscChannelErrorEvent(String deviceId, String type, int errorCode, UscErrorLevel level, String message) {
+        super(deviceId, type, errorCode, level, message);
     }
 
     /**
@@ -42,7 +44,12 @@ public class UscChannelErrorEvent extends UscErrorEvent {
      *            the exception class of error
      */
     public UscChannelErrorEvent(UscChannelImpl channel, UscChannelException ex) {
-        this(channel.getDevice().toString(), 0, UscErrorLevel.ERROR, ex.getMessage());
+        this(channel.getDevice().toString(), channel.getType().name(), 0, UscErrorLevel.ERROR, ex.getMessage());
+    }
+
+    @Override
+    public String toString() {
+        return "UscChannelErrorEvent:" + super.toString();
     }
 
 }

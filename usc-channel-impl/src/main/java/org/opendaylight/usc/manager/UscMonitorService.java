@@ -10,9 +10,9 @@ package org.opendaylight.usc.manager;
 import java.util.Hashtable;
 
 import org.opendaylight.usc.manager.api.UscEvent;
-import org.opendaylight.usc.manager.api.UscMonitorListener;
+import org.opendaylight.usc.manager.api.UscMonitor;
 import org.opendaylight.usc.manager.monitor.UscChannelEventHandler;
-import org.opendaylight.usc.manager.monitor.UscChannelListener;
+import org.opendaylight.usc.manager.monitor.UscMonitorImpl;
 import org.opendaylight.usc.manager.monitor.UscEventHandler;
 import org.opendaylight.usc.manager.monitor.UscSessionEventHandler;
 import org.opendaylight.usc.manager.monitor.evt.UscChannelCloseEvent;
@@ -30,26 +30,12 @@ import org.slf4j.LoggerFactory;
  */
 public class UscMonitorService {
     @SuppressWarnings("unused")
-    private static final Logger LOG = LoggerFactory
-            .getLogger(UscMonitorService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UscMonitorService.class);
     private static UscMonitorService monitorManager = new UscMonitorService();
-    private UscMonitorListener channelListener;
     private Hashtable<Class<? extends UscEvent>, UscEventHandler> eventHandlerList;
 
     private UscMonitorService() {
         initEventHandlerList();
-    }
-
-    /**
-     * get monitor listener
-     * 
-     * @return monitor listener
-     */
-    public UscMonitorListener getChannelListener() {
-        if (channelListener == null) {
-            channelListener = new UscChannelListener();
-        }
-        return channelListener;
     }
 
     /**
@@ -82,8 +68,7 @@ public class UscMonitorService {
      * @param handler
      *            the event handler
      */
-    public void registerEventHandler(Class<? extends UscEvent> eventType,
-            UscEventHandler handler) {
+    public void registerEventHandler(Class<? extends UscEvent> eventType, UscEventHandler handler) {
         if (eventType != null && handler != null)
             eventHandlerList.put(eventType, handler);
     }

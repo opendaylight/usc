@@ -16,7 +16,6 @@ import org.opendaylight.usc.plugin.model.UscChannel;
 public class UscChannelCreateEvent extends UscMonitorEvent {
 
     private boolean isCallHome;
-    private String type;
 
     /**
      * create a channel create event
@@ -30,9 +29,8 @@ public class UscChannelCreateEvent extends UscMonitorEvent {
      *            channel type,like tcp, udp
      */
     public UscChannelCreateEvent(String deviceId, boolean isCallHome, String type) {
-        super(deviceId);
+        super(deviceId, type);
         this.isCallHome = isCallHome;
-        this.type = type;
     }
 
     /**
@@ -54,13 +52,8 @@ public class UscChannelCreateEvent extends UscMonitorEvent {
         return isCallHome;
     }
 
-    /**
-     * get channel type
-     * 
-     * @return channel type
-     */
-    public String getType() {
-        return type;
+    @Override
+    public String toString() {
+        return "UscChannelCreateEvent:" + super.toString() + ",type is " + getType() + ",isCallHome is " + isCallHome();
     }
-
 }

@@ -13,11 +13,15 @@ import io.netty.channel.ChannelFutureListener;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.opendaylight.usc.manager.UscRouteBrokerService;
+import org.opendaylight.usc.manager.cluster.UscRemoteChannelIdentifier;
+import org.opendaylight.usc.manager.cluster.message.UscRemoteChannelEventMessage;
 import org.opendaylight.usc.manager.monitor.evt.UscChannelCloseEvent;
 import org.opendaylight.usc.manager.monitor.evt.UscChannelCreateEvent;
 import org.opendaylight.usc.plugin.model.UscChannel;
 import org.opendaylight.usc.plugin.model.UscChannelImpl;
 import org.opendaylight.usc.plugin.model.UscDevice;
+import org.opendaylight.usc.util.UscServiceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +36,7 @@ public class UscConnectionManager {
     private static final Logger log = LoggerFactory.getLogger(UscConnectionManager.class);
 
     private final UscPlugin plugin;
+    private UscRouteBrokerService brokerService = null;
 
     /**
      * Map from host name to agentChannel
@@ -40,21 +45,22 @@ public class UscConnectionManager {
 
     protected UscConnectionManager(UscPlugin plugin) {
         this.plugin = plugin;
+        brokerService = UscServiceUtils.getService(UscRouteBrokerService.class);
     }
 
-    protected UscChannelImpl getConnection(UscDevice device, UscChannel.ChannelType type) throws Exception {
+    public UscChannelImpl getConnection(UscDevice device, UscChannel.ChannelType type) throws Exception {
         UscChannelImpl connection = connections.get(device);
+        log.trace("device is" + device + ",type is " + type + ",Connections is " + connections);
         if (connection == null) {
-/*        	Channel channel = null;
-        	try {
-        		channel = plugin.connectToAgent(device);
-        	}catch(Exception e) {
-        		log.warn(e.getMessage());
-        		channel = plugin.connectToDeviceDirectly(device);
-        	}
-        	
-            return addConnection(device, channel, false, type); */
-        	return addConnection(device, plugin.connectToAgent(device), false, type);
+            /*
+             * Channel channel = null; try { channel =
+             * plugin.connectToAgent(device); }catch(Exception e) {
+             * log.warn(e.getMessage()); channel =
+             * plugin.connectToDeviceDirectly(device); }
+             * 
+             * return addConnection(device, channel, false, type);
+             */
+            return addConnection(device, plugin.connectToAgent(device), false, type);
         } else {
             return connection;
         }
@@ -75,6 +81,15 @@ public class UscConnectionManager {
                         log.trace("agentChannel for device " + device + " closed");
                     }
                 });
+                if (brokerService != null) {
+                    UscRemoteChannelIdentifier remoteChannel = new UscRemoteChannelIdentifier(newConnection.getDevice()
+                            .getInetAddress(), newConnection.getType());
+                    brokerService.broadcastMessage(new UscRemoteChannelEventMessage(remoteChannel,
+                            UscRemoteChannelEventMessage.ChannelEventType.CREATE));
+                } else {
+                    log.warn("Broker service is null, can't send broadcast for adding channel message("
+                            + newConnection.getDevice().getInetAddress() + ")!");
+                }
                 plugin.sendEvent(new UscChannelCreateEvent(newConnection));
                 connection = newConnection;
             } else {
@@ -110,4 +125,8 @@ public class UscConnectionManager {
         return count;
     }
 
+    @Override
+    public String toString() {
+        return connections.toString();
+    }
 }

@@ -22,19 +22,23 @@ import org.opendaylight.usc.manager.api.UscShardService;
 import org.opendaylight.usc.manager.topology.UscTopologyFactory;
 import org.opendaylight.usc.util.UscDtoUtils;
 import org.opendaylight.usc.util.UscServiceUtils;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.impl.rev150101.UscRoot;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.impl.rev150101.UscRootBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.NodeId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.TopologyId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.link.attributes.Alarm;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.link.attributes.Session;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.topologies.Topology;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.topologies.TopologyBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.topologies.TopologyKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.topologies.topology.Link;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.topologies.topology.Node;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.topologies.topology.NodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.topologies.topology.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.NodeId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.TerminationPointId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.TopologyId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.UscTopology;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.UscTopologyBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.channel.attributes.ChannelAlarm;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.channel.attributes.Session;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.session.attributes.SessionAlarm;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.session.attributes.TerminationPoint;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.topology.attributes.Channel;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.topology.attributes.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.topology.attributes.NodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.topology.attributes.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.usc.topology.Topology;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.usc.topology.TopologyBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.usc.topology.TopologyKey;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +46,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.util.concurrent.FutureCallback;
 
 /**
- * Manager all of nodes and links of topology, which contains only local
+ * Manager all of nodes and Channels of topology, which contains only local
  * controller and USC related staffs All of methods should be thread safe for
  * asynchronous event handler
  */
@@ -53,15 +57,14 @@ public class UscTopologyService {
      */
     public static final String NODE_TYPE_CONTROLLER = "Controller";
     /**
-     * channel link type string
+     * channel channel type string
      */
-    public static final String LINK_TYPE_CHANNEL = "Channel";
+    public static final String Channel_TYPE_CHANNEL = "channel";
     /**
      * network device node type string
      */
     public static final String NODE_TYPE_NETWORK_DEVICE = "Device";
-    private static final Logger LOG = LoggerFactory
-            .getLogger(UscTopologyService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UscTopologyService.class);
     private static UscTopologyService topoService = new UscTopologyService();
     private Node localController;
     private Topology localTopology;
@@ -71,7 +74,7 @@ public class UscTopologyService {
     private UscConfigurationService configService;
     private long maxErrorNumber = 0;
     private InstanceIdentifier<Topology> topoIdentifier;
-    private List<Link> localLinkList = new CopyOnWriteArrayList<Link>();
+    private List<Channel> localChannelList = new CopyOnWriteArrayList<Channel>();
     private List<Node> localNodeList = new CopyOnWriteArrayList<Node>();
     private Hashtable<String, Integer> nodeReferList = new Hashtable<String, Integer>();
     private boolean finished = false;
@@ -93,75 +96,92 @@ public class UscTopologyService {
     /**
      * create topology manager of USC using a given shard data manger
      */
-    public void init() {
+    public synchronized void init() {
         shardService = UscServiceUtils.getService(UscShardService.class);
-        configService = UscServiceUtils
-                .getService(UscConfigurationService.class);
-        maxErrorNumber = configService
-                .getConfigIntValue(UscConfigurationService.USC_MAX_ERROR_NUMER);
-        logError = configService
-                .isConfigAsTure(UscConfigurationService.USC_LOG_ERROR_EVENT);
+        configService = UscServiceUtils.getService(UscConfigurationService.class);
+        maxErrorNumber = configService.getConfigIntValue(UscConfigurationService.USC_MAX_ERROR_NUMER);
+        logError = configService.isConfigAsTure(UscConfigurationService.USC_LOG_ERROR_EVENT);
         initLocalHostName();
         TopologyBuilder topoBuilder = new TopologyBuilder();
         TopologyId topoId = new TopologyId(localHostName);
-        localTopology = topoBuilder.setTopologyId(topoId)
-                .setKey(new TopologyKey(topoId)).setNode(localNodeList)
-                .setLink(localLinkList).build();
+        localTopology = topoBuilder.setTopologyId(topoId).setKey(new TopologyKey(topoId)).setNode(localNodeList)
+                .setChannel(localChannelList).build();
         topoIdentifier = UscDtoUtils.getTopologyIdentifier(localHostName);
         initLocalController();
         localNodeList.add(localController);
-        updateUscRoot();
-        //for cleaning the former shard data
-        updateShard();
+        updateUscTopology();
     }
 
     private void initLocalHostName() {
         try {
             localHostName = InetAddress.getLocalHost().getHostName();
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            if (LOG.isDebugEnabled()) {
+                e.printStackTrace();
+            }
             localHostName = "Random" + Math.random() + "";
-            LOG.warn("Failed to get local hostname!create a random key for local controller.nodeId = "
-                    + localHostName);
+            LOG.warn("Failed to get local hostname!create a random key for local controller.nodeId = " + localHostName
+                    + ", error message is " + e.getMessage());
         }
     }
 
     private void initLocalController() {
         NodeBuilder nodeBuilder = new NodeBuilder();
         NodeId nodeId = new NodeId(localHostName);
-        localController = nodeBuilder.setNodeType(NODE_TYPE_CONTROLLER)
-                .setNodeId(nodeId).setKey(new NodeKey(nodeId)).build();
+        localController = nodeBuilder.setNodeType(NODE_TYPE_CONTROLLER).setNodeId(nodeId).setKey(new NodeKey(nodeId))
+                .build();
     }
 
     @SuppressWarnings("unchecked")
-    private void updateUscRoot() {
-        UscRootBuilder uscRootBuilder = new UscRootBuilder();
-        List<Topology> topoList = new ArrayList<Topology>();
-        topoList.add(localTopology);
-        UscRoot uscRoot = null;
+    private void updateUscTopology() {
+        UscTopology UscTopology = null;
         if (shardService != null) {
-        	uscRoot = (UscRoot) shardService.read(LogicalDatastoreType.OPERATIONAL,
+            if (existLocalTopology()) {
+                // reset since USC service were restarted.
+                updateShard();
+                LOG.info("The local topology already exists in Shard, and has been reseted ");
+                return;
+            }
+            UscTopology = (UscTopology) shardService.read(LogicalDatastoreType.OPERATIONAL,
                     UscDtoUtils.getUscTopologyIdentifier());
-        	if(uscRoot != null){
-        		LOG.info("topology number = "+uscRoot.getTopology().size());
-        	}
+            boolean UscTopologyExist = false;
+            if (UscTopology != null) {
+                LOG.info("Before initialize USC root, Topologies already has " + UscTopology.getTopology().size()
+                        + ",which is set by other controller.");
+                UscTopologyExist = true;
+            }
+            UscTopologyBuilder UscTopologyBuilder = new UscTopologyBuilder();
+            List<Topology> topoList = new ArrayList<Topology>();
+            topoList.add(localTopology);
+            UscTopology = UscTopologyBuilder.setTopology(topoList).build();
+            if (UscTopologyExist) {
+                shardService.merge(LogicalDatastoreType.OPERATIONAL, UscDtoUtils.getUscTopologyIdentifier(),
+                        UscTopology);
+            } else {
+                shardService.write(LogicalDatastoreType.OPERATIONAL, UscDtoUtils.getUscTopologyIdentifier(),
+                        UscTopology);
+            }
         } else {
-            LOG.error("The shard manager is not initialized!");
+            LOG.error("The shard manager is not initialized!UscTopology can't be initialized for Shard.");
         }
-        uscRoot = uscRootBuilder.setTopology(topoList).build();
+    }
+
+    private boolean existLocalTopology() {
         if (shardService != null) {
-            shardService.merge(LogicalDatastoreType.OPERATIONAL,
-                    UscDtoUtils.getUscTopologyIdentifier(), uscRoot);
-        } else {
-            LOG.error("The shard manager is not initialized!");
+            @SuppressWarnings("unchecked")
+            DataObject tmp = shardService.read(LogicalDatastoreType.OPERATIONAL, topoIdentifier);
+            if (tmp != null) {
+                return true;
+            }
         }
+        return false;
     }
 
     @SuppressWarnings("unchecked")
     private synchronized void updateShard() {
         if (shardService != null) {
-            shardService.write(LogicalDatastoreType.OPERATIONAL,
-                    topoIdentifier, localTopology, new FutureCallback<Void>() {
+            shardService.write(LogicalDatastoreType.OPERATIONAL, topoIdentifier, localTopology,
+                    new FutureCallback<Void>() {
                         @Override
                         public void onSuccess(final Void result) {
                             finished = true;
@@ -208,41 +228,39 @@ public class UscTopologyService {
     public Topology getLocalTopolgy() {
         return localTopology;
     }
-    
+
     /**
      * get the whole USC topology from shard data
+     * 
      * @return the whole USC topology
      */
     @SuppressWarnings({ "unchecked" })
-    public Topology getWholeUscTopology() {
+    public synchronized Topology getWholeUscTopology() {
         if (shardService == null) {
             LOG.error("UscShardService is not initialized!");
             return null;
         }
-        UscRoot uscTopology = (UscRoot) shardService.read(
-                LogicalDatastoreType.OPERATIONAL,
+        UscTopology uscTopology = (UscTopology) shardService.read(LogicalDatastoreType.OPERATIONAL,
                 UscDtoUtils.getUscTopologyIdentifier());
-        if(uscTopology == null){
+        if (uscTopology == null) {
             LOG.error("Failed to get usc topology root data.");
             return null;
         }
         String id = null;
         Topology topology = null;
-        Topology wholeUscTopology = UscTopologyFactory.createTopology("usc",
-                new ArrayList<Node>(), new ArrayList<Link>());
+        Topology wholeUscTopology = UscTopologyFactory.createTopology("usc", new ArrayList<Node>(),
+                new ArrayList<Channel>());
         for (Topology topo : uscTopology.getTopology()) {
             id = topo.getTopologyId().getValue();
-            topology = (Topology) shardService.read(
-                    LogicalDatastoreType.OPERATIONAL,
+            topology = (Topology) shardService.read(LogicalDatastoreType.OPERATIONAL,
                     UscDtoUtils.getTopologyIdentifier(id));
             if (topology != null) {
-                UscDtoUtils.mergeLinkList(
-                        UscDtoUtils.mergeNodeList(wholeUscTopology, topology),
-                        topology);
+                UscDtoUtils.mergeChannelList(UscDtoUtils.mergeNodeList(wholeUscTopology, topology), topology);
             }
         }
         return wholeUscTopology;
     }
+
     /**
      * get node through the id of node
      * 
@@ -251,7 +269,7 @@ public class UscTopologyService {
      * @return if node id exists than return it, other wise create a new node
      *         using node id
      */
-    public Node getNode(String nodeId) {
+    public synchronized Node getNode(String nodeId) {
         for (Node node : localTopology.getNode()) {
             if (sameNodeId(nodeId, node)) {
                 return node;
@@ -267,7 +285,7 @@ public class UscTopologyService {
      * @param node
      *            the adding node
      */
-    public void addNode(Node node) {
+    public synchronized void addNode(Node node) {
         if (node != null) {
             String nodeId = node.getKey().getNodeId().getValue();
             Integer num = nodeReferList.get(nodeId);
@@ -296,10 +314,14 @@ public class UscTopologyService {
      * @return the node of the removing node,if node is not exists then return
      *         null
      */
-    public Node removeNode(String nodeId) {
+    public synchronized Node removeNode(String nodeId) {
         if (nodeId != null && !nodeId.equals("")) {
             Integer num = nodeReferList.get(nodeId);
             Node node = getNode(nodeId);
+            if (node == null) {
+                LOG.warn("removeNode:Node is not found for device id = " + nodeId);
+                return null;
+            }
             if (num == null) {
                 return null;
             } else if (num <= 1) {
@@ -326,126 +348,155 @@ public class UscTopologyService {
      * @return if the node has same id with the specified id then return
      *         true,other wise return false
      */
-    public boolean sameNodeId(String id, Node node) {
+    public synchronized boolean sameNodeId(String id, Node node) {
         return id.equals(node.getNodeId().getValue());
     }
 
     /**
-     * add a link to topology link list
+     * add a channel to topology channel list
      * 
      * @param channel
-     *            the adding link
+     *            the adding channel
      */
-    public void addLink(Link channel) {
+    public synchronized void addChannel(Channel channel) {
         if (channel != null) {
-            List<Link> list = localTopology.getLink();
-            if (list == null) {
-                list = new CopyOnWriteArrayList<Link>();
-            }
-            list.add(channel);
+            localTopology.getChannel().add(channel);
+            addNode(UscTopologyFactory.createNode(channel.getDestination().getDestNode().getValue(),
+                    UscTopologyService.NODE_TYPE_NETWORK_DEVICE));
             updateShard();
-
         }
     }
 
     /**
-     * remove the link specified by the destination id,and same time will remove
-     * the corresponding source and destination nodes
+     * remove the channel specified by the destination id,and same time will
+     * remove the corresponding source and destination nodes
      * 
      * @param destinationId
      *            node id of the destination node
-     * @return the link of the removing link,if the link related with specified
-     *         destination id is not exists then return null
+     * @param type
+     *            the type of channel
+     * @return the channel of the removing channel,if the channel related with
+     *         specified destination id is not exists then return null
      */
-    public Link removeLink(String destinationId) {
+    public synchronized Channel removeChannel(String destinationId, String type) {
         if (destinationId != null) {
-            Link link = getLink(destinationId);
-            if (link != null) {
-                localTopology.getLink().remove(link);
+            Channel channel = getChannel(destinationId, type);
+            if (channel != null) {
+                localTopology.getChannel().remove(channel);
                 // source controller node only add once on initializing
-                // removeNode(link.getSource().getSourceNode().getValue());
-                removeNode(link.getDestination().getDestNode().getValue());
+                // removeNode(channel.getSource().getSourceNode().getValue());
+                removeNode(channel.getDestination().getDestNode().getValue());
                 updateShard();
-                return link;
+                return channel;
             } else {
-                LOG.warn("Not found specified destionation.id ="
-                        + destinationId);
+                LOG.warn("Not found specified destionation.id =" + destinationId);
             }
         }
         return null;
     }
 
     /**
-     * update link information, and update the shard data of local topology
+     * update channel information, and update the shard data of local topology
      * 
      * @param channel
-     *            the new link
-     * @return old link
+     *            the new channel
+     * @return old channel
      */
-    public Link updateLink(Link channel) {
+    public synchronized Channel updateChannel(Channel channel) {
         if (channel != null) {
-            Link oldLink = removeLink(channel.getDestination().getDestNode()
-                    .getValue());
-            addLink(channel);
+            Channel oldChannel = removeChannel(channel.getDestination().getDestNode().getValue(),
+                    channel.getChannelType());
+            addChannel(channel);
             updateShard();
-            return oldLink;
+            return oldChannel;
         }
         return null;
     }
 
+    public synchronized void updateChannel(Channel channel, Session session, boolean removeFlag) {
+        Session oldSession = getSession(channel, session.getSessionId().getValue());
+        if (oldSession != null) {
+            channel.getSession().remove(oldSession);
+        }
+        if (!removeFlag) {
+            channel.getSession().add(session);
+        }
+        String destinationId = channel.getDestination().getDestNode().getValue();
+        Node deviceNode = UscTopologyFactory.createNode(destinationId, UscTopologyService.NODE_TYPE_NETWORK_DEVICE);
+        channel = UscTopologyFactory.createChannel(getLocalController(), deviceNode, channel.getKey().getChannelId()
+                .getValue(), channel.getChannelType(), UscTopologyFactory.isCallHome(channel.getCallHome()),
+                channel.getBytesIn(), channel.getBytesOut(), channel.getChannelAlarm(), channel.getSession());
+        updateChannel(channel);
+    }
+
+    public synchronized void updateTransaction(Channel channel, Session session, long bytesIn, long bytesOut) {
+        Session oldSession = getSession(channel, session.getSessionId().getValue());
+        if (oldSession != null) {
+            channel.getSession().remove(oldSession);
+        }
+        channel.getSession().add(session);
+        String destinationId = channel.getDestination().getDestNode().getValue();
+        Node deviceNode = UscTopologyFactory.createNode(destinationId, UscTopologyService.NODE_TYPE_NETWORK_DEVICE);
+        channel = UscTopologyFactory.createChannel(getLocalController(), deviceNode, channel.getKey().getChannelId()
+                .getValue(), channel.getChannelType(), UscTopologyFactory.isCallHome(channel.getCallHome()),
+                channel.getBytesIn() + bytesIn, channel.getBytesOut() + bytesOut, channel.getChannelAlarm(),
+                channel.getSession());
+        updateChannel(channel);
+    }
+
     /**
-     * get first link of specified destination id
+     * get first channel of specified destination id
      * 
      * @param destinationId
      *            destination node id
-     * @return the link, if the link related with specified destination id is
-     *         not exists then return null
+     * @return the channel, if the channel related with specified destination id
+     *         is not exists then return null
      */
-    public Link getLink(String destinationId) {
-        for (Link link : localTopology.getLink()) {
-            if (link.getDestination().getDestNode().getValue()
-                    .equals(destinationId)) {
-                return link;
+    public synchronized Channel getChannel(String destinationId, String type) {
+        for (Channel channel : localTopology.getChannel()) {
+            if (channel.getDestination().getDestNode().getValue().equals(destinationId)
+                    && channel.getChannelType().equals(type)) {
+                return channel;
             }
         }
         return null;
     }
 
     /**
-     * add session to the link which has the specified destination id
+     * add session to the channel which has the specified destination id
      * 
      * @param destinationId
      *            destination id
+     * @param type
+     *            channel type
      * @param session
      *            the adding session
      */
-    public void addSession(String destinationId, Session session) {
-        Link link = getLink(destinationId);
-        if (link != null) {
-            List<Session> list = link.getSession();
-            if (list == null) {
-                list = new CopyOnWriteArrayList<Session>();
-            }
-            list.add(session);
+    public synchronized void addSession(String destinationId, String type, Session session) {
+        Channel channel = getChannel(destinationId, type);
+        if (channel != null) {
+            updateChannel(channel, session, false);
         } else {
             LOG.warn("Not found specified destionation.id =" + destinationId);
         }
     }
 
     /**
-     * remove session from the link which has the specified destination id
+     * remove session from the channel which has the specified destination id
      * 
      * @param destinationId
      *            destination id
+     * @param type
+     *            channel type
      * @param sessionId
      *            the removing session
      */
-    public Session removeSession(String destinationId, String sessionId) {
-        Link link = getLink(destinationId);
-        if (link != null) {
-            Session session = getSession(link, sessionId);
+    public synchronized Session removeSession(String destinationId, String type, String sessionId) {
+        Channel channel = getChannel(destinationId, type);
+        if (channel != null) {
+            Session session = getSession(channel, sessionId);
             if (session != null) {
-                link.getSession().remove(session);
+                updateChannel(channel, session, true);
                 return session;
             } else {
                 LOG.warn("Not found specified Session.id =" + sessionId);
@@ -457,71 +508,17 @@ public class UscTopologyService {
     }
 
     /**
-     * update session of the link which has the specified destination id
+     * get session from the channel with specified session id
      * 
-     * @param destinationId
-     *            destination id
-     * @param session
-     *            the updating session
-     */
-    public Session updateSession(String destinationId, Session session) {
-        Link link = getLink(destinationId);
-        if (link != null) {
-            Session oldSession = getSession(link, session.getSessionId()
-                    .getValue());
-            if (oldSession != null) {
-                link.getSession().remove(oldSession);
-                link.getSession().add(session);
-                return oldSession;
-            } else {
-                LOG.warn("Not found specified Session.id ="
-                        + session.getSessionId().getValue());
-            }
-        } else {
-            LOG.warn("Not found specified destionation.id =" + destinationId);
-        }
-        return null;
-    }
-
-    /**
-     * update session of the link
-     * 
-     * @param link
-     *            updating target link
-     * @param session
-     *            the updating session
-     * @return old session if the session is exists, other wise return null
-     */
-    public Session updateSession(Link link, Session session) {
-        if (link != null) {
-            Session oldSession = getSession(link, session.getSessionId()
-                    .getValue());
-            if (oldSession != null) {
-                link.getSession().remove(oldSession);
-                link.getSession().add(session);
-                return oldSession;
-            } else {
-                LOG.warn("Not found specified Session.id ="
-                        + session.getSessionId().getValue());
-            }
-        } else {
-            LOG.warn("link is null!");
-        }
-        return null;
-    }
-
-    /**
-     * get session from the link with specified session id
-     * 
-     * @param link
-     *            the target link for getting
+     * @param channel
+     *            the target channel for getting
      * @param sessionId
      *            specified session id
      * @return if find the session which has the session id, return the session
      *         other wise return null
      */
-    public Session getSession(Link link, String sessionId) {
-        for (Session session : link.getSession()) {
+    public synchronized Session getSession(Channel channel, String sessionId) {
+        for (Session session : channel.getSession()) {
             if (session.getSessionId().getValue().equals(sessionId)) {
                 return session;
             }
@@ -530,21 +527,20 @@ public class UscTopologyService {
     }
 
     /**
-     * get session which has specified session id from the link which has the
+     * get session which has specified session id from the channel which has the
      * destination id
      * 
      * @param destinationId
-     *            the target link for getting
+     *            the target channel for getting
      * @param sessionId
      *            specified session id
      * @return if find the session which has the session id, return the session
      *         other wise return null
      */
-    public Session getSession(String destinationId, String sessionId) {
-        for (Link link : localTopology.getLink()) {
-            if (link.getDestination().getDestNode().getValue()
-                    .equals(destinationId)) {
-                for (Session session : link.getSession()) {
+    public synchronized Session getSession(String destinationId, String sessionId) {
+        for (Channel channel : localTopology.getChannel()) {
+            if (channel.getDestination().getDestNode().getValue().equals(destinationId)) {
+                for (Session session : channel.getSession()) {
                     if (session.getSessionId().getValue().equals(sessionId)) {
                         return session;
                     }
@@ -555,132 +551,125 @@ public class UscTopologyService {
     }
 
     /**
-     * update the transaction data values of the link which specified by the
-     * destination id
-     * 
-     * @param destinationId
-     *            specified destination id
-     * @param bytesIn
-     *            bytes in number
-     * @param bytesOut
-     *            bytes out number
-     */
-    public void updateLinkTransaction(String destinationId, long bytesIn,
-            long bytesOut) {
-        Link link = getLink(destinationId);
-        Node deviceNode = UscTopologyFactory.createNode(destinationId,
-                UscTopologyService.NODE_TYPE_NETWORK_DEVICE);
-        String key = UscTopologyService.NODE_TYPE_NETWORK_DEVICE + ":"
-                + getLocalController().getNodeId() + "-"
-                + UscTopologyService.NODE_TYPE_NETWORK_DEVICE + ":"
-                + destinationId;
-        link = UscTopologyFactory.createLink(getLocalController(), deviceNode,
-                key, link.getLinkType(),
-                UscTopologyFactory.isCallHome(link.getCallHome()),
-                link.getBytesIn() + bytesIn, link.getBytesOut() + bytesOut,
-                link.getAlarm(), link.getSession());
-
-    }
-
-    /**
      * update the transaction data values of the session specified by session
-     * id, the session belongs to the link which specified by the destination id
+     * id, the session belongs to the channel which specified by the destination
+     * id
      * 
      * @param destinationId
      *            specified destination id
      * @param sessionId
      *            specified session id
+     * @param type
+     *            channel type
      * @param bytesIn
      *            bytes in number
      * @param bytesOut
      *            bytes out number
      */
-    public void updateSessionTransaction(String destinationId,
-            String sessionId, long bytesIn, long bytesOut) {
-        Link link = getLink(destinationId);
+    public synchronized void updateSessionTransaction(String destinationId, String type, String sessionId,
+            long bytesIn, long bytesOut) {
+        Channel channel = getChannel(destinationId, type);
+        if (channel == null) {
+            LOG.warn("channel is not found for device({}),type({})", destinationId, type);
+            return;
+        }
         Session session = getSession(destinationId, sessionId);
-        session = UscTopologyFactory.createSession(sessionId, session
-                .getTerminalPoint().getTerminalPointId().getValue(),
-                link.getBytesIn() + bytesIn, link.getBytesOut() + bytesOut,
-                session.getAlarm());
-        updateSession(link, session);
-        // update link date at same time
-        updateLinkTransaction(destinationId, bytesIn, bytesOut);
-        updateLink(link);
+        if (session == null) {
+            LOG.warn("Session is not found for device[" + destinationId + "] and session[" + sessionId + "].");
+            return;
+        }
+        TerminationPoint tp = session.getTerminationPoint();
+        if (tp == null) {
+            LOG.warn("TerminationPoint is not found for device[" + destinationId + "] and session[" + sessionId + "].");
+            return;
+        }
+        TerminationPointId tpid = tp.getTerminationPointId();
+        if (tpid == null) {
+            LOG.warn("TerminationPointId is not found for device[" + destinationId + "] and session[" + sessionId
+                    + "].");
+            return;
+        }
+        String tpPort = tpid.getValue();
+        session = UscTopologyFactory.createSession(sessionId, tpPort, session.getBytesIn() + bytesIn,
+                session.getBytesOut() + bytesOut, session.getSessionAlarm());
+        updateTransaction(channel, session, bytesIn, bytesOut);
     }
 
     /**
-     * add error information to the link which has the specified destination id
+     * add error information to the channel which has the specified destination
+     * id
      * 
      * @param destinationId
      *            specified destination id
+     * @param type
+     *            channel type
      * @param alarm
      *            error information object
      */
-    public void addLinkError(String destinationId, Alarm alarm) {
+    public synchronized void addChannelError(String destinationId, String type, ChannelAlarm alarm) {
         if (alarm == null) {
-            LOG.error("Channel Error Event: alarm is null for device id = "
-                    + destinationId);
+            LOG.error("Channel Error Event: alarm is null for device id = " + destinationId);
             return;
         }
         if (logError) {
-            LOG.error("Channel Error Event: device Id = " + destinationId
-                    + ",Id = " + alarm.getAlarmId().getValue() + ",Code = "
-                    + alarm.getAlarmCode() + ",Message = "
-                    + alarm.getAlarmMessage());
+            LOG.error("Channel Error Event: device Id = " + destinationId + ",Id = " + alarm.getAlarmId().getValue()
+                    + ",Code = " + alarm.getAlarmCode() + ",Message = " + alarm.getAlarmMessage());
             return;
         }
-        Link link = getLink(destinationId);
-        Node deviceNode = UscTopologyFactory.createNode(destinationId,
-                UscTopologyService.NODE_TYPE_NETWORK_DEVICE);
-        List<Alarm> alarmList = link.getAlarm();
+        Channel channel = getChannel(destinationId, type);
+        if (channel == null) {
+            LOG.warn("Channel is not found for device id = " + destinationId);
+            return;
+        }
+        Node deviceNode = UscTopologyFactory.createNode(destinationId, UscTopologyService.NODE_TYPE_NETWORK_DEVICE);
+        List<ChannelAlarm> alarmList = channel.getChannelAlarm();
         addAlarm(alarmList, alarm);
-        link = UscTopologyFactory.createLink(getLocalController(), deviceNode,
-                link.getLinkId().getValue(), link.getLinkType(),
-                UscTopologyFactory.isCallHome(link.getCallHome()),
-                link.getBytesIn(), link.getBytesOut(), alarmList,
-                link.getSession());
-        updateLink(link);
+        channel = UscTopologyFactory.createChannel(getLocalController(), deviceNode, channel.getChannelId().getValue(),
+                channel.getChannelType(), UscTopologyFactory.isCallHome(channel.getCallHome()), channel.getBytesIn(),
+                channel.getBytesOut(), alarmList, channel.getSession());
+        updateChannel(channel);
     }
 
     /**
      * add error information to the session specified by session id, the session
-     * belongs to the link which specified by the destination id
+     * belongs to the channel which specified by the destination id
      * 
      * @param destinationId
      *            specified destination id
+     * @param type
+     *            channel type
      * @param sessionId
      *            specified session id
      * @param alarm
      *            error information object
      */
-    public void addSessionError(
-            String destinationId,
-            String sessionId,
-            org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.session.attributes.Alarm alarm) {
+    public synchronized void addSessionError(String destinationId, String type, String sessionId, SessionAlarm alarm) {
         if (alarm == null) {
-            LOG.error("Session Error Event: alarm is null for device id = "
-                    + destinationId + ",sessionId = " + sessionId);
+            LOG.error("Session Error Event: alarm is null for device id = " + destinationId + ",sessionId = "
+                    + sessionId);
             return;
         }
         if (logError) {
-            LOG.error("Session Error Event: deviceId = " + destinationId
-                    + ",sessionId = " + sessionId + ",Id = "
-                    + alarm.getAlarmId().getValue() + ",Code = "
-                    + alarm.getAlarmCode() + ",Message = "
+            LOG.error("Session Error Event: deviceId = " + destinationId + ",sessionId = " + sessionId + ",Id = "
+                    + alarm.getAlarmId().getValue() + ",Code = " + alarm.getAlarmCode() + ",Message = "
                     + alarm.getAlarmMessage());
             return;
         }
-        Link link = getLink(destinationId);
+        Channel channel = getChannel(destinationId, type);
+        if (channel == null) {
+            LOG.warn("Channel is not found for device id = " + destinationId);
+            return;
+        }
         Session session = getSession(destinationId, sessionId);
-        List<org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.session.attributes.Alarm> alarmList = session
-                .getAlarm();
+        if (session == null) {
+            LOG.warn("Session is not found for device[" + destinationId + "] and session[" + sessionId + "].");
+            return;
+        }
+        List<SessionAlarm> alarmList = session.getSessionAlarm();
         addAlarm(alarmList, alarm);
-        session = UscTopologyFactory.createSession(sessionId, session
-                .getTerminalPoint().getTerminalPointId().getValue(),
-                link.getBytesIn(), link.getBytesOut(), alarmList);
-        updateSession(link, session);
-        updateLink(link);
+        session = UscTopologyFactory.createSession(sessionId, session.getTerminationPoint().getTerminationPointId()
+                .getValue(), session.getBytesIn(), session.getBytesOut(), alarmList);
+        updateChannel(channel, session, false);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -699,19 +688,16 @@ public class UscTopologyService {
      * remove all of topology manager used shard data
      */
     @SuppressWarnings("unchecked")
-    public void destory() {
+    public synchronized void destory() {
         if (shardService != null) {
             // remove all of shard data used by USC
-            UscRoot uscTopology = (UscRoot) shardService.read(
-                    LogicalDatastoreType.OPERATIONAL,
+            UscTopology uscTopology = (UscTopology) shardService.read(LogicalDatastoreType.OPERATIONAL,
                     UscDtoUtils.getUscTopologyIdentifier());
             for (Topology topo : uscTopology.getTopology()) {
                 shardService.delete(LogicalDatastoreType.OPERATIONAL,
-                        UscDtoUtils.getTopologyIdentifier(topo.getTopologyId()
-                                .getValue()));
+                        UscDtoUtils.getTopologyIdentifier(topo.getTopologyId().getValue()));
             }
-            shardService.delete(LogicalDatastoreType.OPERATIONAL,
-                    UscDtoUtils.getUscTopologyIdentifier());
+            shardService.delete(LogicalDatastoreType.OPERATIONAL, UscDtoUtils.getUscTopologyIdentifier());
         }
     }
 

@@ -12,10 +12,13 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.socket.DatagramPacket;
+
+import java.net.InetSocketAddress;
 
 import org.opendaylight.usc.manager.monitor.evt.UscSessionTransactionEvent;
+import org.opendaylight.usc.plugin.model.UscChannel;
 import org.opendaylight.usc.plugin.model.UscSessionImpl;
-import org.opendaylight.usc.protocol.UscControl;
 import org.opendaylight.usc.protocol.UscData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +28,6 @@ import org.slf4j.LoggerFactory;
  */
 @Sharable
 public class UscMultiplexer extends ChannelInboundHandlerAdapter {
-
     private static final Logger LOG = LoggerFactory.getLogger(UscMultiplexer.class);
 
     private final UscPlugin plugin;
@@ -45,14 +47,16 @@ public class UscMultiplexer extends ChannelInboundHandlerAdapter {
         ByteBuf payload = (ByteBuf) msg;
         LOG.trace("UscMultiplexer.channelRead: " + payload);
 
-        Channel ch = ctx.channel();
-        
-        LOG.trace("UscMultiplexer.channelRead: localServerChannel = " + ch);
-        LOG.trace("UscMultiplexer.channelRead: localServerChannel.pipeline = " + ch.pipeline());
-        
+        Channel ch = ctx.channel();     
         Channel outboundChannel = ch.attr(UscPlugin.DIRECT_CHANNEL).get();
         if(outboundChannel != null) {
-        	outboundChannel.write(msg);
+            if(plugin.getChannelType() == UscChannel.ChannelType.DTLS || plugin.getChannelType() == UscChannel.ChannelType.UDP) {
+                DatagramPacket packet = new DatagramPacket(payload, (InetSocketAddress)outboundChannel.remoteAddress());
+                LOG.trace("UscMultiplexer.channelRead: convert payload to DatagramPacket " + packet);
+                outboundChannel.write(packet);
+            }
+            else
+                outboundChannel.write(msg);
         }
         else {
         	UscSessionImpl session = ch.attr(UscPlugin.SESSION).get().get();
@@ -68,10 +72,15 @@ public class UscMultiplexer extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        Channel ch = ctx.channel();
-        UscSessionImpl session = ch.attr(UscPlugin.SESSION).get().get();
-        Channel outboundChannel = session.getChannel().getChannel();
-        outboundChannel.flush();
+    	LOG.trace("UscMultiplexer.channelReadComplete");
+		Channel ch = ctx.channel();
+		Channel outboundChannel = ch.attr(UscPlugin.DIRECT_CHANNEL).get();
+		if (outboundChannel != null) {
+			outboundChannel.flush();
+		} else {
+			UscSessionImpl session = ch.attr(UscPlugin.SESSION).get().get();
+			outboundChannel = session.getChannel().getChannel();
+			outboundChannel.flush();
+		}
     }
-
 }

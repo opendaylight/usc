@@ -1,4 +1,7 @@
 package org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.impl.rev150101;
+
+import org.opendaylight.usc.UscProvider;
+
 public class UscChannelImplModule extends org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.impl.rev150101.AbstractUscChannelImplModule {
     public UscChannelImplModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
@@ -15,8 +18,9 @@ public class UscChannelImplModule extends org.opendaylight.yang.gen.v1.urn.opend
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        // TODO:implement
-        throw new java.lang.UnsupportedOperationException();
+        UscProvider provider = new UscProvider(getDataBrokerDependency());
+        getBrokerDependency().registerProvider(provider);
+        return provider;
     }
 
 }

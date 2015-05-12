@@ -20,7 +20,8 @@ public class UscControl extends UscFrame {
 	public static enum ControlCode {
 		OTHER(0),
 		TERMINATION_REQUEST(1),
-		TERMINATION_RESPONSE(2);
+		TERMINATION_RESPONSE(2),
+		ECHO(3);  // send this from UscPlugin to test if the channel from UscPlugin to UscAgent is reachable
 		
 		private int code;
 		

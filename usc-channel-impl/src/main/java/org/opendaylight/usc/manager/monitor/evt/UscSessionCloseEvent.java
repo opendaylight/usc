@@ -18,13 +18,15 @@ public class UscSessionCloseEvent extends UscSessionEvent {
     /**
      * create session close event
      * 
+     * @param type
+     *            channel type
      * @param deviceId
      *            device id which identify a channel which contains the session
      * @param sessionId
      *            session id
      */
-    public UscSessionCloseEvent(String deviceId, String sessionId) {
-        super(deviceId, sessionId);
+    public UscSessionCloseEvent(String deviceId, String type, String sessionId) {
+        super(deviceId, sessionId, type);
     }
 
     /**
@@ -34,8 +36,14 @@ public class UscSessionCloseEvent extends UscSessionEvent {
      *            session closed
      */
     public UscSessionCloseEvent(UscSession session) {
-        this(session.getChannel().getDevice().toString(), Integer.toString(session.getSessionId()));
+        this(session.getChannel().getDevice().toString(), Integer.toString(session.getSessionId()), session
+                .getChannel().getType().name());
 
+    }
+
+    @Override
+    public String toString() {
+        return "UscSessionCloseEvent:" + super.toString();
     }
 
 }

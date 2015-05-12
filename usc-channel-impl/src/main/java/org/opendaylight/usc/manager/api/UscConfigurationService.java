@@ -55,9 +55,13 @@ public interface UscConfigurationService {
      */
     public final static String PRIVATE_KEY_FILE = "org.opendaylight.usc.PrivateKeyFile";
     /**
-     * the configuration key the property file for configuration initialization
+     * the configuration key of the configuration file path of akka cluster
      */
-    public final static String PROPERTY_FILE = "org.opendaylight.usc.PropertyFile";
+    public final static String AKKA_CLUSTER_FILE = "org.opendaylight.usc.CusterConfigurationFile";
+    /**
+     * the configuration file path for configuration initialization
+     */
+    public final static String PROPERTY_FILE_PATH = "etc/usc/usc.properties";
 
     /**
      * get String value configuration

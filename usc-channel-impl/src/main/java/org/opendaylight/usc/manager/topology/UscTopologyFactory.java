@@ -12,33 +12,36 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.AlarmId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.LinkId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.NodeId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.SessionId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.TerminalPointId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.TopologyId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.link.attributes.Alarm;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.link.attributes.AlarmBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.link.attributes.AlarmKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.link.attributes.DestinationBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.link.attributes.Session;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.link.attributes.SessionBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.link.attributes.SessionKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.link.attributes.SourceBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.session.attributes.TerminalPointBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.topologies.Topology;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.topologies.TopologyBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.topologies.TopologyKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.topologies.topology.Link;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.topologies.topology.LinkBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.topologies.topology.LinkKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.topologies.topology.Node;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.topologies.topology.NodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.topologies.topology.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.AlarmId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.ChannelId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.NodeId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.SessionId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.TerminationPointId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.TopologyId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.channel.attributes.ChannelAlarm;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.channel.attributes.ChannelAlarmBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.channel.attributes.ChannelAlarmKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.channel.attributes.DestinationBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.channel.attributes.Session;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.channel.attributes.SessionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.channel.attributes.SessionKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.channel.attributes.SourceBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.session.attributes.SessionAlarm;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.session.attributes.SessionAlarmBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.session.attributes.SessionAlarmKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.session.attributes.TerminationPointBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.topology.attributes.Channel;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.topology.attributes.ChannelBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.topology.attributes.ChannelKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.topology.attributes.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.topology.attributes.NodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.topology.attributes.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.usc.topology.Topology;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.usc.topology.TopologyBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.usc.topology.TopologyKey;
 
 /**
- * the create factory of links and nodes of usc topology
+ * the create factory of Channels and nodes of usc topology
  */
 public class UscTopologyFactory {
 
@@ -48,75 +51,72 @@ public class UscTopologyFactory {
     public static final String CALL_HOME_DISPLAY_STRING = "CallHome";
 
     /**
-     * Builds a link for the provided source, destination, and id. Passes link
-     * attributes to LinkBuilder to build a link.
+     * Builds a Channel for the provided source, destination, and id. Passes
+     * Channel attributes to ChannelBuilder to build a Channel.
      * 
      * @param source
-     *            the source node of link
+     *            the source node of Channel
      * @param destination
-     *            the destination node of link
+     *            the destination node of Channel
      * @param id
-     *            the link id
+     *            the Channel id
      * @param type
-     *            the link type
+     *            the Channel type
      * @param isCallHome
-     *            if the link created by call home way
-     * @return new link
+     *            if the Channel created by call home way
+     * @return new Channel
      */
-    public static Link createLink(Node source, Node destination, String id,
-            String type, boolean isCallHome) {
-        return createLink(source, destination, id, type, isCallHome, 0, 0,
-                Collections.synchronizedList(new LinkedList<Alarm>()),
-                new CopyOnWriteArrayList<Session>());
+    public static Channel createChannel(Node source, Node destination, String id, String type, boolean isCallHome) {
+        return createChannel(source, destination, id, type, isCallHome, 0, 0,
+                Collections.synchronizedList(new LinkedList<ChannelAlarm>()), new CopyOnWriteArrayList<Session>());
     }
 
     /**
-     * Builds a link for the provided source, destination, and id. Passes link
-     * attributes to LinkBuilder to build a link.
+     * Builds a Channel for the provided source, destination, and id. Passes
+     * Channel attributes to ChannelBuilder to build a Channel.
      * 
      * @param source
-     *            the source node of link
+     *            the source node of Channel
      * @param destination
-     *            the destination node of link
+     *            the destination node of Channel
      * @param id
-     *            the link id
+     *            the Channel id
      * @param type
-     *            the link type
+     *            the Channel type
      * @param isCallHome
-     *            if the link created by call home way
+     *            if the Channel created by call home way
      * @param bytesIn
-     *            link bytes in number
+     *            Channel bytes in number
      * @param bytesOut
-     *            link bytes out number
+     *            Channel bytes out number
      * @param alarms
-     *            the error list of link
+     *            the error list of Channel
      * @param sessions
-     *            the session list of link
-     * @return new link
+     *            the session list of Channel
+     * @return new Channel
      */
-    public static Link createLink(Node source, Node destination, String id,
-            String type, boolean isCallHome, long bytesIn, long bytesOut,
-            List<Alarm> alarms, List<Session> sessions) {
-        LinkId linkId = new LinkId(id);
-        LinkKey linkKey = new LinkKey(linkId);
+    public static Channel createChannel(Node source, Node destination, String id, String type, boolean isCallHome,
+            long bytesIn, long bytesOut, List<ChannelAlarm> alarms, List<Session> sessions) {
+        ChannelId channelId = new ChannelId(id);
+        ChannelKey channelKey = new ChannelKey(channelId);
         SourceBuilder sourceBuilder = new SourceBuilder();
         sourceBuilder.setSourceNode(source.getNodeId());
         DestinationBuilder destinationBuilder = new DestinationBuilder();
         destinationBuilder.setDestNode(destination.getNodeId());
-        LinkBuilder linkBuilder = new LinkBuilder();
-        linkBuilder.setLinkId(linkId);
-        linkBuilder.setKey(linkKey);
-        linkBuilder.setLinkType(type);
-        linkBuilder.setSource(sourceBuilder.build());
-        linkBuilder.setDestination(destinationBuilder.build());
-        linkBuilder.setBytesIn(bytesIn);
-        linkBuilder.setBytesOut(bytesOut);
-        linkBuilder.setCallHome(getCallHomeString(isCallHome));
-        linkBuilder.setAlarms((long) alarms.size());
-        linkBuilder.setAlarm(alarms);
-        linkBuilder.setSessions((long) sessions.size());
-        linkBuilder.setSession(sessions);
-        return linkBuilder.build();
+        ChannelBuilder channelBuilder = new ChannelBuilder();
+        channelBuilder.setChannelId(channelId);
+        channelBuilder.setKey(channelKey);
+        channelBuilder.setChannelType(type);
+        channelBuilder.setSource(sourceBuilder.build());
+        channelBuilder.setDestination(destinationBuilder.build());
+        channelBuilder.setBytesIn(bytesIn);
+        channelBuilder.setBytesOut(bytesOut);
+        channelBuilder.setCallHome(getCallHomeString(isCallHome));
+        channelBuilder.setChannelAlarms((long) alarms.size());
+        channelBuilder.setChannelAlarm(alarms);
+        channelBuilder.setSessions((long) sessions.size());
+        channelBuilder.setSession(sessions);
+        return channelBuilder.build();
     }
 
     /**
@@ -169,26 +169,25 @@ public class UscTopologyFactory {
     }
 
     /**
-     * Builds a topology for the provided id, nodes and links. Passes topology
-     * attributes to TopologyBuilder to build a topology.
+     * Builds a topology for the provided id, nodes and Channels. Passes
+     * topology attributes to TopologyBuilder to build a topology.
      * 
      * @param id
      *            topology id
      * @param nodes
      *            node list of topology
-     * @param links
-     *            link list of topology
+     * @param Channels
+     *            Channel list of topology
      * @return new topology
      */
-    public static Topology createTopology(String id, List<Node> nodes,
-            List<Link> links) {
+    public static Topology createTopology(String id, List<Node> nodes, List<Channel> Channels) {
         TopologyId topologyId = new TopologyId(id);
         TopologyKey topologyKey = new TopologyKey(topologyId);
         TopologyBuilder topologyBuilder = new TopologyBuilder();
         topologyBuilder.setTopologyId(topologyId);
         topologyBuilder.setKey(topologyKey);
         topologyBuilder.setNode(nodes);
-        topologyBuilder.setLink(links);
+        topologyBuilder.setChannel(Channels);
         return topologyBuilder.build();
     }
 
@@ -203,13 +202,7 @@ public class UscTopologyFactory {
      * @return new session
      */
     public static Session createSession(String sessionId, String tpPort) {
-        return createSession(
-                sessionId,
-                tpPort,
-                0,
-                0,
-                Collections
-                        .synchronizedList(new LinkedList<org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.session.attributes.Alarm>()));
+        return createSession(sessionId, tpPort, 0, 0, Collections.synchronizedList(new LinkedList<SessionAlarm>()));
     }
 
     /**
@@ -228,15 +221,11 @@ public class UscTopologyFactory {
      *            error list
      * @return new session
      */
-    public static Session createSession(
-            String sessionId,
-            String tpPort,
-            long bytesIn,
-            long bytesOut,
-            List<org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.session.attributes.Alarm> alarms) {
-        TerminalPointId tpId = new TerminalPointId(tpPort);
-        TerminalPointBuilder tpBuilder = new TerminalPointBuilder();
-        tpBuilder.setTerminalPointId(tpId);
+    public static Session createSession(String sessionId, String tpPort, long bytesIn, long bytesOut,
+            List<SessionAlarm> alarms) {
+        TerminationPointId tpId = new TerminationPointId(tpPort);
+        TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
+        tpBuilder.setTerminationPointId(tpId);
         SessionId sId = new SessionId(sessionId);
         SessionKey sessionKey = new SessionKey(sId);
         SessionBuilder sessionBuilder = new SessionBuilder();
@@ -244,9 +233,9 @@ public class UscTopologyFactory {
         sessionBuilder.setKey(sessionKey);
         sessionBuilder.setBytesIn(bytesIn);
         sessionBuilder.setBytesOut(bytesOut);
-        sessionBuilder.setTerminalPoint(tpBuilder.build());
-        sessionBuilder.setAlarms((long) alarms.size());
-        sessionBuilder.setAlarm(alarms);
+        sessionBuilder.setTerminationPoint(tpBuilder.build());
+        sessionBuilder.setSessionAlarms((long) alarms.size());
+        sessionBuilder.setSessionAlarm(alarms);
         return sessionBuilder.build();
     }
 
@@ -260,14 +249,12 @@ public class UscTopologyFactory {
      *            error code
      * @param message
      *            error message
-     * @return new link error
+     * @return new Channel error
      */
-    public static org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.session.attributes.Alarm createSessionAlram(
-            String id, String code, String message) {
-        org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.session.attributes.AlarmBuilder alarmBuilder = new org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.session.attributes.AlarmBuilder();
+    public static SessionAlarm createSessionAlram(String id, String code, String message) {
+        SessionAlarmBuilder alarmBuilder = new SessionAlarmBuilder();
         AlarmId alarmId = new AlarmId(id);
-        org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.session.attributes.AlarmKey alarmKey = new org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.session.attributes.AlarmKey(
-                alarmId);
+        SessionAlarmKey alarmKey = new SessionAlarmKey(alarmId);
         alarmBuilder.setAlarmId(alarmId);
         alarmBuilder.setKey(alarmKey);
         alarmBuilder.setAlarmCode(code);
@@ -276,7 +263,7 @@ public class UscTopologyFactory {
     }
 
     /**
-     * Builds a link alarm Passes alarm attributes to AlarmBuilder to build a
+     * Builds a Channel alarm Passes alarm attributes to AlarmBuilder to build a
      * alarm.
      * 
      * @param id
@@ -285,12 +272,12 @@ public class UscTopologyFactory {
      *            error code
      * @param message
      *            error message
-     * @return new link error
+     * @return new Channel error
      */
-    public static Alarm createLinkAlram(String id, String code, String message) {
-        AlarmBuilder alarmBuilder = new AlarmBuilder();
+    public static ChannelAlarm createChannelAlram(String id, String code, String message) {
+        ChannelAlarmBuilder alarmBuilder = new ChannelAlarmBuilder();
         AlarmId alarmId = new AlarmId(id);
-        AlarmKey alarmKey = new AlarmKey(alarmId);
+        ChannelAlarmKey alarmKey = new ChannelAlarmKey(alarmId);
         alarmBuilder.setAlarmId(alarmId);
         alarmBuilder.setKey(alarmKey);
         alarmBuilder.setAlarmCode(code);

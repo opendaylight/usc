@@ -25,6 +25,7 @@
     <mdsal.version>1.2.0-SNAPSHOT</mdsal.version>
     <netconf.version>0.3.0-SNAPSHOT</netconf.version>
     <yangtools.version>0.7.0-SNAPSHOT</yangtools.version>
+    <dlux.version>0.2.0-SNAPSHOT</dlux.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -39,6 +40,13 @@
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>features-netconf-connector</artifactId>
         <version>${mdsal.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.dlux</groupId>
+        <artifactId>features-dlux</artifactId>
+        <version>${dlux.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -81,6 +89,14 @@
       <scope>runtime</scope>
     </dependency>
     <dependency>
+      <groupId>org.opendaylight.dlux</groupId>
+      <artifactId>features-dlux</artifactId>
+      <version>${dlux.version}</version>
+      <classifier>features</classifier>
+      <type>xml</type>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>usc-channel-api</artifactId>
       <version>${project.version}</version>
@@ -96,6 +112,46 @@
       <version>${project.version}</version>
       <classifier>config</classifier>
       <type>xml</type>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>usc-channel-impl</artifactId>
+      <version>${project.version}</version>
+      <classifier>clientkey</classifier>
+      <type>pem</type>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>usc-channel-impl</artifactId>
+      <version>${project.version}</version>
+      <classifier>client</classifier>
+      <type>pem</type>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>usc-channel-impl</artifactId>
+      <version>${project.version}</version>
+      <classifier>rootCA</classifier>
+      <type>pem</type>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>usc-channel-impl</artifactId>
+      <version>${project.version}</version>
+      <classifier>usc</classifier>
+      <type>properties</type>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>usc-channel-impl</artifactId>
+      <version>${project.version}</version>
+      <classifier>akka</classifier>
+      <type>conf</type>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>usc-channel-ui</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>

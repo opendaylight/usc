@@ -14,11 +14,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.usc.manager.UscTopologyService;
 import org.opendaylight.usc.manager.topology.UscTopologyFactory;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.topologies.Topology;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.topologies.topology.Link;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.rev150101.topologies.topology.Node;
+import org.opendaylight.usc.test.AbstractUscTest;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.topology.attributes.Channel;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.topology.attributes.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.usc.topology.Topology;
 
-public class UscTopologyManagerTest {
+/**
+ * Test suite for USC topology.
+ */
+public class UscTopologyManagerTest extends AbstractUscTest {
     private String serverName = "Server1";
     private UscTopologyService topoManager = UscTopologyService.getInstance();
     private UscTopologyFactoryTest topoTestFactory = new UscTopologyFactoryTest();
@@ -26,10 +30,10 @@ public class UscTopologyManagerTest {
     @Before
     public void setUp() {
         topoManager.init();
-        for (Link link : topoManager.getLocalTopolgy().getLink()) {
-            while (link != null) {
-                link = topoManager.removeLink(link.getDestination()
-                        .getDestNode().getValue());
+        for (Channel Channel : topoManager.getLocalTopolgy().getChannel()) {
+            while (Channel != null) {
+                Channel = topoManager.removeChannel(Channel.getDestination().getDestNode().getValue(),
+                        Channel.getChannelType());
             }
         }
         for (Node node : topoManager.getLocalTopolgy().getNode()) {
@@ -41,9 +45,8 @@ public class UscTopologyManagerTest {
 
     @Test
     public void createTopology() {
-        Topology topology = UscTopologyFactory.createTopology(serverName,
-                new CopyOnWriteArrayList<Node>(),
-                new CopyOnWriteArrayList<Link>());
+        Topology topology = UscTopologyFactory.createTopology(serverName, new CopyOnWriteArrayList<Node>(),
+                new CopyOnWriteArrayList<Channel>());
         UscManagerUtils.outputTopology(topology);
     }
 
@@ -51,8 +54,7 @@ public class UscTopologyManagerTest {
     public void getNode() {
         initSequenceNodeList(5);
         topoManager.addNode(topoManager.getLocalController());
-        Node node = topoManager.getNode(topoManager.getLocalController()
-                .getNodeId().getValue());
+        Node node = topoManager.getNode(topoManager.getLocalController().getNodeId().getValue());
         Assert.assertNotNull(node);
         node = topoManager.getNode("Device4");
         UscManagerUtils.checkNode("Device4", "Device Type4", node);
@@ -102,42 +104,42 @@ public class UscTopologyManagerTest {
         Assert.assertNull(node);
     }
 
+    // @Test
+    // public void getChannel() {
+    // initSequenceChannelList(5);
+    // String deviceId = "Device2";
+    // Channel Channel = topoManager.getChannel(deviceId,);
+    // Assert.assertNotNull(Channel);
+    // UscManagerUtils.checkChannel(deviceId, Channel.getChannelType(),
+    // UscTopologyFactory.isCallHome(Channel.getCallHome()), Channel);
+    // }
+
     @Test
-    public void getLink() {
-        initSequenceLinkList(5);
-        String deviceId = "Device2";
-        Link link = topoManager.getLink(deviceId);
-        Assert.assertNotNull(link);
-        UscManagerUtils.checkLink(deviceId, link.getLinkType(),
-                UscTopologyFactory.isCallHome(link.getCallHome()), link);
+    public void addChannel() {
+        initSequenceChannelList(5);
+        String controllerId = "Controller Test";
+        String deviceId = "Device Test";
+        Channel Channel = topoTestFactory.createRandomChannel(controllerId, deviceId);
+        topoManager.addChannel(Channel);
+        Channel = topoManager.getChannel(deviceId, Channel.getChannelType());
+        Assert.assertNotNull(Channel);
+        UscManagerUtils.checkChannel(deviceId, Channel.getChannelType(),
+                UscTopologyFactory.isCallHome(Channel.getCallHome()), Channel);
     }
 
     @Test
-    public void addLink() {
-        initSequenceLinkList(5);
+    public void removeChannel() {
+        initSequenceChannelList(5);
         String controllerId = "Controller Test";
         String deviceId = "Device Test";
-        Link link = topoTestFactory.createRandomLink(controllerId, deviceId);
-        topoManager.addLink(link);
-        link = topoManager.getLink(deviceId);
-        Assert.assertNotNull(link);
-        UscManagerUtils.checkLink(deviceId, link.getLinkType(),
-                UscTopologyFactory.isCallHome(link.getCallHome()), link);
-    }
-
-    @Test
-    public void removeLink() {
-        initSequenceLinkList(5);
-        String controllerId = "Controller Test";
-        String deviceId = "Device Test";
-        Link link = topoTestFactory.createRandomLink(controllerId, deviceId);
-        topoManager.addLink(link);
-        link = topoManager.removeLink(deviceId);
-        Assert.assertNotNull(link);
-        UscManagerUtils.checkLink(deviceId, link.getLinkType(),
-                UscTopologyFactory.isCallHome(link.getCallHome()), link);
-        link = topoManager.removeLink(deviceId);
-        Assert.assertNull(link);
+        Channel Channel = topoTestFactory.createRandomChannel(controllerId, deviceId);
+        topoManager.addChannel(Channel);
+        Channel = topoManager.removeChannel(deviceId, Channel.getChannelType());
+        Assert.assertNotNull(Channel);
+        UscManagerUtils.checkChannel(deviceId, Channel.getChannelType(),
+                UscTopologyFactory.isCallHome(Channel.getCallHome()), Channel);
+        Channel = topoManager.removeChannel(deviceId, Channel.getChannelType());
+        Assert.assertNull(Channel);
     }
 
     public void initRandomNodeList(int number) {
@@ -158,20 +160,19 @@ public class UscTopologyManagerTest {
         }
     }
 
-    public void initRandomLinkList(int number) {
-        Link link = null;
+    public void initRandomChannelList(int number) {
+        Channel Channel = null;
         for (int i = 0; i < number; i++) {
-            link = topoTestFactory.createRandomLink();
-            topoManager.addLink(link);
+            Channel = topoTestFactory.createRandomChannel();
+            topoManager.addChannel(Channel);
         }
     }
 
-    public void initSequenceLinkList(int number) {
-        Link link = null;
+    public void initSequenceChannelList(int number) {
+        Channel Channel = null;
         for (int i = 0; i < number; i++) {
-            link = topoTestFactory.createRandomLink("Contorller" + i, "Device"
-                    + i);
-            topoManager.addLink(link);
+            Channel = topoTestFactory.createRandomChannel("Contorller" + i, "Device" + i);
+            topoManager.addChannel(Channel);
         }
     }
 }

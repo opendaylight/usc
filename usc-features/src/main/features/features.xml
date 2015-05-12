@@ -12,6 +12,7 @@
   <repository>mvn:org.opendaylight.controller/features-mdsal/${mdsal.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.controller/features-restconf/${mdsal.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.controller/features-netconf-connector/${mdsal.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.dlux/features-dlux/${dlux.version}/xml/features</repository>
   <feature name='odl-usc-agent' version='${project.version}' description='OpenDaylight :: USC :: Agent'>
     <bundle>mvn:org.opendaylight.usc/usc-agent/${project.version}</bundle>
   </feature>
@@ -25,16 +26,23 @@
     <feature version='${project.version}'>odl-usc-api</feature>
     <bundle>mvn:org.opendaylight.usc/usc-channel-impl/${project.version}</bundle>
     <bundle>mvn:org.opendaylight.usc/usc-netconf-client-dispatcher/${project.version}</bundle>
+    <configfile finalname='etc/usc/certificates/client.key.pem'>mvn:org.opendaylight.usc/usc-channel-impl/${project.version}/pem/clientkey</configfile>
+    <configfile finalname='etc/usc/certificates/client.pem'>mvn:org.opendaylight.usc/usc-channel-impl/${project.version}/pem/client</configfile>
+    <configfile finalname='etc/usc/certificates/rootCA.pem'>mvn:org.opendaylight.usc/usc-channel-impl/${project.version}/pem/rootCA</configfile>
+    <configfile finalname='etc/usc/usc.properties'>mvn:org.opendaylight.usc/usc-channel-impl/${project.version}/properties/usc</configfile>
+    <configfile finalname='etc/usc/akka.conf'>mvn:org.opendaylight.usc/usc-channel-impl/${project.version}/conf/akka</configfile>
     <configfile finalname='etc/opendaylight/karaf/00-usc.xml'>mvn:org.opendaylight.usc/usc-channel-impl/${project.version}/xml/config</configfile>
     <configfile finalname='etc/opendaylight/karaf/01-usc-netconf.xml'>mvn:org.opendaylight.usc/usc-netconf-client-dispatcher/${project.version}/xml/config</configfile>
   </feature>
   <feature name='odl-usc-channel-rest' version='${project.version}' description='OpenDaylight :: USC :: Channel :: REST'>
     <feature version="${mdsal.version}">odl-restconf</feature>
+    <feature version="${mdsal.version}">odl-mdsal-apidocs</feature>
+    <feature version="${mdsal.version}">odl-mdsal-xsql</feature>
     <feature version="${project.version}">odl-usc-channel</feature>
   </feature>
   <feature name='odl-usc-channel-ui' version='${project.version}' description='OpenDaylight :: USC :: Channel :: UI'>
-    <feature version="${mdsal.version}">odl-mdsal-apidocs</feature>
-    <feature version="${mdsal.version}">odl-mdsal-xsql</feature>
+    <feature version="${dlux.version}">odl-dlux-core</feature>
     <feature version="${project.version}">odl-usc-channel-rest</feature>
+    <bundle>mvn:org.opendaylight.usc/usc-channel-ui/${project.version}</bundle>
   </feature>
 </features>
