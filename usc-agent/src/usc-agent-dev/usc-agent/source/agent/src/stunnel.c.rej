@@ -1,0 +1,11 @@
+--- ./stunnel(orig).c	2014-03-08 10:34:42.000000000 +0100
++++ ./stunnel.c	2014-08-27 08:09:35.293250932 +0200
+@@ -551,7 +551,7 @@
+ /**************************************** log build details */
+ 
+ void stunnel_info(int level) {
+-    s_log(level, "stunnel " STUNNEL_VERSION " on " HOST " platform");
++    s_log(level, "stunnel " STUNNEL_VERSION " netopeer on " HOST " platform");
+     if(SSLeay()==SSLEAY_VERSION_NUMBER) {
+         s_log(level, "Compiled/running with " OPENSSL_VERSION_TEXT);
+     } else {

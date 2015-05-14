@@ -1,0 +1,210 @@
+
+#Below is the Development Environment, which I used for setting up the USC 
+plug-in and NETCONF Server.
+
+#libnetconf dependencies setup:
+>sudo apt-get install pkg - config 
+>sudo apt-get install libxml2 -dev 
+>sudo apt-get install libxslt1 -dbg xsltproc 
+>sudo apt-get install libssh -dev libssh2 -1- dev 
+>sudo apt-get install libcurl4 -gnutls -dev 
+>sudo apt-get install openssl 
+>sudo apt-get install doxygen 
+>sudo apt-get install librpmbuild2 
+>sudo apt-get install libxslt-dev
+
+git clone https://code.google.com/p/libnetconf/ 
+>cd libnetconf 
+>./confugre --enable -tls 
+>make 
+>sudo make install 
+
+#pyang setup:
+wget https://pyang.googlecode.com/files/pyang-1.4.1.tar.gz 
+>tar xzvf pyang-1.4.1.tar.gz 
+>cd pyang-1.4.1 
+>sudo setup.py install 
+
+#Netconf Server setup (netopeer): 
+>sudo apt-get install libevent -dev 
+
+wget http://download.augeas.net/augeas-1.0.0.tar.gz 
+>cd augeas-1.0.0 
+>./ configure && make && sudo make install 
+
+#Downloading NETCONF Server
+Donwload netopeer source code from google website
+>cd netopeer
+>cd cli 
+>./configure --enable -tls && make && sudo make install 
+>cd ../server 
+>./configure --enable -tls && make && sudo make install 
+>cd ../server -sl 
+>./configure --enable -tls && make && sudo make install 
+>cd ../transAPI/cfgsystem 
+>./configure --enable -tls && make && sudo make install 
+
+#toaster setup:
+>cd server-sl/toaster 
+>make 
+>sudo make install 
+>netopeer-manager add --name toaster --model toaster.yin --transapi /usr/local/lib/toaster.so --datastore  ~/toaster 
+
+cd netopeer/server/stunnel 
+>wget http://mirrors.zerg.biz/stunnel/stunnel-5.03. tar.gz 
+>tar xzvf stunnel -5.03. tar.gz 
+>cd stunnel -5.03/ src 
+>patch -p0 -i ../../stunnel_netopeer.patch 
+>cd .. 
+>./ configure 
+>make 
+>sudo make install 
+
+#Start netconf server
+>cd netconf server
+>netopeer-server -v 5  
+
+Replace stunnel binary with the binary which I provided.
+
+#Configuring for Call Home Mode
+
+>cd netopeer/server>vi Makefile
+
+CPce below line
+
+CPPFLAGS = -I/usr/local/include    -DDISABLE_DBUS -DENABLE_TLS  -I/usr/include/libxml2
+
+with this line
+CPPFLAGS = -I/usr/local/include    -DDISABLE_DBUS -DENABLE_TLS -DCALL_HOME  -I/usr/include/libxml2
+
+Compile the code using make command
+
+#we are providing CALL_HOME option for Server.
+
+open below file
+>vi /usr/local/etc/netopeer/modules.conf.d/NETCONF-server.xml
+
+change this line 
+
+<path>/usr/local/etc/netopeer/cfgnetopeer/datastore-server.xml</path>
+
+to  
+
+<path>/usr/local/etc/netopeer/cfgnetopeer/datastore-server-callhome.xml</path>
+
+
+# replace datastore-server.xml to datastore-server-callhome.xml
+
+Create a new file vi /usr/local/etc/netopeer/cfgnetopeer/datastore-server-callhome.xml
+
+add below xml text to datastore-server-callhome.xml
+
+<?xml version="1.0" encoding="UTF-8"?>
+<datastores xmlns="urn:cesnet:tmc:datastores:file">
+  <running lock="">
+    <netconf xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-server">
+      <tls>
+        <call-home>
+          <applications>
+            <application>
+              <name>nim</name>
+              <servers>
+                <server>
+                  <address>127.0.0.1</address>
+                  <port>10000</port>
+                </server>
+              </servers>
+              <host-keys>
+                <host-key>
+                  <name>nim</name>
+                </host-key>
+              </host-keys>
+            </application>
+          </applications>
+        </call-home>
+      </tls>
+    </netconf>
+  </running>
+  <startup lock="">
+    <netconf xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-server">
+      <tls>
+        <call-home>
+          <applications>
+            <application>
+              <name>nim</name>
+              <servers>
+                <server>
+                  <address>127.0.0.1</address>
+                  <port>10000</port>
+                </server>
+              </servers>
+              <host-keys>
+                <host-key>
+                  <name>nim</name>
+                </host-key>
+              </host-keys>
+            </application>
+          </applications>
+        </call-home>
+      </tls>
+    </netconf>
+  </startup>
+  <candidate modified="false" lock=""/>
+</datastores>
+
+
+
+ 
+#open stunnel.conf file  remove all service section and comment below line 
+
+exec = /usr/local/bin/netopeer-agent
+
+stunnel.conf file
+
+ **************************************************************************
+; * Global options                                                         *
+; **************************************************************************
+
+; PID is created inside the chroot jail
+pid = //usr/local/etc/netopeer/stunnel/stunnel.pid
+
+; Debugging stuff (may useful for troubleshooting)
+debug = 7
+output = //usr/local/etc/netopeer/stunnel/stunnel.log
+
+; **************************************************************************
+; * Service defaults may also be specified in individual service sections  *
+; **************************************************************************
+
+; Certificate/key
+;cert = //usr/local/etc/netopeer/stunnel/new-server.pem
+cert = //usr/local/etc/netopeer/stunnel/server.pem
+;key = //usr/local/etc/netopeer/stunnel/server.key
+
+; Verify peer first with trusted CA chain, on fail try to find exact local match.
+verify = 5
+
+; CA certificates directory, with verify level 3, it also includes allowed
+; client certificates.
+CApath = //usr/local/etc/netopeer/stunnel/
+CAfile = //usr/local/etc/stunnel/ca_rootCA.pem
+
+
+; Certificate Revocation List directory
+CRLpath = //usr/local/etc/netopeer/stunnel/crl
+
+; Disable support for insecure SSLv2 protocol
+options = NO_SSLv2
+
+; If running in inetd mode (call home)
+;exec = /usr/local/bin/netopeer-agent
+
+; **************************************************************************
+; * Service definitions (remove all services for inetd mode)               *
+; **************************************************************************
+
+#run sudo ./netopeer-server -v 5
+
+This will spawn TLS server and it tries to connect to TLS Server o nclient side.
+
+ 

@@ -1,0 +1,12 @@
+<device>
+	<name>Netopeer</name>
+	<data-models>
+		<model-main>
+			<path>/usr/local/etc/netopeer/cfgnetopeer/netopeer-cfgnetopeer.yin</path>
+		</model-main>
+	</data-models>
+	<repo>
+		<type>file</type>
+		<path>/usr/local/etc/netopeer/cfgnetopeer/datastore.xml</path>
+	</repo>
+</device>

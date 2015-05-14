@@ -1,0 +1,64 @@
+.TH "client" 3 "Tue Mar 3 2015" "Version 0.9.0-48_trunk" "libnetconf" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+client \- Client 
+.SH "Client Workflow"
+.PP
+Here is a description of using libnetconf functions in a NETCONF client:
+.IP "1." 4
+**Set verbosity (optional)**\&.
+.br
+ The verbosity of the libnetconf can be set by \fBnc_verbosity()\fP\&. By default, libnetconf is completely silent\&.
+.br
+ There is a default message-printing function that writes messages on stderr\&. The application's specific message printing function can be set via \fBnc_callback_print()\fP function\&.
+.IP "2." 4
+**Set SSH authentication methods priorities (optional)**\&.
+.br
+ libnetconf supports several SSH authentication methods for connecting to a NETCONF server over SSH\&. However, the used method is selected from a list of supported authentication methods provided by the server\&. Client is allowed to specify the priority of each supported authentication method via \fBnc_ssh_pref()\fP function\&. The authentication method can also be disabled using a negative priority value\&.
+.br
+ Default priorities are following:
+.IP "  \(bu" 4
+*Interactive* (value 3)
+.IP "  \(bu" 4
+*Password* (value 2)
+.IP "  \(bu" 4
+*Public keys* (value 1)
+.PP
+
+.IP "3." 4
+**Set your own callback(s) for the SSH authentication methods (optional)**\&.
+.br
+ User credentials are received via the callback functions specific for each authentication method\&. There are default callbacks, but application can set their own via:
+.IP "  \(bu" 4
+*Interactive* - \fBnc_callback_sshauth_interactive()\fP
+.IP "  \(bu" 4
+*Password* - \fBnc_callback_sshauth_password()\fP
+.IP "  \(bu" 4
+*Publuc keys* - \fBnc_callback_sshauth_passphrase()\fP\&. Here can the paths to the key files be also specified by nc_set_publickey_path() and nc_set_privatekey_path()\&. If not set, libnetconf tries to find them in the default paths\&.
+.PP
+
+.IP "4." 4
+**Connect to the NETCONF server(s)**\&.
+.br
+ Simply call \fBnc_session_connect()\fP to connect to the specified host via SSH\&. Authentication method is selected according to the default values or the previous steps\&.
+.IP "5." 4
+**Prepare NETCONF rpc message(s)**\&.
+.br
+ Creating NETCONF rpc messages is covered by the functions described in the section \fBNETCONF rpc\fP\&. The application prepares NETCONF rpc messages according to the specified attributes\&. These messages can be then repeatedly used for communication over any of the created NETCONF sessions\&.
+.IP "6." 4
+**Send the message to the selected NETCONF server**\&.
+.br
+ To send created NETCONF rpc message to the NETCONF server, use \fBnc_session_send_rpc()\fP function\&. \fBnc_session_send_recv()\fP function connects sending and receiving the reply (see the next step) into one blocking call\&.
+.IP "7." 4
+**Get the server's rpc-reply message**\&. When the NETCONF rpc is sent, use \fBnc_session_recv_reply()\fP to receive the reply\&. To learn when the reply is coming, a file descriptor of the communication channel can be checked by poll(), select(), \&.\&.\&. This descriptor can be obtained via \fBnc_session_get_eventfd()\fP function\&.
+.IP "8." 4
+**Close the NETCONF session**\&.
+.br
+ When the communication is done, the NETCONF session should be freed (session is also properly closed) via \fBnc_session_free()\fP function\&.
+.IP "9." 4
+**Free all created objects**\&.
+.br
+ Do not forget to free created rpc messages (\fBnc_rpc_free()\fP), \fBfilters\fP (\fBnc_filter_free()\fP) or received NETCONF rpc-replies (\fBnc_reply_free()\fP)\&. 
+.PP
+

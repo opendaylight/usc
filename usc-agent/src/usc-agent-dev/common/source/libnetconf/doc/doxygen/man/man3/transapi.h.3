@@ -1,0 +1,126 @@
+.TH "src/transapi.h" 3 "Tue Mar 3 2015" "Version 0.9.0-48_trunk" "libnetconf" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+src/transapi.h \- 
+.PP
+Functions implementing libnetconf TransAPI mechanism\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <sys/inotify\&.h>\fP
+.br
+\fC#include <libxml/tree\&.h>\fP
+.br
+\fC#include 'netconf\&.h'\fP
+.br
+\fC#include 'error\&.h'\fP
+.br
+
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBclbk\fP"
+.br
+.RI "\fIStructure describing callback - path + function\&. \fP"
+.ti -1c
+.RI "struct \fBns_pair\fP"
+.br
+.ti -1c
+.RI "struct \fBtransapi\fP"
+.br
+.RI "\fIStructure to describe transAPI module and connect it statically with libnetconf using \fBncds_new_transapi_static()\fP\&. \fP"
+.ti -1c
+.RI "struct \fBtransapi_data_callbacks\fP"
+.br
+.RI "\fISame as \fBtransapi_data_callbacks\fP\&. Using libxml2 structures for callbacks parameters\&. \fP"
+.ti -1c
+.RI "struct \fBtransapi_file_callbacks\fP"
+.br
+.RI "\fIFunctions to call if the specified file is modified\&. \fP"
+.ti -1c
+.RI "struct \fBtransapi_rpc_callbacks\fP"
+.br
+.RI "\fISame as \fBtransapi_rpc_callbacks\fP\&. Using libxml2 structures for callbacks parameters\&. \fP"
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBTRANSAPI_VERSION\fP   5"
+.br
+.in -1c
+.SS "Enumerations"
+
+.in +1c
+.ti -1c
+.RI "enum \fBCLBCKS_APPLIED\fP { \fBCLBCKS_APPLIED_NONE\fP, \fBCLBCKS_APPLYING_CHILDREN\fP, \fBCLBCKS_APPLIED_ERROR\fP, \fBCLBCKS_APPLIED_NO_ERROR\fP, \fBCLBCKS_APPLIED_CHILDREN_ERROR\fP, \fBCLBCKS_APPLIED_CHILDREN_NO_ERROR\fP, \fBCLBCKS_APPLIED_NOT_FULLY\fP, \fBCLBCKS_APPLIED_FULLY\fP }"
+.br
+.ti -1c
+.RI "enum \fBTRANSAPI_CLBCKS_ORDER_TYPE\fP { \fBTRANSAPI_CLBCKS_LEAF_TO_ROOT\fP, \fBTRANSAPI_CLBCKS_ROOT_TO_LEAF\fP, \fBTRANSAPI_CLBCKS_ORDER_DEFAULT\fP =  TRANSAPI_CLBCKS_LEAF_TO_ROOT }"
+.br
+.ti -1c
+.RI "enum \fBXMLDIFF_OP\fP { \fBXMLDIFF_ERR\fP =  -1, \fBXMLDIFF_NONE\fP =  0, \fBXMLDIFF_ADD\fP =  1, \fBXMLDIFF_REM\fP =  2, \fBXMLDIFF_MOD\fP =  4, \fBXMLDIFF_CHAIN\fP =  8, \fBXMLDIFF_SIBLING\fP =  16, \fBXMLDIFF_REORDER\fP =  32 }"
+.br
+.RI "\fIEnum specifying states of node in document\&. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Functions implementing libnetconf TransAPI mechanism\&. 
+
+\fBAuthor:\fP
+.RS 4
+Radek Krejci <rkrejci@cesnet.cz> 
+.PP
+David Kupka <david.kupka@cesent.cz> 
+.PP
+Michal Vasko <mvasko@cesnet.cz> Copyright (c) 2012-2014 CESNET, z\&.s\&.p\&.o\&.
+.RE
+.PP
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 1\&. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer\&. 2\&. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution\&. 3\&. Neither the name of the Company nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission\&.
+.PP
+ALTERNATIVELY, provided that this notice is retained in full, this product may be distributed under the terms of the GNU General Public License (GPL) version 2 or later, in which case the provisions of the GPL apply INSTEAD OF those given above\&.
+.PP
+This software is provided ``as is, and any express or implied warranties, including, but not limited to, the implied warranties of merchantability and fitness for a particular purpose are disclaimed\&. In no event shall the company or contributors be liable for any direct, indirect, incidental, special, exemplary, or consequential damages (including, but not limited to, procurement of substitute goods or services; loss of use, data, or profits; or business interruption) however caused and on any theory of liability, whether in contract, strict liability, or tort (including negligence or otherwise) arising in any way out of the use of this software, even if advised of the possibility of such damage\&. 
+.SH "Define Documentation"
+.PP 
+.SS "#define \fBTRANSAPI_VERSION\fP   5"
+.SH "Enumeration Type Documentation"
+.PP 
+.SS "enum \fBCLBCKS_APPLIED\fP"
+.PP
+\fBEnumerator: \fP
+.in +1c
+.TP
+\fB\fICLBCKS_APPLIED_NONE \fP\fP
+.TP
+\fB\fICLBCKS_APPLYING_CHILDREN \fP\fP
+.TP
+\fB\fICLBCKS_APPLIED_ERROR \fP\fP
+.TP
+\fB\fICLBCKS_APPLIED_NO_ERROR \fP\fP
+.TP
+\fB\fICLBCKS_APPLIED_CHILDREN_ERROR \fP\fP
+.TP
+\fB\fICLBCKS_APPLIED_CHILDREN_NO_ERROR \fP\fP
+.TP
+\fB\fICLBCKS_APPLIED_NOT_FULLY \fP\fP
+.TP
+\fB\fICLBCKS_APPLIED_FULLY \fP\fP
+
+.SS "enum \fBTRANSAPI_CLBCKS_ORDER_TYPE\fP"
+.PP
+\fBEnumerator: \fP
+.in +1c
+.TP
+\fB\fITRANSAPI_CLBCKS_LEAF_TO_ROOT \fP\fP
+.TP
+\fB\fITRANSAPI_CLBCKS_ROOT_TO_LEAF \fP\fP
+.TP
+\fB\fITRANSAPI_CLBCKS_ORDER_DEFAULT \fP\fP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for libnetconf from the source code\&.

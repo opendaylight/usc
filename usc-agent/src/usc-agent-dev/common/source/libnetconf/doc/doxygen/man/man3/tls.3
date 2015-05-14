@@ -1,0 +1,71 @@
+.TH "NETCONF over TLS" 3 "Tue Mar 3 2015" "Version 0.9.0-48_trunk" "libnetconf" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+NETCONF over TLS \- 
+.PP
+libnetconf's functions to use TLS\&. More information can be found at \fBTransport Protocol\fP page\&.  
+
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBnc_tls_destroy\fP (void)"
+.br
+.RI "\fIDestroy all resources allocated for preparation of TLS connections\&. \fP"
+.ti -1c
+.RI "int \fBnc_tls_init\fP (const char *peer_cert, const char *peer_key, const char *CAfile, const char *CApath, const char *CRLfile, const char *CRLpath)"
+.br
+.RI "\fISet paths to the client certificate and its private key\&. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+libnetconf's functions to use TLS\&. More information can be found at \fBTransport Protocol\fP page\&. 
+
+These functions are experimental\&. It is possible, that TLS transport (and mainly certificates management) is not fully implemented in this version\&.
+.PP
+Remember, that to make these functions available, libnetconf must be compiled with --enable-tls configure's option\&. 
+.SH "Function Documentation"
+.PP 
+.SS "void \fBnc_tls_destroy\fP (void)"
+.PP
+Destroy all resources allocated for preparation of TLS connections\&. See \fBnc_tls_init()\fP for more information about NETCONF session preparation\&.
+.PP
+To make this function available, you have to include \fBlibnetconf_ssh\&.h\fP header file\&. 
+.SS "int \fBnc_tls_init\fP (const char *peer_cert, const char *peer_key, const char *CAfile, const char *CApath, const char *CRLfile, const char *CRLpath)"
+.PP
+Set paths to the client certificate and its private key\&. This function takes effect only on client side\&. It must be used before establishing NETCONF session (including call home) over TLS\&.
+.PP
+This function is thread-safe\&. It is supposed to be part of the process of establishing NETCONF session within a single thread:
+.IP "1." 4
+Use \fBnc_tls_init()\fP to set client certificate and CA for server certificate verification\&. Calling this function repeatedly with different parameters changes those parameter for new NETCONF session created after the call\&. Any currently used NETCONF session will be still using the settings specified before the creation of the NETCONF session\&.
+.IP "2." 4
+Establish NETCONF session using \fBnc_session_connect()\fP\&. If you don't need to change parameters set in \fBnc_tls_init()\fP, you can call \fBnc_session_connect()\fP repeatedly\&.
+.IP "3." 4
+To properly clean all resources, call \fBnc_tls_destroy()\fP\&. It will destroy TLS connection context in the current thread\&.
+.PP
+.PP
+\fBParameters:\fP
+.RS 4
+\fIpeer_cert\fP Path to the file containing client certificate 
+.br
+\fIpeer_key\fP Path to the file containing private key for the client certificate\&. If NULL, key is expected to be stored in the file specified in cert parameter\&. 
+.br
+\fICAfile\fP Location of the CA certificate used to verify the server certificates\&. For More info, see documentation for SSL_CTX_load_verify_locations() function from OpenSSL\&. 
+.br
+\fICApath\fP Location of the CA certificates used to verify the server certificates\&. For More info, see documentation for SSL_CTX_load_verify_locations() function from OpenSSL\&. 
+.br
+\fICRLfile\fP Location of the CRL certificate used to check for revocated certificates\&. 
+.br
+\fICRLpath\fP Locarion of the CRL certificates used to check for revocated certificates\&. 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+EXIT_SUCCESS or EXIT_FAILURE 
+.RE
+.PP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for libnetconf from the source code\&.

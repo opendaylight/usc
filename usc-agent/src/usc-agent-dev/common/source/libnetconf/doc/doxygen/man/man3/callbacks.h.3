@@ -1,0 +1,47 @@
+.TH "src/callbacks.h" 3 "Tue Mar 3 2015" "Version 0.9.0-48_trunk" "libnetconf" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+src/callbacks.h \- 
+.PP
+Functions to set application's callbacks\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fC#include 'netconf\&.h'\fP
+.br
+
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBnc_callback_error_reply\fP (void(*func)(const char *tag, const char *type, const char *severity, const char *apptag, const char *path, const char *message, const char *attribute, const char *element, const char *ns, const char *sid))"
+.br
+.RI "\fISet a callback function to process (e\&.g\&. print) NETCONF <rpc-error> message items\&.
+.PP
+If the func parameter is NULL, the callback is set back to the default (no) function\&. \fP"
+.ti -1c
+.RI "void \fBnc_callback_print\fP (void(*func)(\fBNC_VERB_LEVEL\fP level, const char *msg))"
+.br
+.RI "\fISet a callback function for printing libnetconf's messages\&.
+.PP
+If the func parameter is NULL, the callback is set back to the default (no) function\&. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Functions to set application's callbacks\&. 
+
+\fBAuthor:\fP
+.RS 4
+Radek Krejci <rkrejci@cesnet.cz> Copyright (c) 2012-2014 CESNET, z\&.s\&.p\&.o\&.
+.RE
+.PP
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 1\&. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer\&. 2\&. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution\&. 3\&. Neither the name of the Company nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission\&.
+.PP
+ALTERNATIVELY, provided that this notice is retained in full, this product may be distributed under the terms of the GNU General Public License (GPL) version 2 or later, in which case the provisions of the GPL apply INSTEAD OF those given above\&.
+.PP
+This software is provided ``as is, and any express or implied warranties, including, but not limited to, the implied warranties of merchantability and fitness for a particular purpose are disclaimed\&. In no event shall the company or contributors be liable for any direct, indirect, incidental, special, exemplary, or consequential damages (including, but not limited to, procurement of substitute goods or services; loss of use, data, or profits; or business interruption) however caused and on any theory of liability, whether in contract, strict liability, or tort (including negligence or otherwise) arising in any way out of the use of this software, even if advised of the possibility of such damage\&. 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for libnetconf from the source code\&.

@@ -1,0 +1,106 @@
+Prerequisites
+=============
+
+You will need to have installed the following software. Header
+files (-dev or -devel packages) of the following libraries are
+also needed to compile libnetconf.
+
+- libxml2
+  http://xmlsoft.org
+
+- libssh2
+  Version 1.2.9 or greater is recomended.
+  http://www.libssh2.org
+
+  To disable usage of the libssh2, use:
+
+  $ ./configure --disable-libssh2
+
+  In such a case, libnetconf will use standalone ssh(1) client
+  application to connect NETCONF client to the NETCONF server.
+  ssh(1) is available as a part of the OpenSSH.
+
+- DBus
+  libdbus version 1.0.0 or greater
+  http://dbus.freedesktop.org
+
+  DBus is required by the NETCONF Notifications subsystem. If the
+  Notifications support is switched off, DBus is no more needed:
+
+  $ ./configure --disable-notifications
+
+These items are conditional.
+
+- OpenSSL
+  Always the newest version is recommended, to ensure maximum
+  security.
+  https://www.openssl.org
+
+  OpenSSL is required only if compiling with either
+
+  $ ./configure --enable-tls
+
+  or
+
+  $ ./configure --enable-dnssec
+
+  or both.
+
+- dnsval (libval)
+  Version 2.0 or greater
+  http://dnssec-tools.org
+
+  Required when compiling with
+
+  $ ./configure --enable-dnssec
+
+  to enable DNSSEC data retrieval and validation (for more
+  information please refer to README).
+
+The remaining items are optional.
+
+- doxygen
+  Used to generate documentation from the source code.
+  Version 1.8.0 or greater is recommended.
+  http://www.doxygen.org
+
+- rpmbuild
+  Used to build RPM package.
+  http://www.rpm.org
+
+
+Building / Installation
+=======================
+
+To install libnetconf with default options:
+
+$ ./configure
+$ make
+# make install
+
+This way the library will be installed in /usr/local/lib and
+/usr/local/include respectively. Configure can have many
+options specified, to show them all use:
+
+$ ./configure --help
+
+
+Contact
+=======
+
+The homepage is at
+
+  http://libnetconf.googlecode.com
+
+
+To get the very latest source code from the GIT repository, use:
+
+  $ git clone https://code.google.com/p/libnetconf/
+
+
+Problem reports, questions, suggestions as well as success stories
+are welcome. Feel free to contact us via our mailing-list:
+
+  libnetconf@googlegroups.com
+  https://groups.google.com/d/forum/libnetconf
+
