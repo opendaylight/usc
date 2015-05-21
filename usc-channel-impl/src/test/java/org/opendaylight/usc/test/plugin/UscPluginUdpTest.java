@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.opendaylight.usc.agent.UscAgentUdp;
 import org.opendaylight.usc.plugin.UscPlugin;
 import org.opendaylight.usc.plugin.UscPluginUdp;
+import org.opendaylight.usc.plugin.UscSessionIdManager;
 import org.opendaylight.usc.plugin.exception.UscSessionException;
 import org.opendaylight.usc.plugin.model.UscSessionImpl;
 import org.opendaylight.usc.protocol.UscError;
@@ -36,6 +37,7 @@ public class UscPluginUdpTest extends UscPluginTest {
 
     @Before
     public void initConfig() {
+        UscSessionIdManager.getInstance().clear();
     }
 
     @Override

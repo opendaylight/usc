@@ -76,4 +76,19 @@ public class UscListTable<K, E> {
         }
         return null;
     }
+
+    /**
+     * get the value of the key
+     * 
+     * @param key
+     *            key value
+     * @return the list of value
+     */
+    public List<E> get(K key) {
+        return table.get(key);
+    }
+    
+    public void clear(){
+        table.clear();
+    }
 }

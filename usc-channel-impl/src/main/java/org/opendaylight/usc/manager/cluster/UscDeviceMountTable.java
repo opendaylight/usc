@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.opendaylight.usc.manager.UscRouteBrokerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +22,7 @@ import akka.actor.ActorRef;
 /**
  * remote channel management table
  */
-public class UscDeviceMountTable extends UscListTable<UscRemoteChannelIdentifier, ActorRef> {
+public class UscDeviceMountTable extends UscListTable<UscChannelIdentifier, ActorRef> {
     private static final Logger LOG = LoggerFactory.getLogger(UscDeviceMountTable.class);
     private static UscDeviceMountTable instance = new UscDeviceMountTable();
 
@@ -46,7 +47,7 @@ public class UscDeviceMountTable extends UscListTable<UscRemoteChannelIdentifier
      *            the identifier of remote channel
      * @return the actor(currently return first actor
      */
-    public ActorRef getActorRef(UscRemoteChannelIdentifier remoteChannel) {
+    public ActorRef getActorRef(UscChannelIdentifier remoteChannel) {
         // TODO improve for not first one is the latest response one
         ActorRef tmp = getFirstElement(remoteChannel);
         if (tmp == null) {
@@ -61,7 +62,7 @@ public class UscDeviceMountTable extends UscListTable<UscRemoteChannelIdentifier
      * @param remoteChannel
      * @return
      */
-    public boolean existRemoteChannel(UscRemoteChannelIdentifier remoteChannel) {
+    public boolean existRemoteChannel(UscChannelIdentifier remoteChannel) {
         LOG.trace("Device table:remote device number is " + table.size() + ", content is " + table
                 + ",search channel is " + remoteChannel);
         List<ActorRef> actorRefList = table.get(remoteChannel);
@@ -78,7 +79,7 @@ public class UscDeviceMountTable extends UscListTable<UscRemoteChannelIdentifier
      */
     public List<ActorRef> getActorRefList() {
         Set<ActorRef> refSet = new HashSet<ActorRef>();
-        for (Entry<UscRemoteChannelIdentifier, List<ActorRef>> entry : table.entrySet()) {
+        for (Entry<UscChannelIdentifier, List<ActorRef>> entry : table.entrySet()) {
             List<ActorRef> refList = entry.getValue();
             for (ActorRef ref : refList) {
                 refSet.add(ref);
@@ -97,16 +98,16 @@ public class UscDeviceMountTable extends UscListTable<UscRemoteChannelIdentifier
      * @param actorPath
      *            a communicator actor path
      */
-    public void removeEntry(UscRemoteChannelIdentifier remoteChannel, String actorPath) {
+    public void removeEntry(UscChannelIdentifier remoteChannel, String actorPath) {
         // since the hash code is different,it can not use UscRouteIdentifier as
         // a UscRemoteChannelIdentifier
-        UscRemoteChannelIdentifier filteredRemoteChannel = new UscRemoteChannelIdentifier(
-                remoteChannel.getInetAddress(), remoteChannel.getChannelType());
-        for (Entry<UscRemoteChannelIdentifier, List<ActorRef>> entry : table.entrySet()) {
+        UscChannelIdentifier filteredRemoteChannel = new UscChannelIdentifier(remoteChannel.getInetAddress(),
+                remoteChannel.getChannelType());
+        for (Entry<UscChannelIdentifier, List<ActorRef>> entry : table.entrySet()) {
             if (entry.getKey().equals(filteredRemoteChannel)) {
                 List<ActorRef> refList = entry.getValue();
                 for (ActorRef ref : refList) {
-                    if (ref.path().toString().equals(actorPath)) {
+                    if (UscRouteBrokerService.isSameActorRef(actorPath, ref)) {
                         if (refList.size() == 1) {
                             table.remove(entry.getKey());
                         } else {
@@ -125,7 +126,7 @@ public class UscDeviceMountTable extends UscListTable<UscRemoteChannelIdentifier
      *            a communicator actor path
      */
     public void removeAll(String actorPath) {
-        for (Entry<UscRemoteChannelIdentifier, List<ActorRef>> entry : table.entrySet()) {
+        for (Entry<UscChannelIdentifier, List<ActorRef>> entry : table.entrySet()) {
             List<ActorRef> refList = entry.getValue();
             for (ActorRef ref : refList) {
                 if (ref.path().toString().equals(actorPath)) {
