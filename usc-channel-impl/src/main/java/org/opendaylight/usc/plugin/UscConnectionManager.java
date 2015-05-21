@@ -14,7 +14,7 @@ import io.netty.channel.ChannelFutureListener;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.opendaylight.usc.manager.UscRouteBrokerService;
-import org.opendaylight.usc.manager.cluster.UscRemoteChannelIdentifier;
+import org.opendaylight.usc.manager.cluster.UscChannelIdentifier;
 import org.opendaylight.usc.manager.cluster.message.UscRemoteChannelEventMessage;
 import org.opendaylight.usc.manager.monitor.evt.UscChannelCloseEvent;
 import org.opendaylight.usc.manager.monitor.evt.UscChannelCreateEvent;
@@ -82,7 +82,7 @@ public class UscConnectionManager {
                     }
                 });
                 if (brokerService != null) {
-                    UscRemoteChannelIdentifier remoteChannel = new UscRemoteChannelIdentifier(newConnection.getDevice()
+                    UscChannelIdentifier remoteChannel = new UscChannelIdentifier(newConnection.getDevice()
                             .getInetAddress(), newConnection.getType());
                     brokerService.broadcastMessage(new UscRemoteChannelEventMessage(remoteChannel,
                             UscRemoteChannelEventMessage.ChannelEventType.CREATE));

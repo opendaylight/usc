@@ -18,7 +18,7 @@ import org.opendaylight.usc.plugin.model.UscChannel.ChannelType;
  *
  */
 @SuppressWarnings("serial")
-public class UscRouteIdentifier extends UscRemoteChannelIdentifier implements Serializable {
+public class UscRouteIdentifier extends UscChannelIdentifier implements Serializable {
     private int sessionId;
     private int applicationPort;
 
@@ -32,7 +32,7 @@ public class UscRouteIdentifier extends UscRemoteChannelIdentifier implements Se
      * @param applicationPort
      *            application port
      */
-    public UscRouteIdentifier(UscRemoteChannelIdentifier remoteChannel, int sessionId, int applicationPort) {
+    public UscRouteIdentifier(UscChannelIdentifier remoteChannel, int sessionId, int applicationPort) {
         super(remoteChannel.getInetAddress(), remoteChannel.getChannelType());
         this.sessionId = sessionId;
         this.applicationPort = applicationPort;
@@ -88,19 +88,26 @@ public class UscRouteIdentifier extends UscRemoteChannelIdentifier implements Se
     }
 
     /**
-     * check if the route identifier using same device
+     * check if the route identifier using same channel
      * 
      * @param other
      *            another route identifier
-     * @return true for using same device, false for others
+     * @return true for using same channel, false for others
      */
-    public boolean hasSameDevice(UscRouteIdentifier other) {
-        if (this.getInetAddress().equals(other.getInetAddress())) {
-            return true;
-        } else {
-            return false;
-        }
+    public boolean isSameChannel(UscRouteIdentifier other) {
+        UscChannelIdentifier channelId = new UscChannelIdentifier(other.getInetAddress(), other.getChannelType());
+        return isSameChannel(channelId);
+    }
 
+    /**
+     * check if the route identifier using same channel
+     * 
+     * @param channelId
+     *            channel identifier
+     * @return true for using same channel, false for others
+     */
+    public boolean isSameChannel(UscChannelIdentifier channelId) {
+        return channelId.equals(this);
     }
 
     /**

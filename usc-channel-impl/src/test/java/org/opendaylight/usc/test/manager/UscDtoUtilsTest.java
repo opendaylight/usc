@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.usc.manager.UscTopologyService;
 import org.opendaylight.usc.manager.cluster.UscDeviceMountTable;
-import org.opendaylight.usc.manager.cluster.UscRemoteChannelIdentifier;
+import org.opendaylight.usc.manager.cluster.UscChannelIdentifier;
 import org.opendaylight.usc.plugin.model.UscChannel.ChannelType;
 import org.opendaylight.usc.test.AbstractUscTest;
 import org.opendaylight.usc.util.UscDtoUtils;
@@ -35,12 +35,16 @@ public class UscDtoUtilsTest extends AbstractUscTest {
 
     @Test
     public void mergeTopology() {
-        Topology topoA = topoFactoryTest.createTopology(1, 2);
+        int con1 = 1,con2 = 2;
+        int node1 = 2, node2 = 2;
+        Topology topoA = topoFactoryTest.createTopology(con1, node1);
         UscManagerUtils.outputTopology(topoA);
-        Topology topoB = topoFactoryTest.createTopology(2, 2);
+        Topology topoB = topoFactoryTest.createTopology(con2, node2);
         UscManagerUtils.outputTopology(topoB);
         UscDtoUtils.mergeChannelList(topoA, topoB);
         UscDtoUtils.mergeNodeList(topoA, topoB);
+//        Assert.assertEquals(topoA.getNode().size(), node1 + node2);
+//        Assert.assertEquals(topoA.getChannel().size(), con1 * node1 + con2 *  node2);
         UscManagerUtils.outputTopology(topoA);
     }
 
@@ -56,8 +60,8 @@ public class UscDtoUtilsTest extends AbstractUscTest {
             e.printStackTrace();
         }
         UscDeviceMountTable table = UscDeviceMountTable.getInstance();
-        UscRemoteChannelIdentifier remoteChannel1 = new UscRemoteChannelIdentifier(address1, ChannelType.TLS);
-        UscRemoteChannelIdentifier remoteChannel2 = new UscRemoteChannelIdentifier(address2, ChannelType.TLS);
+        UscChannelIdentifier remoteChannel1 = new UscChannelIdentifier(address1, ChannelType.TLS);
+        UscChannelIdentifier remoteChannel2 = new UscChannelIdentifier(address2, ChannelType.TLS);
         table.addEntry(remoteChannel1, null);
         Assert.assertEquals(remoteChannel1, remoteChannel2);
         // Assert.assertTrue(table.existRemoteChannel(remoteChannel2, null));
