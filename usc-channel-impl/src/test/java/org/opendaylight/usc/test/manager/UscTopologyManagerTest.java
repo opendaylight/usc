@@ -11,6 +11,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.usc.manager.UscTopologyService;
 import org.opendaylight.usc.manager.topology.UscTopologyFactory;
@@ -24,12 +25,17 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.chan
  */
 public class UscTopologyManagerTest extends AbstractUscTest {
     private String serverName = "Server1";
-    private UscTopologyService topoManager = UscTopologyService.getInstance();
+    private static UscTopologyService topoManager = UscTopologyService.getInstance();
     private UscTopologyFactoryTest topoTestFactory = new UscTopologyFactoryTest();
+
+    @BeforeClass
+    public static void init() {
+        // topoManager.clear();
+        topoManager.init();
+    }
 
     @Before
     public void setUp() {
-        topoManager.init();
         for (Channel Channel : topoManager.getLocalTopolgy().getChannel()) {
             while (Channel != null) {
                 Channel = topoManager.removeChannel(Channel.getDestination().getDestNode().getValue(),

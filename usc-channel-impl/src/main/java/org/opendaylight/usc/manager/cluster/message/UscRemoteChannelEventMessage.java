@@ -7,14 +7,14 @@
  */
 package org.opendaylight.usc.manager.cluster.message;
 
-import org.opendaylight.usc.manager.cluster.UscRemoteChannelIdentifier;
+import org.opendaylight.usc.manager.cluster.UscChannelIdentifier;
 import org.opendaylight.usc.manager.cluster.UscRouteIdentifier;
 
 @SuppressWarnings("serial")
 public class UscRemoteChannelEventMessage extends UscRemoteMessage {
     private ChannelEventType eventType = ChannelEventType.UNKNOWN;
 
-    public UscRemoteChannelEventMessage(UscRemoteChannelIdentifier remoteChannel, ChannelEventType type) {
+    public UscRemoteChannelEventMessage(UscChannelIdentifier remoteChannel, ChannelEventType type) {
         super(new UscRouteIdentifier(remoteChannel, -1, -1));
         this.eventType = type;
     }

@@ -5,33 +5,36 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.local.LocalChannel;
 
 import org.opendaylight.usc.manager.api.UscConfigurationService;
 import org.opendaylight.usc.manager.api.UscMonitor;
 import org.opendaylight.usc.manager.cluster.UscCommunicatorActor;
 import org.opendaylight.usc.manager.cluster.UscDeviceMountTable;
-import org.opendaylight.usc.manager.cluster.UscRemoteChannelIdentifier;
+import org.opendaylight.usc.manager.cluster.UscChannelIdentifier;
 import org.opendaylight.usc.manager.cluster.UscRouteIdentifier;
-import org.opendaylight.usc.manager.cluster.UscRouteIdentifierData;
-import org.opendaylight.usc.manager.cluster.UscRoutedLocalSessionManager;
-import org.opendaylight.usc.manager.cluster.UscRoutedRemoteSessionManager;
+import org.opendaylight.usc.manager.cluster.UscRouteSessionData;
 import org.opendaylight.usc.manager.cluster.message.UscRemoteDataMessage;
 import org.opendaylight.usc.manager.cluster.message.UscRemoteExceptionMessage;
 import org.opendaylight.usc.manager.cluster.message.UscRemoteMessage;
 import org.opendaylight.usc.manager.monitor.UscMonitorImpl;
 import org.opendaylight.usc.manager.monitor.evt.UscChannelCloseEvent;
+import org.opendaylight.usc.manager.monitor.evt.UscChannelCreateEvent;
 import org.opendaylight.usc.manager.monitor.evt.UscSessionCloseEvent;
 import org.opendaylight.usc.manager.monitor.evt.UscSessionCreateEvent;
 import org.opendaylight.usc.manager.monitor.evt.UscSessionErrorEvent;
 import org.opendaylight.usc.manager.monitor.evt.UscSessionTransactionEvent;
 import org.opendaylight.usc.manager.monitor.evt.base.UscErrorLevel;
 import org.opendaylight.usc.plugin.UscConnectionManager;
+import org.opendaylight.usc.plugin.UscSessionIdManager;
 import org.opendaylight.usc.plugin.exception.UscChannelException;
 import org.opendaylight.usc.plugin.exception.UscException;
 import org.opendaylight.usc.plugin.exception.UscSessionException;
@@ -68,13 +71,12 @@ public class UscRouteBrokerService {
     private static final String COMMUNICATOR_ACTOR_NAME = "UscCommunicator";
     private static final Logger LOG = LoggerFactory.getLogger(UscRouteBrokerService.class);
     private UscDeviceMountTable deviceTable;
-    private UscRoutedRemoteSessionManager remoteSessionManager = new UscRoutedRemoteSessionManager();
-    private UscRoutedLocalSessionManager localSessionManager = new UscRoutedLocalSessionManager();
+    private ConcurrentHashMap<UscRouteIdentifier, UscRouteSessionData> remoteSessionManager = new ConcurrentHashMap<UscRouteIdentifier, UscRouteSessionData>();
+    private ConcurrentHashMap<UscRouteIdentifier, UscRouteSessionData> localSessionManager = new ConcurrentHashMap<UscRouteIdentifier, UscRouteSessionData>();
     private ConcurrentHashMap<String, UscConnectionManager> connectionManagerMap = new ConcurrentHashMap<String, UscConnectionManager>();
-    private ConcurrentHashMap<UscRemoteChannelIdentifier, Integer> sessionIdMap = new ConcurrentHashMap<UscRemoteChannelIdentifier, Integer>();
+    private ConcurrentHashMap<UscRouteIdentifier, Integer> routeIdToLocalSessionIdMap = new ConcurrentHashMap<UscRouteIdentifier, Integer>();
     private ActorRef communicator;
     private static UscRouteBrokerService service = new UscRouteBrokerService();
-    private final int MAX_FIXED_SESSION_ID = Character.MAX_VALUE - 1000;
     private ActorSystem actorSystem = null;
     private Set<ActorSelection> remoteActors = new CopyOnWriteArraySet<ActorSelection>();
     private Config actorSystemConfig = null;
@@ -185,16 +187,45 @@ public class UscRouteBrokerService {
                     + member.address());
             if (actorSelection.pathString().contains(member.address().toString())) {
                 remoteActors.remove(actorSelection);
-                String actorPath = member.address() + communicator.path().toStringWithoutAddress();
-                // remove all remote channels related with the specified cluster
-                // member
-                deviceTable.removeAll(actorPath);
-                LOG.info("Succed to remove the remote actor when Member(" + member.address()
-                        + ") is down or unreachable.");
+            }
+        }
+        String actorPath = member.address() + communicator.path().toStringWithoutAddress();
+        // remove all remote channels related with the specified cluster
+        // member
+        deviceTable.removeAll(actorPath);
+        removeSessionsByActor(actorPath, localSessionManager);
+        removeSessionsByActor(actorPath, remoteSessionManager);
+        return false;
+    }
+
+    private void removeSessionsByActor(String actorPath,
+            ConcurrentHashMap<UscRouteIdentifier, UscRouteSessionData> sessionMap) {
+        for (Entry<UscRouteIdentifier, UscRouteSessionData> entry : sessionMap.entrySet()) {
+            if (isSameActorRef(actorPath, entry.getValue().getActorRef())) {
+                sessionMap.remove(entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
+    private void removeSessionsByRemoteChannel(UscChannelIdentifier remoteChannel, String actorPath,
+            ConcurrentHashMap<UscRouteIdentifier, UscRouteSessionData> sessionMap) {
+        UscRouteSessionData sessionData = null;
+        for (Entry<UscRouteIdentifier, UscRouteSessionData> entry : sessionMap.entrySet()) {
+            sessionData = entry.getValue();
+            if (entry.getKey().isSameChannel(remoteChannel) && isSameActorRef(actorPath, sessionData.getActorRef())) {
+                sessionMap.remove(entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
+    public static boolean isSameActorRef(String actorPath, ActorRef actorRef) {
+        LOG.info("isSameActorRef:actorPath is {}, actorRef.path().toString() is {},actorRef.path().address() is {}",
+                actorPath, actorRef.path().toString(), actorRef.path().address());
+        if (actorRef != null) {
+            if (actorRef.path().toString().equals(actorPath)) {
                 return true;
             }
         }
-        LOG.info("Failed to remove the remote actor when Member(" + member.address() + ") is down or unreachable.");
         return false;
     }
 
@@ -230,7 +261,10 @@ public class UscRouteBrokerService {
      * @return true for local route identifier, false for others
      */
     public boolean isLocalRemoteSession(UscRouteIdentifier routeId) {
-        return localSessionManager.isRemoteMessage(routeId);
+        if (localSessionManager.get(routeId) != null) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -242,9 +276,10 @@ public class UscRouteBrokerService {
      * @return true for remote route identifier, false for others
      */
     public boolean isRemoteSession(UscRouteIdentifier routeId) {
-        if (routeId == null)
-            return false;
-        return remoteSessionManager.isRemoteSession(routeId);
+        if (remoteSessionManager.get(getRemoteRouteIdentifier(routeId)) != null) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -257,7 +292,7 @@ public class UscRouteBrokerService {
     public ActorRef getRemoteActorForRequest(UscRouteIdentifier localRouteId) {
         // since route identifier has different hash code , even it is the child
         // of remote channel
-        UscRemoteChannelIdentifier remoteChannel = new UscRemoteChannelIdentifier(localRouteId.getInetAddress(),
+        UscChannelIdentifier remoteChannel = new UscChannelIdentifier(localRouteId.getInetAddress(),
                 localRouteId.getChannelType());
         return deviceTable.getActorRef(remoteChannel);
     }
@@ -271,7 +306,7 @@ public class UscRouteBrokerService {
      * @return call back actorRef
      */
     public ActorRef getRemoteActorForResponse(UscRouteIdentifier localRouteId) {
-        return remoteSessionManager.getActorRef(localRouteId);
+        return remoteSessionManager.get(localRouteId).getActorRef();
     }
 
     /**
@@ -281,12 +316,17 @@ public class UscRouteBrokerService {
      *            remote channel
      * @return true for exist,false for others
      */
-    public boolean existRemoteChannel(UscRemoteChannelIdentifier remoteChannel) {
+    public boolean existRemoteChannel(UscChannelIdentifier remoteChannel) {
         return deviceTable.existRemoteChannel(remoteChannel);
     }
 
     private UscRouteIdentifier getRemoteRouteIdentifier(UscRouteIdentifier localRouteId) {
-        return remoteSessionManager.getRemoteRouteIdentifier(localRouteId);
+        for (Entry<UscRouteIdentifier, Integer> entry : routeIdToLocalSessionIdMap.entrySet()) {
+            if (entry.getKey().isSameChannel(localRouteId) && entry.getValue().equals(localRouteId.getSessionId())) {
+                return entry.getKey();
+            }
+        }
+        return null;
     }
 
     /**
@@ -298,11 +338,11 @@ public class UscRouteBrokerService {
      * @param communicator
      *            communicator
      */
-    public void addMountedDevice(UscRemoteChannelIdentifier remoteChannel, ActorRef communicator) {
+    public void addMountedDevice(UscChannelIdentifier remoteChannel, ActorRef communicator) {
         // since the hash code is different,it can not use UscRouteIdentifier as
         // a UscRemoteChannelIdentifier
-        UscRemoteChannelIdentifier filteredRemoteChannel = new UscRemoteChannelIdentifier(
-                remoteChannel.getInetAddress(), remoteChannel.getChannelType());
+        UscChannelIdentifier filteredRemoteChannel = new UscChannelIdentifier(remoteChannel.getInetAddress(),
+                remoteChannel.getChannelType());
         deviceTable.addEntry(filteredRemoteChannel, communicator);
         if (communicator.compareTo(this.communicator) != 0) {
             ActorSelection remoteActorSelection = actorSystem.actorSelection(communicator.path());
@@ -318,17 +358,18 @@ public class UscRouteBrokerService {
      * remove remote channel and communicator which belongs to the controller
      * which connected with the remote channel
      * 
-     * @param remoteChannel
+     * @param channelId
      *            remote channel
      * @param communicator
      *            communicator
      */
-    public void removeMountedDevice(UscRemoteChannelIdentifier remoteChannel, ActorRef communicator) {
-        deviceTable.removeEntry(remoteChannel, communicator.toString());
+    public void removeMountedDevice(UscChannelIdentifier channelId, ActorRef communicator) {
+        deviceTable.removeEntry(channelId, communicator.path().toString());
         // send channel connection exception to all related local session
-        localSessionManager.removeAll(remoteChannel);
-        monitor.onEvent(new UscChannelCloseEvent(remoteChannel.getIp(), remoteChannel.getRemoteChannelType()));
-        LOG.info("Remove remote channel {}", remoteChannel);
+        removeSessionsByRemoteChannel(channelId, communicator.path().toString(), localSessionManager);
+        removeSessionsByRemoteChannel(channelId, communicator.path().toString(), remoteSessionManager);
+        monitor.onEvent(new UscChannelCloseEvent(channelId.getIp(), channelId.getRemoteChannelType()));
+        LOG.info("Remove remote channel {}", channelId);
     }
 
     /**
@@ -341,7 +382,14 @@ public class UscRouteBrokerService {
      *            server local channel
      */
     public void addLocalSession(UscRouteIdentifier localRouteId, LocalChannel serverChannel) {
-        localSessionManager.addEntry(localRouteId, serverChannel);
+        //for performance, maybe we can add some logic to select the proper 
+        ActorRef actorRef = getActorByRemoteChannel(localRouteId);
+        if (actorRef == null) {
+            // first use this remote channel
+            actorRef = getRemoteActorForRequest(localRouteId);
+            monitor.onEvent(new UscChannelCreateEvent(localRouteId.getIp(), true, localRouteId.getRemoteChannelType()));
+        }
+        localSessionManager.put(localRouteId, new UscRouteSessionData(serverChannel, actorRef));
         monitor.onEvent(new UscSessionCreateEvent(localRouteId.getIp(), localRouteId.getRemoteChannelType(),
                 localRouteId.getSessionId() + "", localRouteId.getApplicationPort()));
     }
@@ -354,29 +402,10 @@ public class UscRouteBrokerService {
      *            local route identifier
      */
     public void removeLocalSession(UscRouteIdentifier localRouteId) {
-        localSessionManager.removeEntry(localRouteId);
+        localSessionManager.remove(localRouteId);
         monitor.onEvent(new UscSessionCloseEvent(localRouteId.getIp(), localRouteId.getRemoteChannelType(),
                 localRouteId.getSessionId() + ""));
         LOG.info("Remove local session {}", localRouteId);
-    }
-
-    /**
-     * create a new lcoal session id for remote caller
-     * 
-     * @param remoteRouteId
-     *            remote route identifier
-     * @return the new session id, the id is descending from max session id
-     */
-    public int createNewLocalSessionId(UscRouteIdentifier remoteRouteId) {
-        Integer maxSessionId = sessionIdMap.get(remoteRouteId);
-        if (maxSessionId == null) {
-            sessionIdMap.put(remoteRouteId, 1);
-            return MAX_FIXED_SESSION_ID;
-        } else {
-            int sessionId = MAX_FIXED_SESSION_ID - maxSessionId;
-            sessionIdMap.put(remoteRouteId, maxSessionId + 1);
-            return sessionId;
-        }
     }
 
     /**
@@ -387,8 +416,12 @@ public class UscRouteBrokerService {
      *            local route identifier
      * @return server local channel
      */
-    public LocalChannel getRequestSource(UscRouteIdentifier localRouteId) {
-        return localSessionManager.getServerChannel(localRouteId);
+    private LocalChannel getRequestSource(UscRouteIdentifier localRouteId) {
+        UscRouteSessionData data = localSessionManager.get(localRouteId);
+        if (data != null) {
+            return (LocalChannel) data.getChannel();
+        }
+        return null;
     }
 
     /**
@@ -399,7 +432,14 @@ public class UscRouteBrokerService {
      */
     public void sendRequest(UscRemoteMessage message) {
         UscRouteIdentifier routeId = message.getRouteIdentifier();
-        ActorRef remoteActorRef = getRemoteActorForRequest(routeId);
+        UscRouteSessionData sessionData = localSessionManager.get(routeId);
+        if (sessionData == null) {
+            LOG.error(
+                    "Failed to send request(routeId is {}),since not found remote actoRef in remote session manager({}).",
+                    routeId, remoteSessionManager);
+            return;
+        }
+        ActorRef remoteActorRef = sessionData.getActorRef();
         if (remoteActorRef != null) {
             remoteActorRef.tell(message, communicator);
             if (message instanceof UscRemoteDataMessage) {
@@ -425,8 +465,7 @@ public class UscRouteBrokerService {
             updateActorListFromCluster();
         }
         if (remoteActors.size() == 0) {
-            LOG.warn("Failed to send broadcast message to all remote actor, since currently there is no remote actor!Remote actor list is empty!");
-            // TODO broadcast message
+            LOG.trace("Failed to send broadcast message to all remote actor, since currently there is no remote actor!Remote actor list is empty!");
             for (ActorRef actorRef : deviceTable.getActorRefList()) {
                 if (actorRef.compareTo(communicator) != 0) {
                     actorRef.tell(message, communicator);
@@ -449,15 +488,21 @@ public class UscRouteBrokerService {
      *            response pay load, no usc header
      */
     public void sendResponse(UscRouteIdentifier localRouteId, byte[] payload) {
-        ActorRef remoteActor = getRemoteActorForResponse(localRouteId);
-        if (remoteActor != null) {
-            UscRouteIdentifier remoteRouteId = getRemoteRouteIdentifier(localRouteId);
-            // frame sessionId is local sessionId,can not be used in remote
-            UscRemoteDataMessage message = new UscRemoteDataMessage(remoteRouteId, payload, false);
-            remoteActor.tell(message, communicator);
-        } else {
-            LOG.error("Not found the remote actor for routeIdentifier (" + localRouteId + ")");
+        UscRouteIdentifier remoteRouteId = getRemoteRouteIdentifier(localRouteId);
+        if (remoteRouteId == null) {
+            LOG.error("sendResponse:Not found the remote route identifier for local route identifier(" + localRouteId
+                    + ")");
+            return;
         }
+        UscRouteSessionData sessionData = remoteSessionManager.get(remoteRouteId);
+        if (sessionData == null) {
+            LOG.error("sendResponse:Not found the remote actor for routeIdentifier (" + remoteRouteId + ")");
+            return;
+        }
+        ActorRef remoteActor = sessionData.getActorRef();
+        // frame sessionId is local sessionId,can not be used in remote
+        UscRemoteDataMessage message = new UscRemoteDataMessage(remoteRouteId, payload, false);
+        remoteActor.tell(message, communicator);
     }
 
     /**
@@ -469,15 +514,21 @@ public class UscRouteBrokerService {
      *            exception of agent channel
      */
     public void sendException(UscRouteIdentifier localRouteId, UscException exception) {
-        ActorRef remoteActor = getRemoteActorForResponse(localRouteId);
-        if (remoteActor != null) {
-            UscRouteIdentifier remoteRouteId = getRemoteRouteIdentifier(localRouteId);
-            // frame sessionId is local sessionId,can not be used in remote
-            UscRemoteExceptionMessage message = new UscRemoteExceptionMessage(remoteRouteId, exception);
-            remoteActor.tell(message, communicator);
-        } else {
-            LOG.error("Not found the remote actor for routeIdentifier (" + localRouteId + ")");
+        UscRouteIdentifier remoteRouteId = getRemoteRouteIdentifier(localRouteId);
+        if (remoteRouteId == null) {
+            LOG.error("sendException:Not found the remote route identifier for local route identifier(" + localRouteId
+                    + ")");
+            return;
         }
+        UscRouteSessionData sessionData = remoteSessionManager.get(remoteRouteId);
+        if (sessionData == null) {
+            LOG.error("sendResponse:Not found the remote actor for routeIdentifier (" + remoteRouteId + ")");
+            return;
+        }
+        ActorRef remoteActor = sessionData.getActorRef();
+        // frame sessionId is local sessionId,can not be used in remote
+        UscRemoteExceptionMessage message = new UscRemoteExceptionMessage(remoteRouteId, exception);
+        remoteActor.tell(message, communicator);
     }
 
     /**
@@ -491,9 +542,8 @@ public class UscRouteBrokerService {
     public void processRequest(UscRemoteDataMessage message, ActorRef sender) {
         UscRouteIdentifier remoteRouteId = message.getRouteIdentifier();
         // find response remote session
-        UscRouteIdentifier localRouteId = remoteSessionManager.getLocalRouteIdentifier(remoteRouteId);
         io.netty.channel.Channel agentChannel = null;
-        if (localRouteId == null) {
+        if (!remoteSessionManager.containsKey(remoteRouteId)) {
 
             // first time for this route id
             UscChannelImpl localUscChannel = getLocalUscChannel(remoteRouteId);
@@ -507,22 +557,30 @@ public class UscRouteBrokerService {
             }
 
             // add new remote session for first time
-            UscRouteIdentifierData routeData = new UscRouteIdentifierData(sender, remoteRouteId,
-                    createNewLocalSessionId(remoteRouteId), localUscChannel.getChannel());
-            remoteSessionManager.addEntry(routeData);
-            LOG.info("Added remote session for " + routeData);
-            localRouteId = routeData.getLocalRouteIdentifier();
+            UscRouteSessionData sessionData = new UscRouteSessionData(localUscChannel.getChannel(), sender);
+            final int localSessionId = UscSessionIdManager.getInstance().create(remoteRouteId);
+            remoteSessionManager.put(remoteRouteId, sessionData);
+            routeIdToLocalSessionIdMap.put(remoteRouteId, localSessionId);
+            LOG.info("Added remote session for " + sessionData);
+            final UscChannelIdentifier channelId = remoteRouteId;
+            sessionData.getChannel().closeFuture().addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture future) throws Exception {
+                    UscSessionIdManager.getInstance().remove(channelId, localSessionId);
+                    LOG.trace("serverChannel for session " + localSessionId + " closed");
+                }
+            });
             agentChannel = localUscChannel.getChannel();
         } else {
             LOG.trace("Find used channel, send request to agent directly.");
             // for next time request from same remote route id
-            agentChannel = remoteSessionManager.getAgentChannel(localRouteId);
+            agentChannel = remoteSessionManager.get(remoteRouteId).getChannel();
         }
 
         // change remote session id to local session id
 
-        UscData data = new UscData(message.getRouteIdentifier().getApplicationPort(), localRouteId.getSessionId(),
-                Unpooled.copiedBuffer(message.getPayload()));
+        UscData data = new UscData(message.getRouteIdentifier().getApplicationPort(),
+                routeIdToLocalSessionIdMap.get(remoteRouteId), Unpooled.copiedBuffer(message.getPayload()));
         agentChannel.writeAndFlush(data);
         return;
 
@@ -581,7 +639,7 @@ public class UscRouteBrokerService {
      *            remote channel identifier
      * @return local corresponding usc channel
      */
-    private UscChannelImpl getLocalUscChannel(UscRemoteChannelIdentifier remoteChannel) {
+    private UscChannelImpl getLocalUscChannel(UscChannelIdentifier remoteChannel) {
         UscConnectionManager connectionManager = connectionManagerMap.get(remoteChannel.getChannelType().name());
         if (connectionManager == null) {
             LOG.info("Current connection manager list is " + connectionManagerMap + ",size is "
@@ -620,4 +678,14 @@ public class UscRouteBrokerService {
         }
     }
 
+    public ActorRef getActorByRemoteChannel(UscChannelIdentifier remoteChannel) {
+        UscRouteIdentifier routeId = null;
+        for (Object tmp : localSessionManager.keySet().toArray()) {
+            routeId = (UscRouteIdentifier) tmp;
+            if (routeId.isSameChannel(remoteChannel)) {
+                return localSessionManager.get(routeId).getActorRef();
+            }
+        }
+        return null;
+    }
 }

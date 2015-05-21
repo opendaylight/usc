@@ -10,9 +10,7 @@ package org.opendaylight.usc.manager;
 import java.util.Hashtable;
 
 import org.opendaylight.usc.manager.api.UscEvent;
-import org.opendaylight.usc.manager.api.UscMonitor;
 import org.opendaylight.usc.manager.monitor.UscChannelEventHandler;
-import org.opendaylight.usc.manager.monitor.UscMonitorImpl;
 import org.opendaylight.usc.manager.monitor.UscEventHandler;
 import org.opendaylight.usc.manager.monitor.UscSessionEventHandler;
 import org.opendaylight.usc.manager.monitor.evt.UscChannelCloseEvent;

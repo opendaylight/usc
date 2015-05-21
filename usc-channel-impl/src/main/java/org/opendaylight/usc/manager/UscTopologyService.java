@@ -66,21 +66,37 @@ public class UscTopologyService {
     public static final String NODE_TYPE_NETWORK_DEVICE = "Device";
     private static final Logger LOG = LoggerFactory.getLogger(UscTopologyService.class);
     private static UscTopologyService topoService = new UscTopologyService();
-    private Node localController;
+    private final Node localController;
     private Topology localTopology;
-    private String localHostName;
+    private final String localHostName;
     @SuppressWarnings("rawtypes")
     private UscShardService shardService;
     private UscConfigurationService configService;
     private long maxErrorNumber = 0;
-    private InstanceIdentifier<Topology> topoIdentifier;
-    private List<Channel> localChannelList = new CopyOnWriteArrayList<Channel>();
-    private List<Node> localNodeList = new CopyOnWriteArrayList<Node>();
+    private final InstanceIdentifier<Topology> topoIdentifier;
     private Hashtable<String, Integer> nodeReferList = new Hashtable<String, Integer>();
     private boolean finished = false;
     private boolean logError = true;
 
     private UscTopologyService() {
+        String name = null;
+        try {
+            name = InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e) {
+            if (LOG.isDebugEnabled()) {
+                e.printStackTrace();
+            }
+            name = "Random" + Math.random() + "";
+            LOG.warn(
+                    "Failed to get local hostname!create a random key for local controller.nodeId({}), error message is {}",
+                    name, e.getMessage());
+        }
+        localHostName = name;
+        NodeBuilder nodeBuilder = new NodeBuilder();
+        NodeId nodeId = new NodeId(localHostName);
+        localController = nodeBuilder.setNodeType(NODE_TYPE_CONTROLLER).setNodeId(nodeId).setKey(new NodeKey(nodeId))
+                .build();
+        topoIdentifier = UscDtoUtils.getTopologyIdentifier(localHostName);
 
     }
 
@@ -101,41 +117,18 @@ public class UscTopologyService {
         configService = UscServiceUtils.getService(UscConfigurationService.class);
         maxErrorNumber = configService.getConfigIntValue(UscConfigurationService.USC_MAX_ERROR_NUMER);
         logError = configService.isConfigAsTure(UscConfigurationService.USC_LOG_ERROR_EVENT);
-        initLocalHostName();
         TopologyBuilder topoBuilder = new TopologyBuilder();
         TopologyId topoId = new TopologyId(localHostName);
-        localTopology = topoBuilder.setTopologyId(topoId).setKey(new TopologyKey(topoId)).setNode(localNodeList)
-                .setChannel(localChannelList).build();
-        topoIdentifier = UscDtoUtils.getTopologyIdentifier(localHostName);
-        initLocalController();
-        localNodeList.add(localController);
+        localTopology = topoBuilder.setTopologyId(topoId).setKey(new TopologyKey(topoId))
+                .setNode(new CopyOnWriteArrayList<Node>()).setChannel(new CopyOnWriteArrayList<Channel>()).build();
+        localTopology.getNode().add(localController);
         updateUscTopology();
-    }
-
-    private void initLocalHostName() {
-        try {
-            localHostName = InetAddress.getLocalHost().getHostName();
-        } catch (UnknownHostException e) {
-            if (LOG.isDebugEnabled()) {
-                e.printStackTrace();
-            }
-            localHostName = "Random" + Math.random() + "";
-            LOG.warn("Failed to get local hostname!create a random key for local controller.nodeId = " + localHostName
-                    + ", error message is " + e.getMessage());
-        }
-    }
-
-    private void initLocalController() {
-        NodeBuilder nodeBuilder = new NodeBuilder();
-        NodeId nodeId = new NodeId(localHostName);
-        localController = nodeBuilder.setNodeType(NODE_TYPE_CONTROLLER).setNodeId(nodeId).setKey(new NodeKey(nodeId))
-                .build();
     }
 
     @SuppressWarnings("unchecked")
     private void updateUscTopology() {
-        UscTopology UscTopology = null;
         if (shardService != null) {
+            UscTopology UscTopology = null;
             if (existLocalTopology()) {
                 // reset since USC service were restarted.
                 updateShard();
@@ -269,10 +262,12 @@ public class UscTopologyService {
      * @return if node id exists than return it, other wise create a new node
      *         using node id
      */
-    public synchronized Node getNode(String nodeId) {
-        for (Node node : localTopology.getNode()) {
-            if (sameNodeId(nodeId, node)) {
-                return node;
+    public Node getNode(String nodeId) {
+        synchronized (localTopology) {
+            for (Node node : localTopology.getNode()) {
+                if (sameNodeId(nodeId, node)) {
+                    return node;
+                }
             }
         }
         return null;
@@ -295,7 +290,9 @@ public class UscTopologyService {
             // should have unique nodeId
             if (num == null) {
                 // not exsits, add node and one refer number
-                localNodeList.add(node);
+                synchronized (localTopology) {
+                    localTopology.getNode().add(node);
+                }
                 nodeReferList.put(nodeId, 1);
             } else {
                 // exsits,only add refer number
@@ -327,7 +324,9 @@ public class UscTopologyService {
             } else if (num <= 1) {
                 // only one, so can remove node and
                 // node refer key
-                localNodeList.remove(node);
+                synchronized (localTopology) {
+                    localTopology.getNode().remove(node);
+                }
                 nodeReferList.remove(nodeId);
             } else {
                 // more than one ,only minus refer number
@@ -348,7 +347,7 @@ public class UscTopologyService {
      * @return if the node has same id with the specified id then return
      *         true,other wise return false
      */
-    public synchronized boolean sameNodeId(String id, Node node) {
+    private boolean sameNodeId(String id, Node node) {
         return id.equals(node.getNodeId().getValue());
     }
 
@@ -359,11 +358,17 @@ public class UscTopologyService {
      *            the adding channel
      */
     public synchronized void addChannel(Channel channel) {
+        innerAddChannel(channel);
+        updateShard();
+    }
+
+    private void innerAddChannel(Channel channel) {
         if (channel != null) {
-            localTopology.getChannel().add(channel);
+            synchronized (localTopology) {
+                localTopology.getChannel().add(channel);
+            }
             addNode(UscTopologyFactory.createNode(channel.getDestination().getDestNode().getValue(),
                     UscTopologyService.NODE_TYPE_NETWORK_DEVICE));
-            updateShard();
         }
     }
 
@@ -379,17 +384,24 @@ public class UscTopologyService {
      *         specified destination id is not exists then return null
      */
     public synchronized Channel removeChannel(String destinationId, String type) {
+        Channel channel = innerRemoveChannel(destinationId, type);
+        updateShard();
+        return channel;
+    }
+
+    private Channel innerRemoveChannel(String destinationId, String type) {
         if (destinationId != null) {
             Channel channel = getChannel(destinationId, type);
             if (channel != null) {
-                localTopology.getChannel().remove(channel);
+                synchronized (localTopology) {
+                    localTopology.getChannel().remove(channel);
+                }
                 // source controller node only add once on initializing
                 // removeNode(channel.getSource().getSourceNode().getValue());
                 removeNode(channel.getDestination().getDestNode().getValue());
-                updateShard();
                 return channel;
             } else {
-                LOG.warn("Not found specified destionation.id =" + destinationId);
+                LOG.warn("innerRemoveChannel:Not found specified destionation.id =" + destinationId);
             }
         }
         return null;
@@ -403,16 +415,32 @@ public class UscTopologyService {
      * @return old channel
      */
     public synchronized Channel updateChannel(Channel channel) {
+        Channel ret = innerUpdateChannel(channel);
+        updateShard();
+        return ret;
+    }
+
+    private Channel innerUpdateChannel(Channel channel) {
         if (channel != null) {
-            Channel oldChannel = removeChannel(channel.getDestination().getDestNode().getValue(),
+            Channel oldChannel = innerRemoveChannel(channel.getDestination().getDestNode().getValue(),
                     channel.getChannelType());
-            addChannel(channel);
-            updateShard();
+            innerAddChannel(channel);
             return oldChannel;
         }
         return null;
     }
 
+    /**
+     * update the session information of channel, and update the shard data of
+     * local topology
+     * 
+     * @param channel
+     *            the channel
+     * @param session
+     *            the session of channel
+     * @param removeFlag
+     *            true for removing the session, false for update session
+     */
     public synchronized void updateChannel(Channel channel, Session session, boolean removeFlag) {
         Session oldSession = getSession(channel, session.getSessionId().getValue());
         if (oldSession != null) {
@@ -429,6 +457,18 @@ public class UscTopologyService {
         updateChannel(channel);
     }
 
+    /**
+     * update the transaction data of Channel
+     * 
+     * @param channel
+     *            the channel
+     * @param session
+     *            session of channel
+     * @param bytesIn
+     *            bytes in from agent server to app client
+     * @param bytesOut
+     *            bytes out from
+     */
     public synchronized void updateTransaction(Channel channel, Session session, long bytesIn, long bytesOut) {
         Session oldSession = getSession(channel, session.getSessionId().getValue());
         if (oldSession != null) {
@@ -452,11 +492,13 @@ public class UscTopologyService {
      * @return the channel, if the channel related with specified destination id
      *         is not exists then return null
      */
-    public synchronized Channel getChannel(String destinationId, String type) {
-        for (Channel channel : localTopology.getChannel()) {
-            if (channel.getDestination().getDestNode().getValue().equals(destinationId)
-                    && channel.getChannelType().equals(type)) {
-                return channel;
+    public Channel getChannel(String destinationId, String type) {
+        synchronized (localTopology) {
+            for (Channel channel : localTopology.getChannel()) {
+                if (channel.getDestination().getDestNode().getValue().equals(destinationId)
+                        && channel.getChannelType().equals(type)) {
+                    return channel;
+                }
             }
         }
         return null;
@@ -477,7 +519,7 @@ public class UscTopologyService {
         if (channel != null) {
             updateChannel(channel, session, false);
         } else {
-            LOG.warn("Not found specified destionation.id =" + destinationId);
+            LOG.warn("addSession:Not found specified channel with device id({})", destinationId);
         }
     }
 
@@ -499,10 +541,11 @@ public class UscTopologyService {
                 updateChannel(channel, session, true);
                 return session;
             } else {
-                LOG.warn("Not found specified Session.id =" + sessionId);
+                LOG.warn("removeSession:Not found specified Session.id({}) of channel({},{})", sessionId,
+                        destinationId, type);
             }
         } else {
-            LOG.warn("Not found specified destionation.id =" + destinationId);
+            LOG.warn("removeSession:Not found specified Channel with device({},{})", destinationId, type);
         }
         return null;
     }
@@ -537,12 +580,14 @@ public class UscTopologyService {
      * @return if find the session which has the session id, return the session
      *         other wise return null
      */
-    public synchronized Session getSession(String destinationId, String sessionId) {
-        for (Channel channel : localTopology.getChannel()) {
-            if (channel.getDestination().getDestNode().getValue().equals(destinationId)) {
-                for (Session session : channel.getSession()) {
-                    if (session.getSessionId().getValue().equals(sessionId)) {
-                        return session;
+    public Session getSession(String destinationId, String sessionId) {
+        synchronized (localTopology) {
+            for (Channel channel : localTopology.getChannel()) {
+                if (channel.getDestination().getDestNode().getValue().equals(destinationId)) {
+                    for (Session session : channel.getSession()) {
+                        if (session.getSessionId().getValue().equals(sessionId)) {
+                            return session;
+                        }
                     }
                 }
             }
@@ -570,23 +615,26 @@ public class UscTopologyService {
             long bytesIn, long bytesOut) {
         Channel channel = getChannel(destinationId, type);
         if (channel == null) {
-            LOG.warn("channel is not found for device({}),type({})", destinationId, type);
+            LOG.warn("updateSessionTransaction:channel is not found for Session({}) of Channel({},{})", sessionId,
+                    destinationId, type);
             return;
         }
         Session session = getSession(destinationId, sessionId);
         if (session == null) {
-            LOG.warn("Session is not found for device[" + destinationId + "] and session[" + sessionId + "].");
+            LOG.warn("updateSessionTransaction:Session({}) is not found for Session({}) of Channel({},{})", sessionId,
+                    destinationId, type);
             return;
         }
         TerminationPoint tp = session.getTerminationPoint();
         if (tp == null) {
-            LOG.warn("TerminationPoint is not found for device[" + destinationId + "] and session[" + sessionId + "].");
+            LOG.warn("updateSessionTransaction:TerminationPoint is not found for Session({}) of Channel({},{})",
+                    sessionId, destinationId, type);
             return;
         }
         TerminationPointId tpid = tp.getTerminationPointId();
         if (tpid == null) {
-            LOG.warn("TerminationPointId is not found for device[" + destinationId + "] and session[" + sessionId
-                    + "].");
+            LOG.warn("updateSessionTransaction:TerminationPointId is not found for Session({}) of Channel({},{})",
+                    sessionId, destinationId, type);
             return;
         }
         String tpPort = tpid.getValue();
@@ -608,7 +656,7 @@ public class UscTopologyService {
      */
     public synchronized void addChannelError(String destinationId, String type, ChannelAlarm alarm) {
         if (alarm == null) {
-            LOG.error("Channel Error Event: alarm is null for device id = " + destinationId);
+            LOG.error("addChannelError: alarm is null for Channel({},{})", destinationId, type);
             return;
         }
         if (logError) {
@@ -618,7 +666,7 @@ public class UscTopologyService {
         }
         Channel channel = getChannel(destinationId, type);
         if (channel == null) {
-            LOG.warn("Channel is not found for device id = " + destinationId);
+            LOG.warn("addChannelError:Channel({},{}) is not found!", destinationId, type);
             return;
         }
         Node deviceNode = UscTopologyFactory.createNode(destinationId, UscTopologyService.NODE_TYPE_NETWORK_DEVICE);
@@ -645,8 +693,8 @@ public class UscTopologyService {
      */
     public synchronized void addSessionError(String destinationId, String type, String sessionId, SessionAlarm alarm) {
         if (alarm == null) {
-            LOG.error("Session Error Event: alarm is null for device id = " + destinationId + ",sessionId = "
-                    + sessionId);
+            LOG.error("Session Error Event: alarm is null for Session({}) of Channel({},{})", sessionId, destinationId,
+                    type);
             return;
         }
         if (logError) {
@@ -657,12 +705,14 @@ public class UscTopologyService {
         }
         Channel channel = getChannel(destinationId, type);
         if (channel == null) {
-            LOG.warn("Channel is not found for device id = " + destinationId);
+            LOG.warn("addSessionError:Channel is not found for Session({}) of Channel({},{})", sessionId,
+                    destinationId, type);
             return;
         }
         Session session = getSession(destinationId, sessionId);
         if (session == null) {
-            LOG.warn("Session is not found for device[" + destinationId + "] and session[" + sessionId + "].");
+            LOG.warn("addSessionError:Session is not found for Session({}) of Channel({},{})", sessionId,
+                    destinationId, type);
             return;
         }
         List<SessionAlarm> alarmList = session.getSessionAlarm();
@@ -690,14 +740,8 @@ public class UscTopologyService {
     @SuppressWarnings("unchecked")
     public synchronized void destory() {
         if (shardService != null) {
-            // remove all of shard data used by USC
-            UscTopology uscTopology = (UscTopology) shardService.read(LogicalDatastoreType.OPERATIONAL,
-                    UscDtoUtils.getUscTopologyIdentifier());
-            for (Topology topo : uscTopology.getTopology()) {
-                shardService.delete(LogicalDatastoreType.OPERATIONAL,
-                        UscDtoUtils.getTopologyIdentifier(topo.getTopologyId().getValue()));
-            }
-            shardService.delete(LogicalDatastoreType.OPERATIONAL, UscDtoUtils.getUscTopologyIdentifier());
+            // remove local topology
+            shardService.delete(LogicalDatastoreType.OPERATIONAL, topoIdentifier);
         }
     }
 

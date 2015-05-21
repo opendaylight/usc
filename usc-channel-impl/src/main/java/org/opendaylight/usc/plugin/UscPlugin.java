@@ -36,10 +36,9 @@ import java.util.concurrent.TimeUnit;
 import org.opendaylight.usc.manager.UscRouteBrokerService;
 import org.opendaylight.usc.manager.api.UscEvent;
 import org.opendaylight.usc.manager.api.UscMonitor;
-import org.opendaylight.usc.manager.cluster.UscRemoteChannelIdentifier;
+import org.opendaylight.usc.manager.cluster.UscChannelIdentifier;
 import org.opendaylight.usc.manager.cluster.UscRouteIdentifier;
 import org.opendaylight.usc.manager.monitor.UscMonitorImpl;
-import org.opendaylight.usc.manager.monitor.evt.UscChannelCreateEvent;
 import org.opendaylight.usc.plugin.model.UscChannel.ChannelType;
 import org.opendaylight.usc.plugin.model.UscChannelImpl;
 import org.opendaylight.usc.plugin.model.UscDevice;
@@ -243,8 +242,7 @@ public abstract class UscPlugin implements AutoCloseable {
 
         if (remote) {
             if (routeBroker != null) {
-                if (routeBroker.existRemoteChannel(new UscRemoteChannelIdentifier(device.getInetAddress(),
-                        getChannelType()))) {
+                if (routeBroker.existRemoteChannel(new UscChannelIdentifier(device.getInetAddress(), getChannelType()))) {
                     remoteDevice = true;
                     LOG.trace("Find remote channel for device " + device);
                 } else {
@@ -312,8 +310,7 @@ public abstract class UscPlugin implements AutoCloseable {
         }
         if (connectException != null) {
             if (routeBroker != null) {
-                if (routeBroker.existRemoteChannel(new UscRemoteChannelIdentifier(device.getInetAddress(),
-                        getChannelType()))) {
+                if (routeBroker.existRemoteChannel(new UscChannelIdentifier(device.getInetAddress(), getChannelType()))) {
                     remoteDevice = true;
                     LOG.trace("Found remote channel for device " + device);
                 } else {
@@ -343,7 +340,10 @@ public abstract class UscPlugin implements AutoCloseable {
         serverChannels.remove(localAddress);
 
         if (connection != null) {
-            UscSessionImpl session = connection.addSession(address.getPort(), serverChannel);
+            UscChannelIdentifier channelId = new UscChannelIdentifier(connection.getDevice().getInetAddress(),
+                    connection.getType());
+            int sessionId = UscSessionIdManager.getInstance().create(channelId);
+            UscSessionImpl session = connection.addSession(sessionId, address.getPort(), serverChannel);
 
             LOG.trace("clientChannel set session " + session);
             // these attributes are used by unit test cases
@@ -365,18 +365,16 @@ public abstract class UscPlugin implements AutoCloseable {
         }
 
         if (remoteDevice) {
-            UscRemoteChannelIdentifier remoteChannel = new UscRemoteChannelIdentifier(device.getInetAddress(),
-                    getChannelType());
+            UscChannelIdentifier remoteChannel = new UscChannelIdentifier(device.getInetAddress(), getChannelType());
             UscRouteIdentifier routeId = new UscRouteIdentifier(remoteChannel, serverChannel.hashCode(),
                     address.getPort());
             clientChannel.attr(RUOTE_IDENTIFIER).setIfAbsent(routeId);
             serverChannel.attr(RUOTE_IDENTIFIER).setIfAbsent(routeId);
-            sendEvent(new UscChannelCreateEvent(remoteChannel.getIp(), true, remoteChannel.getRemoteChannelType()));
             // register local session for routing to remote device
             routeBroker.addLocalSession(routeId, serverChannel);
             if (directChannel != null) {
                 // direct connection only has one session
-                directChannel.attr(this.RUOTE_IDENTIFIER).set(routeId);
+                directChannel.attr(RUOTE_IDENTIFIER).set(routeId);
             }
             LOG.info("Initialized local remote channel for " + routeId);
         }

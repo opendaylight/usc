@@ -8,10 +8,9 @@
 package org.opendaylight.usc.plugin;
 
 import org.opendaylight.usc.manager.UscRouteBrokerService;
-import org.opendaylight.usc.manager.cluster.UscRemoteChannelIdentifier;
+import org.opendaylight.usc.manager.cluster.UscChannelIdentifier;
 import org.opendaylight.usc.manager.cluster.UscRouteIdentifier;
 import org.opendaylight.usc.manager.cluster.message.UscRemoteChannelEventMessage;
-import org.opendaylight.usc.plugin.exception.UscConnectionException;
 import org.opendaylight.usc.plugin.exception.UscSessionException;
 import org.opendaylight.usc.plugin.model.UscChannelImpl;
 import org.opendaylight.usc.protocol.UscError;
@@ -114,10 +113,10 @@ public class UscRemoteServerHandler extends SimpleChannelInboundHandler<Object> 
         if (broker == null) {
             LOG.warn("Broker service is null!Can't broadcast the channel close event to all other remote controller in cluster.");
         } else {
-            UscRemoteChannelIdentifier remoteChannel = null;
+            UscChannelIdentifier remoteChannel = null;
             final UscChannelImpl connection = ctx.channel().attr(UscPlugin.CHANNEL).get();
             if (connection != null) {
-                remoteChannel = new UscRemoteChannelIdentifier(connection.getDevice().getInetAddress(),
+                remoteChannel = new UscChannelIdentifier(connection.getDevice().getInetAddress(),
                         connection.getType());
             } else {
                 // communicate directly with device

@@ -18,7 +18,7 @@ import org.opendaylight.usc.plugin.model.UscChannel.ChannelType;
  *
  */
 @SuppressWarnings("serial")
-public class UscRemoteChannelIdentifier implements Serializable {
+public class UscChannelIdentifier implements Serializable {
     public static final String CHANNEL_TYPE_PREFIX = "Remote";
     private ChannelType type;
     private final InetAddress inetAddress;
@@ -31,7 +31,7 @@ public class UscRemoteChannelIdentifier implements Serializable {
      * @param type
      *            the channel type of remote channel
      */
-    public UscRemoteChannelIdentifier(InetAddress inetAddress, ChannelType type) {
+    public UscChannelIdentifier(InetAddress inetAddress, ChannelType type) {
         this.inetAddress = inetAddress;
         this.type = type;
     }
@@ -109,7 +109,7 @@ public class UscRemoteChannelIdentifier implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        UscRemoteChannelIdentifier other = (UscRemoteChannelIdentifier) obj;
+        UscChannelIdentifier other = (UscChannelIdentifier) obj;
         if (getInetAddress().getHostAddress().equalsIgnoreCase(other.getInetAddress().getHostAddress())
                 && getChannelType().name().equalsIgnoreCase(other.getChannelType().name())) {
             return true;

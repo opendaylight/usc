@@ -50,31 +50,22 @@ public abstract class UscSessionManager {
      * @param channel
      * @return
      */
-    public UscSessionImpl addSession(int port, LocalChannel channel) {
-        // generate unique session ID for this agent
-        // valid session ID range is 1 to 65535
-        // always assign in sequential order for ease of testing
-        for (int sessionId = 1; sessionId <= Character.MAX_VALUE; ++sessionId) {
-            // standard idiom for double-checked locking
-            if (!sessions.containsKey(sessionId)) {
-                final UscSessionImpl session = createSession(sessionId, port, channel);
-                if (sessions.putIfAbsent(sessionId, session) == null) {
-                	final int sId = sessionId;
-                    channel.closeFuture().addListener(new ChannelFutureListener() {
-                        @Override
-                        public void operationComplete(ChannelFuture future) throws Exception {
-                            removeSession(sId);
-                            log.trace("serverChannel for session " + sId + " closed");
-                        }
-                    });
-
-                    plugin.sendEvent(new UscSessionCreateEvent(session));
-
-                    return session;
+    public UscSessionImpl addSession(int sessionId, int port, LocalChannel channel) {
+        final UscSessionImpl session = createSession(sessionId, port, channel);
+        if (sessions.putIfAbsent(sessionId, session) == null) {
+            final int sId = sessionId;
+            channel.closeFuture().addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture future) throws Exception {
+                    removeSession(sId);
+                    log.trace("serverChannel for session " + sId + " closed");
                 }
-            }
+            });
+
+            plugin.sendEvent(new UscSessionCreateEvent(session));
+
+            return session;
         }
-        
         throw new RuntimeException("out of available session IDs");
     }
 
@@ -104,13 +95,13 @@ public abstract class UscSessionManager {
     public UscSessionImpl getSession(int sessionId) {
         return sessions.get(sessionId);
     }
-    
+
     /**
      * 
      * @return return all sessions
      */
     public Collection<UscSessionImpl> getAllSessions() {
-    	return sessions.values();
+        return sessions.values();
     }
 
     @VisibleForTesting
