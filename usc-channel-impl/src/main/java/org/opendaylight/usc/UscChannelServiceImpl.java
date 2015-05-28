@@ -45,9 +45,10 @@ import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.util.concurrent.Futures;
+
 /**
- * Implementation of the YANG RPCs defined in module usc. Service provides rpc
- * for viewing the usc topology.
+ * Implementation of the YANG RPCs defined in module usc. Service provides rpc for viewing the usc topology.
  */
 public class UscChannelServiceImpl implements UscChannelService {
     private static final Logger LOG = LoggerFactory.getLogger(UscChannelServiceImpl.class);
@@ -130,8 +131,8 @@ public class UscChannelServiceImpl implements UscChannelService {
     public Future<RpcResult<ViewChannelOutput>> viewChannel(ViewChannelInput input) {
         if (topoService == null || shardService == null) {
             LOG.error("USC Topology Service is not initialized, currently can't process this rpc request.");
-            return (Future<RpcResult<ViewChannelOutput>>) RpcResultBuilder.failed()
-                    .withError(ErrorType.RPC, "Internal error,For details please see the log.").build();
+            return Futures.immediateFuture(RpcResultBuilder.<ViewChannelOutput> failed()
+                    .withError(ErrorType.RPC, "Internal error,please see the log for details.").build());
         }
 
         // Build Output
@@ -139,8 +140,8 @@ public class UscChannelServiceImpl implements UscChannelService {
         org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.usc.topology.Topology topo = topoService
                 .getWholeUscTopology();
         if (topo == null) {
-            return (Future<RpcResult<ViewChannelOutput>>) RpcResultBuilder.failed()
-                    .withError(ErrorType.RPC, "Internal error,For details please see the log.").build();
+            return Futures.immediateFuture(RpcResultBuilder.<ViewChannelOutput> failed()
+                    .withError(ErrorType.RPC, "Internal error,please see the log for details.").build());
         }
         ViewChannelOutputBuilder outputBuilder = new ViewChannelOutputBuilder();
         TopologyBuilder topoBuilder = new TopologyBuilder();
