@@ -15,6 +15,8 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.usc.manager.api.UscConfigurationService;
@@ -44,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.SettableFuture;
 
 /**
  * Manager all of nodes and Channels of topology, which contains only local
@@ -77,7 +80,6 @@ public class UscTopologyService {
     private List<Channel> localChannelList = new CopyOnWriteArrayList<Channel>();
     private List<Node> localNodeList = new CopyOnWriteArrayList<Node>();
     private Hashtable<String, Integer> nodeReferList = new Hashtable<String, Integer>();
-    private boolean finished = false;
     private boolean logError = true;
 
     private UscTopologyService() {
@@ -180,32 +182,31 @@ public class UscTopologyService {
     @SuppressWarnings("unchecked")
     private synchronized void updateShard() {
         if (shardService != null) {
+            
+            final CountDownLatch finished = new CountDownLatch(1);
+            
             shardService.write(LogicalDatastoreType.OPERATIONAL, topoIdentifier, localTopology,
                     new FutureCallback<Void>() {
                         @Override
                         public void onSuccess(final Void result) {
-                            finished = true;
+                            finished.countDown();
                         }
 
                         @Override
                         public void onFailure(final Throwable t) {
-                            finished = true;
+                            finished.countDown();
                             LOG.error("Failed to update topology data using shard service.");
                         }
                     });
             // wait for shard non-synchronized operation finished for
             // synchronize
             // this operation
-            int m = 0;
-            while (!finished && m < 60) {
-                try {
-                    Thread.sleep(1000);
-                    m++;
-                } catch (InterruptedException e) {
-                    LOG.error("Thread sleep has a exception:" + e.getMessage());
-                }
+            try {
+                finished.await(60, TimeUnit.SECONDS);
+                
+            } catch (InterruptedException e) {
+                LOG.error("Thread sleep has a exception:" + e.getMessage());
             }
-            finished = false;
         } else {
             LOG.error("The shard manager is not initialized!");
         }
