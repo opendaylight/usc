@@ -19,6 +19,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.usc.agent.UscAgentTcp;
 import org.opendaylight.usc.plugin.UscPlugin;
@@ -32,6 +33,7 @@ import com.google.common.util.concurrent.SettableFuture;
 /**
  * Test suite for USC TCP plugin.
  */
+@Ignore
 public class UscPluginTcpTest extends UscPluginTest {
 
     @Before
