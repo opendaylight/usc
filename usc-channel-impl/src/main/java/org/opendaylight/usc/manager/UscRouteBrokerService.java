@@ -445,7 +445,7 @@ public class UscRouteBrokerService {
      * 
      * @param localRouteId
      *            local route identifier
-     * @param data
+     * @param payload
      *            response pay load, no usc header
      */
     public void sendResponse(UscRouteIdentifier localRouteId, byte[] payload) {
