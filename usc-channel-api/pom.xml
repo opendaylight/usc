@@ -10,13 +10,13 @@
   <parent>
     <groupId>org.opendaylight.yangtools</groupId>
     <artifactId>binding-parent</artifactId>
-    <version>0.7.0-SNAPSHOT</version>
+    <version>0.7.0-Lithium</version>
     <relativePath />
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.usc</groupId>
   <artifactId>usc-channel-api</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0-Lithium</version>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
   <build>
