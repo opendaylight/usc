@@ -1,0 +1,8 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+1: Thanh Ha <thanh.ha@linuxfoundation.org>
+Code-Review+2: George Zhao <george.y.zhao@huawei.com>
+Submitted-by: George Zhao <george.y.zhao@huawei.com>
+Submitted-at: Fri, 26 Jun 2015 16:26:59 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/23209
+Project: usc
+Branch: refs/heads/stable/lithium
