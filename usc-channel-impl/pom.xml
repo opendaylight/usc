@@ -22,6 +22,7 @@
   <properties>
     <akka.version>2.3.9</akka.version>
     <scala.version>2.10</scala.version>
+    <jacoco.version>0.7.2.201409121644</jacoco.version>
   </properties>
   <dependencies>
     <dependency>
@@ -101,6 +102,15 @@
     </dependency>
   </dependencies>
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>${jacoco.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <testResources>
       <testResource>
         <directory>src/test/resources</directory>
@@ -184,6 +194,30 @@
                 </artifact>
               </artifacts>
             </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <configuration>
+          <includes>
+            <include>org.opendaylight.usc.*</include>
+          </includes>
+        </configuration>
+        <executions>
+          <execution>
+            <id>pre-test</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>post-test</id>
+            <goals>
+              <goal>report</goal>
+            </goals>
+            <phase>test</phase>
           </execution>
         </executions>
       </plugin>
