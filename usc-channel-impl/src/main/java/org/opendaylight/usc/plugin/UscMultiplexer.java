@@ -29,12 +29,12 @@ import org.slf4j.LoggerFactory;
 @Sharable
 public class UscMultiplexer extends ChannelInboundHandlerAdapter {
     private static final Logger LOG = LoggerFactory.getLogger(UscMultiplexer.class);
-
+    public static final int MAX_PAYLOAD_SIZE = 64512;// 63K
     private final UscPlugin plugin;
 
     /**
      * Constructs a new UscMultiplexer
-     * 
+     *
      * @param plugin
      *            The instance of UscPlugin on whose behalf this demultiplexer is managing session state.
      */
@@ -47,40 +47,65 @@ public class UscMultiplexer extends ChannelInboundHandlerAdapter {
         ByteBuf payload = (ByteBuf) msg;
         LOG.trace("UscMultiplexer.channelRead: " + payload);
 
-        Channel ch = ctx.channel();     
+        Channel ch = ctx.channel();
         Channel outboundChannel = ch.attr(UscPlugin.DIRECT_CHANNEL).get();
-        if(outboundChannel != null) {
-            if(plugin.getChannelType() == UscChannel.ChannelType.DTLS || plugin.getChannelType() == UscChannel.ChannelType.UDP) {
-                DatagramPacket packet = new DatagramPacket(payload, (InetSocketAddress)outboundChannel.remoteAddress());
+        if (outboundChannel != null) {
+            if (plugin.getChannelType() == UscChannel.ChannelType.DTLS
+                    || plugin.getChannelType() == UscChannel.ChannelType.UDP) {
+                DatagramPacket packet = new DatagramPacket(payload, (InetSocketAddress) outboundChannel.remoteAddress());
                 LOG.trace("UscMultiplexer.channelRead: convert payload to DatagramPacket " + packet);
                 outboundChannel.write(packet);
-            }
-            else
+            } else
                 outboundChannel.write(msg);
-        }
-        else {
-        	UscSessionImpl session = ch.attr(UscPlugin.SESSION).get().get();
-        	outboundChannel = session.getChannel().getChannel();
+        } else {
+            UscSessionImpl session = ch.attr(UscPlugin.SESSION).get().get();
+            outboundChannel = session.getChannel().getChannel();
 
-        	UscData data = new UscData(session.getPort(), session.getSessionId(), payload);
+            UscData reply = null;
+            ByteBuf subPayload = null;
+            int length = payload.readableBytes();
+            int bytesOut = length;
+            int index = 0;
+            int realLength = 0;
+            int times = 60000;// 60s
+            while (length > 0) {
+                realLength = (length > MAX_PAYLOAD_SIZE) ? MAX_PAYLOAD_SIZE : length;
+                subPayload = payload.copy(index, realLength);
+                index += realLength;
+                length -= realLength;
 
-        	plugin.sendEvent(new UscSessionTransactionEvent(session, 0, payload.readableBytes()));
-        
-        	outboundChannel.write(data);
+                reply = new UscData(session.getPort(), session.getSessionId(), subPayload);
+                LOG.trace("Send data to Java Agent " + reply);
+                outboundChannel.writeAndFlush(reply);
+                // waiting for being red by peer
+                while (subPayload.readableBytes() > 0) {
+                    Thread.sleep(1);
+                    times--;
+                    if (times == 0) {
+                        LOG.error("Time out,since payload isn't red by peer,can't refill again,failed to send to Java Agent "
+                                + reply);
+                        System.out
+                                .println("Time out,since payload isn't red by peer,can't refill again,failed to send to Java Agent "
+                                        + reply);
+                        return;
+                    }
+                }
+            }
+            plugin.sendEvent(new UscSessionTransactionEvent(session, 0, bytesOut));
         }
     }
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-    	LOG.trace("UscMultiplexer.channelReadComplete");
-		Channel ch = ctx.channel();
-		Channel outboundChannel = ch.attr(UscPlugin.DIRECT_CHANNEL).get();
-		if (outboundChannel != null) {
-			outboundChannel.flush();
-		} else {
-			UscSessionImpl session = ch.attr(UscPlugin.SESSION).get().get();
-			outboundChannel = session.getChannel().getChannel();
-			outboundChannel.flush();
-		}
+        LOG.trace("UscMultiplexer.channelReadComplete");
+        Channel ch = ctx.channel();
+        Channel outboundChannel = ch.attr(UscPlugin.DIRECT_CHANNEL).get();
+        if (outboundChannel != null) {
+            outboundChannel.flush();
+        } else {
+            UscSessionImpl session = ch.attr(UscPlugin.SESSION).get().get();
+            outboundChannel = session.getChannel().getChannel();
+            outboundChannel.flush();
+        }
     }
 }

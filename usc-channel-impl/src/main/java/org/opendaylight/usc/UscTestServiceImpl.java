@@ -35,30 +35,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class UscTestServiceImpl implements UscTestService {
-    private static final Logger LOG = LoggerFactory
-            .getLogger(UscTestServiceImpl.class);
-    public static final AttributeKey<String> CLIENT_KEY = AttributeKey
-            .valueOf("client_key");
+    private static final Logger LOG = LoggerFactory.getLogger(UscTestServiceImpl.class);
+    public static final AttributeKey<String> CLIENT_KEY = AttributeKey.valueOf("client_key");
     private Hashtable<String, Channel> connectList = new Hashtable<String, Channel>();
     private Hashtable<String, EventLoopGroup> groupList = new Hashtable<String, EventLoopGroup>();
     private UscPlugin plugin = UscManagerService.getInstance().getPluginTcp();
-    private static ByteBuf payload = Unpooled.buffer(10000);
 
     @Override
     public Future<RpcResult<AddChannelOutput>> addChannel(AddChannelInput input) {
         String hostname = input.getChannel().getHostname();
         int port = input.getChannel().getPort();
         AddChannelOutputBuilder builder = new AddChannelOutputBuilder();
-        String result = connectNetconfDevice(hostname, port, input.getChannel()
-                .isRemote());
+        String result = connectNetconfDevice(hostname, port, input.getChannel().isRemote());
         builder.setResult(result);
         outputConnectList();
         return RpcResultBuilder.success(builder.build()).buildFuture();
     }
 
     @Override
-    public Future<RpcResult<RemoveChannelOutput>> removeChannel(
-            RemoveChannelInput input) {
+    public Future<RpcResult<RemoveChannelOutput>> removeChannel(RemoveChannelInput input) {
         String hostname = input.getChannel().getHostname();
         int port = input.getChannel().getPort();
         Channel clientChannel = connectList.get(hostname + ":" + port);
@@ -86,16 +81,14 @@ public class UscTestServiceImpl implements UscTestService {
         Bootstrap clientBootStrap = getNewBootstrap();
         InetSocketAddress address = new InetSocketAddress(hostname, port);
         try {
-            Channel clientChannel = plugin
-                    .connect(clientBootStrap, address, remote).sync().channel();
+            Channel clientChannel = plugin.connect(clientBootStrap, address, remote).sync().channel();
             clientChannel.attr(CLIENT_KEY).set(hostname + ":" + port);
             connectList.put(hostname + ":" + port, clientChannel);
             groupList.put(hostname + ":" + port, clientBootStrap.group());
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-            return "Failed to Connect device(" + hostname + ":" + port
-                    + ")!error is " + e.getMessage();
+            return "Failed to Connect device(" + hostname + ":" + port + ")!error is " + e.getMessage();
         }
         return "Succeed to connect device(" + hostname + ":" + port + ")!";
     }
@@ -130,21 +123,20 @@ public class UscTestServiceImpl implements UscTestService {
     }
 
     @Override
-    public Future<RpcResult<NetconfRequestOutput>> netconfRequest(
-            NetconfRequestInput input) {
+    public Future<RpcResult<NetconfRequestOutput>> netconfRequest(NetconfRequestInput input) {
         String hostname = input.getChannel().getHostname();
         int port = input.getChannel().getPort();
         Channel clientChannel = connectList.get(hostname + ":" + port);
         String result = "";
         outputConnectList();
+        ByteBuf payload = Unpooled.buffer(10000);
         payload.writeBytes(input.getChannel().getContent().getBytes());
         if (clientChannel == null) {
-            result = "Failed to send request to device(" + hostname + ":"
-                    + port + "), since it is not found!";
+            result = "Failed to send request to device(" + hostname + ":" + port + "), since it is not found!";
         } else {
             clientChannel.writeAndFlush(payload);
-            result = "Succeed to send request to device(" + hostname + ":"
-                    + port + "),content is " + input.getChannel().getContent();
+            result = "Succeed to send request to device(" + hostname + ":" + port + "),content is "
+                    + input.getChannel().getContent();
         }
         NetconfRequestOutputBuilder builder = new NetconfRequestOutputBuilder();
         builder.setResult(result);

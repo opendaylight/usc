@@ -11,7 +11,6 @@ import org.opendaylight.usc.manager.UscRouteBrokerService;
 import org.opendaylight.usc.manager.cluster.UscRemoteChannelIdentifier;
 import org.opendaylight.usc.manager.cluster.UscRouteIdentifier;
 import org.opendaylight.usc.manager.cluster.message.UscRemoteChannelEventMessage;
-import org.opendaylight.usc.plugin.exception.UscConnectionException;
 import org.opendaylight.usc.plugin.exception.UscSessionException;
 import org.opendaylight.usc.plugin.model.UscChannelImpl;
 import org.opendaylight.usc.protocol.UscError;

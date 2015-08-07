@@ -45,10 +45,10 @@ import com.google.common.util.concurrent.SettableFuture;
 public class UscAgentTcpHandler extends SimpleChannelInboundHandler<UscFrame> {
 
     private static final Logger LOG = LoggerFactory.getLogger(UscAgentTcpHandler.class);
-    private static int MAX_PAYLOAD_SIZE = 63488; // 62KB
-    
+
     public static final AttributeKey<Integer> SESSION_ID = AttributeKey.valueOf("agentTcpSessionId");
     public static final AttributeKey<Integer> PORT = AttributeKey.valueOf("agentTcpPort");
+    public static final int MAX_PAYLOAD_SIZE = 64512;// 63K
 
     final EventLoopGroup clientGroup = new NioEventLoopGroup();
     final Bootstrap cb = new Bootstrap();
@@ -80,28 +80,48 @@ public class UscAgentTcpHandler extends SimpleChannelInboundHandler<UscFrame> {
 
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, ByteBuf payload) throws Exception {
-            LOG.trace("Got reply " + payload);
+
+            LOG.trace("Got reply from echo server" + payload);
+            System.out.println("Got reply from echo server" + payload);
             Channel ch = ctx.channel();
             int sessionId = ch.attr(SESSION_ID).get();
             int port = ch.attr(PORT).get();
+
+            UscData reply = null;
+            ByteBuf subPayload = null;
             int length = payload.readableBytes();
             int index = 0;
+            int realLength = 0;
+            int times = 60000;// 60s
             while (length > 0) {
-                int realLength = (length > MAX_PAYLOAD_SIZE) ? MAX_PAYLOAD_SIZE : length;
-                ByteBuf subPayload = payload.copy(index, realLength);
+                realLength = (length > MAX_PAYLOAD_SIZE) ? MAX_PAYLOAD_SIZE : length;
+                subPayload = payload.copy(index, realLength);
                 index += realLength;
                 length -= realLength;
 
-                UscData reply = new UscData(port, sessionId, subPayload);
+                reply = new UscData(port, sessionId, subPayload);
                 LOG.trace("Send to plugin " + reply);
+                System.out.println("Send to plugin " + reply);
                 plugin.writeAndFlush(reply);
+                // waiting for being red by peer
+                while (subPayload.readableBytes() > 0) {
+                    Thread.sleep(1);
+                    times--;
+                    if (times == 0) {
+                        LOG.error("Time out,since payload isn't red by peer,can't refill again,failed to send to plugin "
+                                + reply);
+                        System.out
+                                .println("Time out,since payload isn't red by peer,can't refill again,failed to send to plugin "
+                                        + reply);
+                        return;
+                    }
+                }
             }
         }
-
-    };
+    }
 
     public UscAgentTcpHandler(UscAgentTcp agent, SocketChannel ch) {
-    	this.agent = agent;
+        this.agent = agent;
         this.plugin = ch;
         cb.group(clientGroup);
         cb.channel(NioSocketChannel.class);
@@ -126,7 +146,7 @@ public class UscAgentTcpHandler extends SimpleChannelInboundHandler<UscFrame> {
 
         Channel client = clients.get(sessionId);
         if (frame instanceof UscData) {
-        	LOG.trace("UscAgentTcpHandler: read uscData " + frame.toString());
+            LOG.trace("UscAgentTcpHandler: read uscData " + frame.toString());
             System.out.println("UscAgentTcpHandler: read uscData " + frame.toString());
             if (client == null) {
                 try {
@@ -151,44 +171,42 @@ public class UscAgentTcpHandler extends SimpleChannelInboundHandler<UscFrame> {
             if (client != null) {
                 client.writeAndFlush(frame.getPayload());
             }
-        }
-        else if(frame instanceof UscControl) {
-        	UscControl control = (UscControl)frame;
-        	LOG.trace("UscAgentTcpHandler: read UscControl " + control.toString());
-        	 System.out.println("UscAgentTcpHandler: read UscControl " + control.toString());
-        	// close it
-        	if(control.getControlCode() == UscControl.ControlCode.TERMINATION_REQUEST) {
-        		if(client != null)
-        		 {
-        			client.close();
-        			clients.remove(sessionId);
-        		}
-        		
-        		// send back the response
-            	UscControl data = new UscControl(port, sessionId, UscControl.ControlCode.TERMINATION_RESPONSE.getCode());
-            	plugin.writeAndFlush(data);
-            	LOG.trace("UscAgentTcpHandler send TERMINATION_RESPONSE");
-            	 System.out.println("UscAgentTcpHandler send TERMINATION_RESPONSE");
-        	}
-        	else if(control.getControlCode() == UscControl.ControlCode.TERMINATION_RESPONSE) {
-        		LOG.trace("UscAgentTcp received control message TERMINATION_RESPONSE, port#: " + port + " ,session#: " + sessionId);
-        		 System.out.println("UscAgentTcp received control message TERMINATION_RESPONSE, port#: " + port + " ,session#: " + sessionId);
-        		SettableFuture<Boolean> status = agent.getCloseFuture().get(sessionId);
-        		status.set(true);
-        		
-        		try {
-        			LOG.trace("UscAgentTcp termination status: " + status.get());
-        			System.out.println("UscAgentTcp termination status: " + status.get());
-        		}catch(Exception e) {
-        			;
-        		}
-        	}
-        	else if(control.getControlCode() == UscControl.ControlCode.ECHO) {
-        		// send back the response
-            	UscControl data = new UscControl(port, sessionId, UscControl.ControlCode.ECHO.getCode());
-            	plugin.writeAndFlush(data);
-            	LOG.trace("UscAgentUdpHandler send ECHO back.");
-        	}
+        } else if (frame instanceof UscControl) {
+            UscControl control = (UscControl) frame;
+            LOG.trace("UscAgentTcpHandler: read UscControl " + control.toString());
+            System.out.println("UscAgentTcpHandler: read UscControl " + control.toString());
+            // close it
+            if (control.getControlCode() == UscControl.ControlCode.TERMINATION_REQUEST) {
+                if (client != null) {
+                    client.close();
+                    clients.remove(sessionId);
+                }
+
+                // send back the response
+                UscControl data = new UscControl(port, sessionId, UscControl.ControlCode.TERMINATION_RESPONSE.getCode());
+                plugin.writeAndFlush(data);
+                LOG.trace("UscAgentTcpHandler send TERMINATION_RESPONSE");
+                System.out.println("UscAgentTcpHandler send TERMINATION_RESPONSE");
+            } else if (control.getControlCode() == UscControl.ControlCode.TERMINATION_RESPONSE) {
+                LOG.trace("UscAgentTcp received control message TERMINATION_RESPONSE, port#: " + port + " ,session#: "
+                        + sessionId);
+                System.out.println("UscAgentTcp received control message TERMINATION_RESPONSE, port#: " + port
+                        + " ,session#: " + sessionId);
+                SettableFuture<Boolean> status = agent.getCloseFuture().get(sessionId);
+                status.set(true);
+
+                try {
+                    LOG.trace("UscAgentTcp termination status: " + status.get());
+                    System.out.println("UscAgentTcp termination status: " + status.get());
+                } catch (Exception e) {
+                    ;
+                }
+            } else if (control.getControlCode() == UscControl.ControlCode.ECHO) {
+                // send back the response
+                UscControl data = new UscControl(port, sessionId, UscControl.ControlCode.ECHO.getCode());
+                plugin.writeAndFlush(data);
+                LOG.trace("UscAgentUdpHandler send ECHO back.");
+            }
         }
     }
 

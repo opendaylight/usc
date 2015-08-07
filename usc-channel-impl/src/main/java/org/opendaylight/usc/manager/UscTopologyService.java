@@ -46,7 +46,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.SettableFuture;
 
 /**
  * Manager all of nodes and Channels of topology, which contains only local
@@ -88,7 +87,7 @@ public class UscTopologyService {
 
     /**
      * get the unique topology service instance
-     * 
+     *
      * @return topology service instance
      */
     public static UscTopologyService getInstance() {
@@ -182,9 +181,9 @@ public class UscTopologyService {
     @SuppressWarnings("unchecked")
     private synchronized void updateShard() {
         if (shardService != null) {
-            
+
             final CountDownLatch finished = new CountDownLatch(1);
-            
+
             shardService.write(LogicalDatastoreType.OPERATIONAL, topoIdentifier, localTopology,
                     new FutureCallback<Void>() {
                         @Override
@@ -203,7 +202,7 @@ public class UscTopologyService {
             // this operation
             try {
                 finished.await(60, TimeUnit.SECONDS);
-                
+
             } catch (InterruptedException e) {
                 LOG.error("Thread sleep has a exception:" + e.getMessage());
             }
@@ -214,7 +213,7 @@ public class UscTopologyService {
 
     /**
      * get local controller node
-     * 
+     *
      * @return controller node
      */
     public Node getLocalController() {
@@ -223,7 +222,7 @@ public class UscTopologyService {
 
     /**
      * get local topology
-     * 
+     *
      * @return local topology
      */
     public Topology getLocalTopolgy() {
@@ -232,7 +231,7 @@ public class UscTopologyService {
 
     /**
      * get the whole USC topology from shard data
-     * 
+     *
      * @return the whole USC topology
      */
     @SuppressWarnings({ "unchecked" })
@@ -264,7 +263,7 @@ public class UscTopologyService {
 
     /**
      * get node through the id of node
-     * 
+     *
      * @param nodeId
      *            node id
      * @return if node id exists than return it, other wise create a new node
@@ -282,7 +281,7 @@ public class UscTopologyService {
     /**
      * add a node to local topology, when the node exists in node list of
      * topology, then only update the refer number of the node
-     * 
+     *
      * @param node
      *            the adding node
      */
@@ -309,7 +308,7 @@ public class UscTopologyService {
      * remove the node specified by the node id, when the refer number of the
      * node is more than one,then only minus one refer number. when the refer
      * number is only one,the will remove the node too
-     * 
+     *
      * @param nodeId
      *            node id of the removing node
      * @return the node of the removing node,if node is not exists then return
@@ -341,7 +340,7 @@ public class UscTopologyService {
 
     /**
      * check the node has same id with the specified id
-     * 
+     *
      * @param id
      *            a node id
      * @param node
@@ -355,23 +354,34 @@ public class UscTopologyService {
 
     /**
      * add a channel to topology channel list
-     * 
+     *
      * @param channel
      *            the adding channel
      */
     public synchronized void addChannel(Channel channel) {
         if (channel != null) {
-            localTopology.getChannel().add(channel);
-            addNode(UscTopologyFactory.createNode(channel.getDestination().getDestNode().getValue(),
-                    UscTopologyService.NODE_TYPE_NETWORK_DEVICE));
+            addChannelWithoutUpdateShard(channel);
             updateShard();
         }
     }
 
     /**
+     * add a channel to topology channel list without update shard
+     *
+     * @param channel
+     *            the adding channel
+     */
+    public synchronized void addChannelWithoutUpdateShard(Channel channel) {
+        if (channel != null) {
+            localTopology.getChannel().add(channel);
+            addNode(UscTopologyFactory.createNode(channel.getDestination().getDestNode().getValue(),
+                    UscTopologyService.NODE_TYPE_NETWORK_DEVICE));
+        }
+    }
+    /**
      * remove the channel specified by the destination id,and same time will
      * remove the corresponding source and destination nodes
-     * 
+     *
      * @param destinationId
      *            node id of the destination node
      * @param type
@@ -381,13 +391,34 @@ public class UscTopologyService {
      */
     public synchronized Channel removeChannel(String destinationId, String type) {
         if (destinationId != null) {
+            Channel channel = removeChannelWithoutUpdateShard(destinationId, type);
+            if(channel != null){
+                updateShard();
+                return channel;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * remove the channel specified by the destination id,and same time will
+     * remove the corresponding source and destination nodes without update Shard
+     *
+     * @param destinationId
+     *            node id of the destination node
+     * @param type
+     *            the type of channel
+     * @return the channel of the removing channel,if the channel related with
+     *         specified destination id is not exists then return null
+     */
+    public synchronized Channel removeChannelWithoutUpdateShard(String destinationId, String type) {
+        if (destinationId != null) {
             Channel channel = getChannel(destinationId, type);
             if (channel != null) {
                 localTopology.getChannel().remove(channel);
                 // source controller node only add once on initializing
                 // removeNode(channel.getSource().getSourceNode().getValue());
                 removeNode(channel.getDestination().getDestNode().getValue());
-                updateShard();
                 return channel;
             } else {
                 LOG.warn("Not found specified destionation.id =" + destinationId);
@@ -398,16 +429,16 @@ public class UscTopologyService {
 
     /**
      * update channel information, and update the shard data of local topology
-     * 
+     *
      * @param channel
      *            the new channel
      * @return old channel
      */
     public synchronized Channel updateChannel(Channel channel) {
         if (channel != null) {
-            Channel oldChannel = removeChannel(channel.getDestination().getDestNode().getValue(),
+            Channel oldChannel = removeChannelWithoutUpdateShard(channel.getDestination().getDestNode().getValue(),
                     channel.getChannelType());
-            addChannel(channel);
+            addChannelWithoutUpdateShard(channel);
             updateShard();
             return oldChannel;
         }
@@ -447,7 +478,7 @@ public class UscTopologyService {
 
     /**
      * get first channel of specified destination id
-     * 
+     *
      * @param destinationId
      *            destination node id
      * @return the channel, if the channel related with specified destination id
@@ -465,7 +496,7 @@ public class UscTopologyService {
 
     /**
      * add session to the channel which has the specified destination id
-     * 
+     *
      * @param destinationId
      *            destination id
      * @param type
@@ -484,7 +515,7 @@ public class UscTopologyService {
 
     /**
      * remove session from the channel which has the specified destination id
-     * 
+     *
      * @param destinationId
      *            destination id
      * @param type
@@ -510,7 +541,7 @@ public class UscTopologyService {
 
     /**
      * get session from the channel with specified session id
-     * 
+     *
      * @param channel
      *            the target channel for getting
      * @param sessionId
@@ -530,7 +561,7 @@ public class UscTopologyService {
     /**
      * get session which has specified session id from the channel which has the
      * destination id
-     * 
+     *
      * @param destinationId
      *            the target channel for getting
      * @param sessionId
@@ -555,7 +586,7 @@ public class UscTopologyService {
      * update the transaction data values of the session specified by session
      * id, the session belongs to the channel which specified by the destination
      * id
-     * 
+     *
      * @param destinationId
      *            specified destination id
      * @param sessionId
@@ -599,7 +630,7 @@ public class UscTopologyService {
     /**
      * add error information to the channel which has the specified destination
      * id
-     * 
+     *
      * @param destinationId
      *            specified destination id
      * @param type
@@ -634,7 +665,7 @@ public class UscTopologyService {
     /**
      * add error information to the session specified by session id, the session
      * belongs to the channel which specified by the destination id
-     * 
+     *
      * @param destinationId
      *            specified destination id
      * @param type
@@ -676,7 +707,7 @@ public class UscTopologyService {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private void addAlarm(List list, Object alarm) {
         if (list == null) {
-            list = (LinkedList) Collections.synchronizedList(new LinkedList());
+            list = Collections.synchronizedList(new LinkedList());
         }
         // control the max number of errors
         for (int i = 0; i < list.size() - maxErrorNumber; i++) {
