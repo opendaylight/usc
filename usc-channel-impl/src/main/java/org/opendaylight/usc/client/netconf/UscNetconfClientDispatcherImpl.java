@@ -66,7 +66,7 @@ public class UscNetconfClientDispatcherImpl implements NetconfClientDispatcher, 
 
     /**
      * Constructs a new UscNetconfClientDispatcherImpl
-     * 
+     *
      * @param bossGroup
      * @param workerGroup
      * @param timer
@@ -113,7 +113,7 @@ public class UscNetconfClientDispatcherImpl implements NetconfClientDispatcher, 
                 LOG.warn("UscNetconfClientDispatcherImpl createReconnectingClient using fallback for TCP");
                 return fallbackDispatcher.createReconnectingClient(clientConfiguration);
             }
-            
+
         case SSH:
             // SSH doesn't support LocalChannel addresses, so use fallback
             LOG.warn("UscNetconfClientDispatcherImpl createReconnectingClient using fallback for SSH");

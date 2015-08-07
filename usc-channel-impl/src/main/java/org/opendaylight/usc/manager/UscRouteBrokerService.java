@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2015 Huawei, Inc and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
 package org.opendaylight.usc.manager;
 
 import java.io.File;
@@ -140,7 +148,7 @@ public class UscRouteBrokerService {
 
     /**
      * process member up event for cluster
-     * 
+     *
      * @param member
      *            the member of cluster
      * @return always true,currently not false
@@ -171,7 +179,7 @@ public class UscRouteBrokerService {
 
     /**
      * process member down event for cluster
-     * 
+     *
      * @param member
      *            the member of cluster
      * @return always true,currently not false
@@ -214,7 +222,7 @@ public class UscRouteBrokerService {
 
     /**
      * get singleton instance of broker service
-     * 
+     *
      * @return singleton instance of broker service
      */
     public static UscRouteBrokerService getInstance() {
@@ -224,7 +232,7 @@ public class UscRouteBrokerService {
     /**
      * check if the route identifier is local session using remote channel for
      * intercepting the request from local channel
-     * 
+     *
      * @param routeId
      *            route identifier
      * @return true for local route identifier, false for others
@@ -236,7 +244,7 @@ public class UscRouteBrokerService {
     /**
      * check if the route identifier is the remote session using local channel
      * for intercepting the response from agent channel
-     * 
+     *
      * @param routeId
      *            route identifier
      * @return true for remote route identifier, false for others
@@ -249,7 +257,7 @@ public class UscRouteBrokerService {
 
     /**
      * get actor which has the remote channel of local route identifier
-     * 
+     *
      * @param localRouteId
      *            local route identifier
      * @return actorRef
@@ -265,7 +273,7 @@ public class UscRouteBrokerService {
     /**
      * get actor which sending request to local channel, and will call back to
      * it
-     * 
+     *
      * @param localRouteId
      *            local route identifier which geting from agent channel
      * @return call back actorRef
@@ -276,7 +284,7 @@ public class UscRouteBrokerService {
 
     /**
      * check if exist the remote channel in remote device table
-     * 
+     *
      * @param remoteChannel
      *            remote channel
      * @return true for exist,false for others
@@ -292,7 +300,7 @@ public class UscRouteBrokerService {
     /**
      * add remote channel and communicator which belongs to the controller which
      * connected with the remote channel
-     * 
+     *
      * @param remoteChannel
      *            remote channel
      * @param communicator
@@ -317,7 +325,7 @@ public class UscRouteBrokerService {
     /**
      * remove remote channel and communicator which belongs to the controller
      * which connected with the remote channel
-     * 
+     *
      * @param remoteChannel
      *            remote channel
      * @param communicator
@@ -334,7 +342,7 @@ public class UscRouteBrokerService {
     /**
      * add local session for processing the response which getting from remote
      * controller
-     * 
+     *
      * @param localRouteId
      *            local route identifier
      * @param serverChannel
@@ -349,7 +357,7 @@ public class UscRouteBrokerService {
     /**
      * remove local session for processing the response which getting from
      * remote controller
-     * 
+     *
      * @param localRouteId
      *            local route identifier
      */
@@ -362,7 +370,7 @@ public class UscRouteBrokerService {
 
     /**
      * create a new lcoal session id for remote caller
-     * 
+     *
      * @param remoteRouteId
      *            remote route identifier
      * @return the new session id, the id is descending from max session id
@@ -382,7 +390,7 @@ public class UscRouteBrokerService {
     /**
      * get the server channel for sending request to remote using the particular
      * route identifier
-     * 
+     *
      * @param localRouteId
      *            local route identifier
      * @return server local channel
@@ -393,7 +401,7 @@ public class UscRouteBrokerService {
 
     /**
      * send local remote request or notice to remote actor
-     * 
+     *
      * @param message
      *            remote message
      */
@@ -414,7 +422,7 @@ public class UscRouteBrokerService {
     /**
      * broad cast message to all managed remote actors,like add channel event
      * message
-     * 
+     *
      * @param message
      *            remote message
      */
@@ -442,7 +450,7 @@ public class UscRouteBrokerService {
 
     /**
      * send local USC channel response to remote session
-     * 
+     *
      * @param localRouteId
      *            local route identifier
      * @param payload
@@ -462,7 +470,7 @@ public class UscRouteBrokerService {
 
     /**
      * send local USC channel exception response to remote session
-     * 
+     *
      * @param localRouteId
      *            local route identifier
      * @param exception
@@ -482,7 +490,7 @@ public class UscRouteBrokerService {
 
     /**
      * process remote request for remote caller(sender)
-     * 
+     *
      * @param message
      *            request content
      * @param sender
@@ -530,7 +538,7 @@ public class UscRouteBrokerService {
 
     /**
      * process response which getting from remote controller
-     * 
+     *
      * @param message
      *            response content
      */
@@ -557,7 +565,7 @@ public class UscRouteBrokerService {
 
     /**
      * process remote exception message
-     * 
+     *
      * @param message
      */
     public void processException(UscRemoteExceptionMessage message) {
@@ -576,7 +584,7 @@ public class UscRouteBrokerService {
 
     /**
      * get local usc channel through the remote channel identifier
-     * 
+     *
      * @param remoteChannel
      *            remote channel identifier
      * @return local corresponding usc channel
@@ -601,7 +609,7 @@ public class UscRouteBrokerService {
 
     /**
      * set connection manager for each channel type
-     * 
+     *
      * @param type
      *            channel type
      * @param connectionManager
