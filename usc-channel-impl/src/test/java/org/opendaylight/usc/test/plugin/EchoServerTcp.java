@@ -24,10 +24,10 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
 /**
- * TCP echo srver.
+ * TCP echo server.
  */
 public class EchoServerTcp implements Runnable, AutoCloseable {
-    static final int PORT = Integer.parseInt(System.getProperty("port", "2007"));
+    static int PORT = Integer.parseInt(System.getProperty("port", "2007"));
     EventLoopGroup bossGroup = new NioEventLoopGroup(1);
     EventLoopGroup workerGroup = new NioEventLoopGroup();
     ServerBootstrap b = new ServerBootstrap();
@@ -76,6 +76,16 @@ public class EchoServerTcp implements Runnable, AutoCloseable {
     }
 
     public static void main(String[] args) throws Exception {
+        if(args.length > 0) {
+            try {
+                int port = Integer.parseInt(args[0]);
+                PORT = port;
+            }catch (NumberFormatException e) {
+                System.err.println("Argument " + args[0] + " must be an integer (port #).");
+                System.exit(1);
+            }
+        }
+        
         try (EchoServerTcp server = new EchoServerTcp(false)) {
             server.run();
         }
