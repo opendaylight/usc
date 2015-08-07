@@ -38,7 +38,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.usc.manager.UscConfigurationServiceImpl;
 import org.opendaylight.usc.manager.api.UscEvent;
-import org.opendaylight.usc.manager.api.UscMonitor;
 import org.opendaylight.usc.manager.monitor.evt.UscChannelCloseEvent;
 import org.opendaylight.usc.manager.monitor.evt.UscChannelCreateEvent;
 import org.opendaylight.usc.manager.monitor.evt.UscSessionCloseEvent;
