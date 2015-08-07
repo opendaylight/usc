@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2015 Huawei, Inc and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
 package org.opendaylight.usc.client.netconf;
 
 import io.netty.bootstrap.Bootstrap;
@@ -55,7 +63,7 @@ final class ProtocolSessionPromise<S> extends DefaultPromise<S> {
             LOG.warn("About to connect");
 
             // final ChannelFuture connectFuture = this.b.connect(this.address);
-            
+
             final ChannelFuture connectFuture = plugin.connect(b, this.address);
             LOG.warn("Connect finished");
             // Add listener that attempts reconnect by invoking this method again.
