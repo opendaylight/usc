@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a7ca5a3_ac7925fe",
+        "filename": "usc-channel-impl/src/main/java/org/opendaylight/usc/agent/UscAgentTcpHandler.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 2567
+      },
+      "writtenOn": "2015-08-07T22:43:58Z",
+      "side": 1,
+      "message": "This may cause performance issues.",
+      "range": {
+        "startLine": 108,
+        "startChar": 20,
+        "endLine": 108,
+        "endChar": 36
+      },
+      "revId": "4049837c0f2504395e7d737b3c7c440223e8dc7f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
