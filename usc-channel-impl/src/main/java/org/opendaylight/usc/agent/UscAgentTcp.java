@@ -22,6 +22,7 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -55,6 +56,10 @@ public class UscAgentTcp implements Runnable, AutoCloseable {
 	private UscSecureService secureService = null;
 
 	public UscAgentTcp(boolean callHome) {
+		this(callHome, InetAddress.getLoopbackAddress());
+	}
+	
+	public UscAgentTcp(boolean callHome, InetAddress host) {
 		final UscAgentTcp agent = this;
         UscConfigurationServiceImpl.setDefaultPropertyFilePath("src/test/resources/etc/usc/usc.properties");
         secureService = UscServiceUtils.getService(UscSecureService.class);
@@ -94,20 +99,20 @@ public class UscAgentTcp implements Runnable, AutoCloseable {
 					}
 					ChannelPipeline p = ch.pipeline();
 					agentServerChannel = ch;
-					p.addLast(new LoggingHandler("UscAgentTcp PLUGIN5", LogLevel.TRACE));
+					p.addLast(new LoggingHandler("UscAgentTcp Handler5", LogLevel.TRACE));
 					p.addLast(secureService.getTcpClientHandler(ch));
-					p.addLast(new LoggingHandler("UscAgentTcp PLUGIN4", LogLevel.TRACE));
+					p.addLast(new LoggingHandler("UscAgentTcp Handler4", LogLevel.TRACE));
 					p.addLast(new UscFrameEncoderTcp());
-					p.addLast(new LoggingHandler("UscAgentTcp PLUGIN3", LogLevel.TRACE));
+					p.addLast(new LoggingHandler("UscAgentTcp Handler3", LogLevel.TRACE));
 					p.addLast(new UscFrameDecoderTcp());
-					p.addLast(new LoggingHandler("UscAgentTcp PLUGIN2", LogLevel.TRACE));
+					p.addLast(new LoggingHandler("UscAgentTcp Handler2", LogLevel.TRACE));
 					p.addLast(new UscAgentTcpHandler(agent, ch));
-					p.addLast(new LoggingHandler("UscAgentTcp PLUGIN1", LogLevel.TRACE));
+					p.addLast(new LoggingHandler("UscAgentTcp Handler1", LogLevel.TRACE));
 				}
 			});
 
 			try {
-				cb.connect(InetAddress.getLoopbackAddress(), 1069).sync();
+				cb.connect(host, 1069).sync();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 			    
@@ -169,7 +174,20 @@ public class UscAgentTcp implements Runnable, AutoCloseable {
 	}
 
 	public static void main(String[] args) throws Exception {
-		try (UscAgentTcp agent = new UscAgentTcp(false)) {
+		boolean callHome = false;
+		InetAddress host = InetAddress.getLoopbackAddress();
+		if (args.length > 0) {
+			try {
+				InetAddress ip = InetAddress.getByName(args[0]);
+				callHome = true; 
+				host = ip;
+			}catch(UnknownHostException e) {
+				System.err.println("Argument " + args[0] + " must be an iP address (callhome IP).");
+        		System.exit(1);
+			}
+		}
+		
+		try (UscAgentTcp agent = new UscAgentTcp(callHome, host)) {
 			agent.run();
 		}
 	}
