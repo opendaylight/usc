@@ -45,7 +45,8 @@ import com.google.common.util.concurrent.SettableFuture;
 public class UscAgentTcpHandler extends SimpleChannelInboundHandler<UscFrame> {
 
     private static final Logger LOG = LoggerFactory.getLogger(UscAgentTcpHandler.class);
-
+    private static int MAX_PAYLOAD_SIZE = 63488; // 62KB
+    
     public static final AttributeKey<Integer> SESSION_ID = AttributeKey.valueOf("agentTcpSessionId");
     public static final AttributeKey<Integer> PORT = AttributeKey.valueOf("agentTcpPort");
 
@@ -79,16 +80,22 @@ public class UscAgentTcpHandler extends SimpleChannelInboundHandler<UscFrame> {
 
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, ByteBuf payload) throws Exception {
-
             LOG.trace("Got reply " + payload);
-            System.out.println("Got reply " + payload);
             Channel ch = ctx.channel();
             int sessionId = ch.attr(SESSION_ID).get();
             int port = ch.attr(PORT).get();
-            UscData reply = new UscData(port, sessionId, payload.copy());
-            LOG.trace("Send to plugin " + reply);
-            System.out.println("Send to plugin " + reply);
-            plugin.writeAndFlush(reply);
+            int length = payload.readableBytes();
+            int index = 0;
+            while (length > 0) {
+                int realLength = (length > MAX_PAYLOAD_SIZE) ? MAX_PAYLOAD_SIZE : length;
+                ByteBuf subPayload = payload.copy(index, realLength);
+                index += realLength;
+                length -= realLength;
+
+                UscData reply = new UscData(port, sessionId, subPayload);
+                LOG.trace("Send to plugin " + reply);
+                plugin.writeAndFlush(reply);
+            }
         }
 
     };
