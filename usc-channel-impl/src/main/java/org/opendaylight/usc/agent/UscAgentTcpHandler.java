@@ -92,7 +92,6 @@ public class UscAgentTcpHandler extends SimpleChannelInboundHandler<UscFrame> {
             int length = payload.readableBytes();
             int index = 0;
             int realLength = 0;
-            int times = 60000;// 60s
             while (length > 0) {
                 realLength = (length > MAX_PAYLOAD_SIZE) ? MAX_PAYLOAD_SIZE : length;
                 subPayload = payload.copy(index, realLength);
@@ -103,19 +102,6 @@ public class UscAgentTcpHandler extends SimpleChannelInboundHandler<UscFrame> {
                 LOG.trace("Send to plugin " + reply);
                 System.out.println("Send to plugin " + reply);
                 plugin.writeAndFlush(reply);
-                // waiting for being red by peer
-                while (subPayload.readableBytes() > 0) {
-                    Thread.sleep(1);
-                    times--;
-                    if (times == 0) {
-                        LOG.error("Time out,since payload isn't red by peer,can't refill again,failed to send to plugin "
-                                + reply);
-                        System.out
-                                .println("Time out,since payload isn't red by peer,can't refill again,failed to send to plugin "
-                                        + reply);
-                        return;
-                    }
-                }
             }
         }
     }
