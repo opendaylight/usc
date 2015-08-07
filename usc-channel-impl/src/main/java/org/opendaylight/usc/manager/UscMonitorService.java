@@ -10,9 +10,7 @@ package org.opendaylight.usc.manager;
 import java.util.Hashtable;
 
 import org.opendaylight.usc.manager.api.UscEvent;
-import org.opendaylight.usc.manager.api.UscMonitor;
 import org.opendaylight.usc.manager.monitor.UscChannelEventHandler;
-import org.opendaylight.usc.manager.monitor.UscMonitorImpl;
 import org.opendaylight.usc.manager.monitor.UscEventHandler;
 import org.opendaylight.usc.manager.monitor.UscSessionEventHandler;
 import org.opendaylight.usc.manager.monitor.evt.UscChannelCloseEvent;
@@ -40,7 +38,7 @@ public class UscMonitorService {
 
     /**
      * get unique monitor manager of USC
-     * 
+     *
      * @return monitor manager
      */
     public static UscMonitorService getInstance() {
@@ -62,7 +60,7 @@ public class UscMonitorService {
 
     /**
      * register event handler for an event type
-     * 
+     *
      * @param eventType
      *            the type of event
      * @param handler
@@ -75,7 +73,7 @@ public class UscMonitorService {
 
     /**
      * get all of registered event handlers
-     * 
+     *
      * @return event handler list
      */
     public Hashtable<Class<? extends UscEvent>, UscEventHandler> getEventHandlerList() {
