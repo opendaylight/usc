@@ -10,25 +10,25 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>karaf-parent</artifactId>
-    <version>1.5.1-SNAPSHOT</version>
+    <version>1.5.1-Lithium-SR1</version>
     <relativePath />
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.usc</groupId>
   <artifactId>usc-karaf</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.0.1-Lithium-SR1</version>
   <name>${project.artifactId}</name>
   <properties>
-    <feature.l2switch.version>0.2.1-SNAPSHOT</feature.l2switch.version>
-    <feature.aaa.version>0.2.1-SNAPSHOT</feature.aaa.version>
-    <feature.test.version>1.5.1-SNAPSHOT</feature.test.version>
-    <feature.mdsal.version>1.2.1-SNAPSHOT</feature.mdsal.version>
-    <feature.dlux.version>0.2.1-SNAPSHOT</feature.dlux.version>
-    <feature.flow.version>1.2.1-SNAPSHOT</feature.flow.version>
-    <feature.yangtools.version>0.7.1-SNAPSHOT</feature.yangtools.version>
-    <feature.adsal.version>0.9.1-SNAPSHOT</feature.adsal.version>
-    <feature.nsf.version>0.5.1-SNAPSHOT</feature.nsf.version>
-    <feature.openflowplugin.version>0.1.1-SNAPSHOT</feature.openflowplugin.version>
+    <feature.l2switch.version>0.2.1-Lithium-SR1</feature.l2switch.version>
+    <feature.aaa.version>0.2.1-Lithium-SR1</feature.aaa.version>
+    <feature.test.version>1.5.1-Lithium-SR1</feature.test.version>
+    <feature.mdsal.version>1.2.1-Lithium-SR1</feature.mdsal.version>
+    <feature.dlux.version>0.2.1-Lithium-SR1</feature.dlux.version>
+    <feature.flow.version>1.2.1-Lithium-SR1</feature.flow.version>
+    <feature.yangtools.version>0.7.1-Lithium-SR1</feature.yangtools.version>
+    <feature.adsal.version>0.9.1-Lithium-SR1</feature.adsal.version>
+    <feature.nsf.version>0.5.1-Lithium-SR1</feature.nsf.version>
+    <feature.openflowplugin.version>0.1.1-Lithium-SR1</feature.openflowplugin.version>
   </properties>
   <prerequisites>
     <maven>3.1.1</maven>
