@@ -23,7 +23,9 @@
     <akka.version>2.3.9</akka.version>
     <scala.version>2.10</scala.version>
     <jacoco.version>0.7.2.201409121644</jacoco.version>
-  </properties>
+    <sonar.jacoco.reportPath>target/code-coverage/jacoco.exec</sonar.jacoco.reportPath>
+    <sonar.jacoco.itReportPath>target/code-coverage/jacoco-it.exec</sonar.jacoco.itReportPath>
+   </properties>
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -198,28 +200,28 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <configuration>
-          <includes>
-            <include>org.opendaylight.usc.*</include>
-          </includes>
-        </configuration>
-        <executions>
+	<groupId>org.jacoco</groupId>
+	<artifactId>jacoco-maven-plugin</artifactId>
+	<executions>
           <execution>
-            <id>pre-test</id>
+            <id>pre-unit-test</id>
             <goals>
               <goal>prepare-agent</goal>
             </goals>
+            <configuration>
+              <destFile>${sonar.jacoco.reportPath}</destFile>
+            </configuration>
           </execution>
           <execution>
-            <id>post-test</id>
+            <id>post-unit-test</id>
             <goals>
               <goal>report</goal>
             </goals>
-            <phase>test</phase>
+            <configuration>
+              <dataFile>${sonar.jacoco.reportPath}</dataFile>
+            </configuration>
           </execution>
-        </executions>
+	</executions>
       </plugin>
     </plugins>
   </build>
