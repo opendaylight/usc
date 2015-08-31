@@ -10,8 +10,8 @@
   xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
   <repository>mvn:org.opendaylight.yangtools/features-yangtools/${yangtools.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.controller/features-mdsal/${mdsal.version}/xml/features</repository>
-  <repository>mvn:org.opendaylight.controller/features-restconf/${mdsal.version}/xml/features</repository>
-  <repository>mvn:org.opendaylight.controller/features-netconf-connector/${mdsal.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.netconf/features-restconf/${restconf.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.netconf/features-netconf-connector/${netconf.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.dlux/features-dlux/${dlux.version}/xml/features</repository>
   <feature name='odl-usc-agent' version='${project.version}' description='OpenDaylight :: USC :: Agent'>
     <bundle>mvn:org.opendaylight.usc/usc-agent/${project.version}</bundle>
@@ -22,7 +22,7 @@
   </feature>
   <feature name='odl-usc-channel' version='${project.version}' description='OpenDaylight :: USC :: Channel'>
     <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
-    <feature version='${mdsal.version}'>odl-netconf-connector</feature>
+    <feature version='${netconf.version}'>odl-netconf-connector</feature>
     <feature version='${project.version}'>odl-usc-api</feature>
     <bundle>mvn:org.opendaylight.usc/usc-channel-impl/${project.version}</bundle>
     <bundle>mvn:org.opendaylight.usc/usc-netconf-client-dispatcher/${project.version}</bundle>
@@ -35,7 +35,7 @@
     <configfile finalname='etc/opendaylight/karaf/01-usc-netconf.xml'>mvn:org.opendaylight.usc/usc-netconf-client-dispatcher/${project.version}/xml/config</configfile>
   </feature>
   <feature name='odl-usc-channel-rest' version='${project.version}' description='OpenDaylight :: USC :: Channel :: REST'>
-    <feature version="${mdsal.version}">odl-restconf</feature>
+    <feature version="${restconf.version}">odl-restconf</feature>
     <feature version="${mdsal.version}">odl-mdsal-apidocs</feature>
     <feature version="${mdsal.version}">odl-mdsal-xsql</feature>
     <feature version="${project.version}">odl-usc-channel</feature>

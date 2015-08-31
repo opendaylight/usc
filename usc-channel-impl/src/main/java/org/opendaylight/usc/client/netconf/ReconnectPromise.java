@@ -20,7 +20,7 @@ import io.netty.util.concurrent.Promise;
 
 import java.net.InetSocketAddress;
 
-import org.opendaylight.controller.netconf.client.NetconfClientSession;
+import org.opendaylight.netconf.client.NetconfClientSession;
 import org.opendaylight.protocol.framework.ReconnectStrategy;
 import org.opendaylight.protocol.framework.ReconnectStrategyFactory;
 import org.opendaylight.usc.client.netconf.UscNetconfClientDispatcherImpl.PipelineInitializer;
