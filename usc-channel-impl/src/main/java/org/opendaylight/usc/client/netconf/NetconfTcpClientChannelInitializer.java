@@ -11,10 +11,10 @@ package org.opendaylight.usc.client.netconf;
 import io.netty.channel.Channel;
 import io.netty.util.concurrent.Promise;
 
-import org.opendaylight.controller.netconf.client.NetconfClientSession;
-import org.opendaylight.controller.netconf.client.NetconfClientSessionListener;
-import org.opendaylight.controller.netconf.client.NetconfClientSessionNegotiatorFactory;
-import org.opendaylight.controller.netconf.nettyutil.AbstractChannelInitializer;
+import org.opendaylight.netconf.client.NetconfClientSession;
+import org.opendaylight.netconf.client.NetconfClientSessionListener;
+import org.opendaylight.netconf.client.NetconfClientSessionNegotiatorFactory;
+import org.opendaylight.netconf.nettyutil.AbstractChannelInitializer;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
 
 class NetconfTcpClientChannelInitializer extends AbstractChannelInitializer<NetconfClientSession> implements
