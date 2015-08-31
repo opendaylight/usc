@@ -21,6 +21,7 @@
   <name>${project.artifactId}</name>
   <properties>
     <akka.version>2.3.9</akka.version>
+    <usc.netconf.version>1.0.0-SNAPSHOT</usc.netconf.version>
     <scala.version>2.10</scala.version>
     <jacoco.version>0.7.2.201409121644</jacoco.version>
     <sonar.jacoco.reportPath>target/code-coverage/jacoco.exec</sonar.jacoco.reportPath>
@@ -89,9 +90,9 @@
       <version>${mdsal.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
+      <groupId>org.opendaylight.netconf</groupId>
       <artifactId>features-netconf-connector</artifactId>
-      <version>${mdsal.version}</version>
+      <version>${usc.netconf.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

@@ -23,7 +23,8 @@
   </prerequisites>
   <properties>
     <mdsal.version>1.3.0-SNAPSHOT</mdsal.version>
-    <netconf.version>0.4.0-SNAPSHOT</netconf.version>
+    <usc.netconf.version>1.0.0-SNAPSHOT</usc.netconf.version>
+    <restconf.version>1.3.0-SNAPSHOT</restconf.version>
     <yangtools.version>0.8.0-SNAPSHOT</yangtools.version>
     <dlux.version>0.3.0-SNAPSHOT</dlux.version>
   </properties>
@@ -37,9 +38,9 @@
         <scope>import</scope>
       </dependency>
       <dependency>
-        <groupId>org.opendaylight.controller</groupId>
+        <groupId>org.opendaylight.netconf</groupId>
         <artifactId>features-netconf-connector</artifactId>
-        <version>${mdsal.version}</version>
+        <version>${usc.netconf.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -75,14 +76,15 @@
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
+      <groupId>org.opendaylight.netconf</groupId>
       <artifactId>features-restconf</artifactId>
       <classifier>features</classifier>
+      <version>${restconf.version}</version>
       <type>xml</type>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
+      <groupId>org.opendaylight.netconf</groupId>
       <artifactId>features-netconf-connector</artifactId>
       <classifier>features</classifier>
       <type>xml</type>
