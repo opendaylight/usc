@@ -17,7 +17,7 @@
     <bundle>mvn:org.opendaylight.usc/usc-agent/${project.version}</bundle>
   </feature>
   <feature name='odl-usc-api' version='${project.version}' description='OpenDaylight :: USC :: API'>
-    <feature version='${yangtools.version}'>odl-yangtools-models</feature>
+    <feature version='${yangtools.version}'>odl-mdsal-models</feature>
     <bundle>mvn:org.opendaylight.usc/usc-channel-api/${project.version}</bundle>
   </feature>
   <feature name='odl-usc-channel' version='${project.version}' description='OpenDaylight :: USC :: Channel'>
