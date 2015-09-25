@@ -21,7 +21,6 @@
   <name>${project.artifactId}</name>
   <properties>
     <akka.version>2.3.9</akka.version>
-    <usc.netconf.version>1.0.0-SNAPSHOT</usc.netconf.version>
     <scala.version>2.10</scala.version>
     <jacoco.version>0.7.2.201409121644</jacoco.version>
     <sonar.jacoco.reportPath>target/code-coverage/jacoco.exec</sonar.jacoco.reportPath>
@@ -33,6 +32,14 @@
       <artifactId>usc-channel-api</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.mdsal.model</groupId>
+      <artifactId>ietf-inet-types</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+    </dependency> 
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-handler</artifactId>
@@ -87,12 +94,6 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-clustering-commons</artifactId>
-      <version>${mdsal.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.netconf</groupId>
-      <artifactId>features-netconf-connector</artifactId>
-      <version>${usc.netconf.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
