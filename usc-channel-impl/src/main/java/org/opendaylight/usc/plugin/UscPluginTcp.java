@@ -11,6 +11,7 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInboundHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOutboundHandler;
@@ -19,6 +20,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+
+import javax.net.ssl.SSLException;
 
 import org.opendaylight.usc.manager.UscRouteBrokerService;
 import org.opendaylight.usc.manager.api.UscConfigurationService;
@@ -191,6 +194,42 @@ public class UscPluginTcp extends UscPlugin {
     @Override
     protected ChannelType getChannelType() {
         return ChannelType.TLS;
+    }
+
+    /**
+     * Returns the security handler for server-side use. Currently this is TLS.
+     *
+     * @param ch
+     *            The physical channel that the traffic will be sent through.
+     * @return The channel handler, or null if the security service was not
+     *         properly initialized.
+     * @throws SSLException
+     */
+    public static ChannelHandler getSecureServerHandler(Channel ch) throws SSLException {
+        UscSecureService service = UscServiceUtils.getService(UscSecureService.class);
+        if (service == null) {
+            log.error("UscSecureService is not initialized!");
+            return null;
+        }
+        return service.getTcpServerHandler(ch);
+    }
+
+    /**
+     * Returns the security handler for client-side use. Currently this is TLS.
+     *
+     * @param ch
+     *            The physical channel that the traffic will be sent through.
+     * @return The channel handler, or null if the security service was not
+     *         properly initialized.
+     * @throws SSLException
+     */
+    public static ChannelHandler getSecureClientHandler(Channel ch) throws SSLException {
+        UscSecureService service = UscServiceUtils.getService(UscSecureService.class);
+        if (service == null) {
+            log.error("UscSecureService is not initialized!");
+            return null;
+        }
+        return service.getTcpClientHandler(ch);
     }
 
 }

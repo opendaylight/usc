@@ -39,7 +39,7 @@ public class UscRemoteDeviceHandler extends ChannelInboundHandlerAdapter {
     }
 
     private boolean isRemote(ChannelHandlerContext ctx) {
-        routeId = ctx.channel().attr(UscPlugin.RUOTE_IDENTIFIER).get();
+        routeId = ctx.channel().attr(UscPlugin.ROUTE_IDENTIFIER).get();
         if (routeId != null) {
             LOG.trace("UscRemoteDeviceHandler:Channel read finished for route id(" + routeId + ")");
             if (broker == null) {

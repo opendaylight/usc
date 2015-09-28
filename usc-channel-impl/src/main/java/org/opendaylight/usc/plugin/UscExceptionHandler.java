@@ -48,7 +48,7 @@ public class UscExceptionHandler extends SimpleChannelInboundHandler<UscExceptio
 
         final Throwable t = ex.getCause();
         Channel channel = ctx.channel();
-        UscRouteIdentifier routeId = ctx.channel().attr(UscPlugin.RUOTE_IDENTIFIER).get();
+        UscRouteIdentifier routeId = ctx.channel().attr(UscPlugin.ROUTE_IDENTIFIER).get();
         if (routeId != null) {
             // this is a channel using remote channel
             if (broker == null) {
@@ -85,7 +85,7 @@ public class UscExceptionHandler extends SimpleChannelInboundHandler<UscExceptio
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         UscConnectionException ex = new UscConnectionException("The channel is closed.");
-        UscRouteIdentifier routeId = ctx.channel().attr(UscPlugin.RUOTE_IDENTIFIER).get();
+        UscRouteIdentifier routeId = ctx.channel().attr(UscPlugin.ROUTE_IDENTIFIER).get();
         if (routeId != null) {
             // this is a channel using remote channel
             if (broker == null) {

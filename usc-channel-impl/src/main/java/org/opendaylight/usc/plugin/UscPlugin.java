@@ -76,7 +76,7 @@ public abstract class UscPlugin implements AutoCloseable {
     /**
      * Constant used for setting the UscDevice attribute on a server channel
      */
-    public static final AttributeKey<UscRouteIdentifier> RUOTE_IDENTIFIER = AttributeKey.valueOf("route_identifier");
+    public static final AttributeKey<UscRouteIdentifier> ROUTE_IDENTIFIER = AttributeKey.valueOf("route_identifier");
 
     /**
      * Constant used for setting the next direct channel between the plugin and
@@ -369,14 +369,14 @@ public abstract class UscPlugin implements AutoCloseable {
                     getChannelType());
             UscRouteIdentifier routeId = new UscRouteIdentifier(remoteChannel, serverChannel.hashCode(),
                     address.getPort());
-            clientChannel.attr(RUOTE_IDENTIFIER).setIfAbsent(routeId);
-            serverChannel.attr(RUOTE_IDENTIFIER).setIfAbsent(routeId);
+            clientChannel.attr(ROUTE_IDENTIFIER).setIfAbsent(routeId);
+            serverChannel.attr(ROUTE_IDENTIFIER).setIfAbsent(routeId);
             sendEvent(new UscChannelCreateEvent(remoteChannel.getIp(), true, remoteChannel.getRemoteChannelType()));
             // register local session for routing to remote device
             routeBroker.addLocalSession(routeId, serverChannel);
             if (directChannel != null) {
                 // direct connection only has one session
-                directChannel.attr(this.RUOTE_IDENTIFIER).set(routeId);
+                directChannel.attr(ROUTE_IDENTIFIER).set(routeId);
             }
             LOG.info("Initialized local remote channel for " + routeId);
         }

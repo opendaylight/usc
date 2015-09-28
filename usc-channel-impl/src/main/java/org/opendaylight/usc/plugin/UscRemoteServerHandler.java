@@ -57,7 +57,7 @@ public class UscRemoteServerHandler extends SimpleChannelInboundHandler<Object> 
         } else {
             LOG.trace("Read data from None Usc Agent: " + data);
             // communicate directly with device
-            localRouteId = ctx.channel().attr(UscPlugin.RUOTE_IDENTIFIER).get();
+            localRouteId = ctx.channel().attr(UscPlugin.ROUTE_IDENTIFIER).get();
         }
 
         if (broker == null) {
@@ -120,7 +120,7 @@ public class UscRemoteServerHandler extends SimpleChannelInboundHandler<Object> 
                         connection.getType());
             } else {
                 // communicate directly with device
-                UscRouteIdentifier localRouteId = ctx.channel().attr(UscPlugin.RUOTE_IDENTIFIER).get();
+                UscRouteIdentifier localRouteId = ctx.channel().attr(UscPlugin.ROUTE_IDENTIFIER).get();
                 if (localRouteId != null) {
                     remoteChannel = localRouteId;
                 }
