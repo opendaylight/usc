@@ -376,7 +376,7 @@ public abstract class UscPlugin implements AutoCloseable {
             routeBroker.addLocalSession(routeId, serverChannel);
             if (directChannel != null) {
                 // direct connection only has one session
-                directChannel.attr(this.RUOTE_IDENTIFIER).set(routeId);
+                directChannel.attr(UscPlugin.RUOTE_IDENTIFIER).set(routeId);
             }
             LOG.info("Initialized local remote channel for " + routeId);
         }

@@ -26,6 +26,8 @@ import io.netty.handler.logging.LoggingHandler;
 
 import java.net.InetSocketAddress;
 
+import javax.net.ssl.SSLException;
+
 import org.opendaylight.usc.manager.UscRouteBrokerService;
 import org.opendaylight.usc.manager.api.UscConfigurationService;
 import org.opendaylight.usc.manager.api.UscSecureService;
@@ -230,5 +232,41 @@ public class UscPluginUdp extends UscPlugin {
     protected ChannelType getChannelType() {
         return ChannelType.DTLS;
     }
+
+	/**
+	 * Returns the security handler for server-side use. Currently this is DTLS.
+	 *
+	 * @param ch
+	 *            The physical channel that the traffic will be sent through.
+	 * @return The channel handler, or null if the security service was not
+	 *         properly initialized.
+	 * @throws SSLException
+	 */
+	public static ChannelHandler getSecureServerHandler(Channel ch) throws SSLException {
+		UscSecureService service = UscServiceUtils.getService(UscSecureService.class);
+		if (service == null) {
+			log.error("UscSecureService is not initialized!");
+			return null;
+		}
+		return service.getUdpServerHandler(ch);
+	}
+
+	/**
+	 * Returns the security handler for client-side use. Currently this is DTLS.
+	 *
+	 * @param ch
+	 *            The physical channel that the traffic will be sent through.
+	 * @return The channel handler, or null if the security service was not
+	 *         properly initialized.
+	 * @throws SSLException
+	 */
+	public static ChannelHandler getSecureClientHandler(Channel ch) throws SSLException {
+		UscSecureService service = UscServiceUtils.getService(UscSecureService.class);
+		if (service == null) {
+			log.error("UscSecureService is not initialized!");
+			return null;
+		}
+		return service.getUdpClientHandler(ch);
+	}
 
 }
