@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_b1e2d901",
+        "filename": "usc-netconf-client-dispatcher/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 2567
+      },
+      "writtenOn": "2015-09-28T18:21:45Z",
+      "side": 1,
+      "message": "please use two spaces in place of tabs",
+      "range": {
+        "startLine": 81,
+        "startChar": 0,
+        "endLine": 81,
+        "endChar": 22
+      },
+      "revId": "ed24a1e7e1d3f2431060310ac4b7ea1ff3945a1e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
