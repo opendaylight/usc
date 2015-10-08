@@ -10,17 +10,17 @@
   <parent>
     <groupId>org.opendaylight.yangtools</groupId>
     <artifactId>binding-parent</artifactId>
-    <version>0.7.2-SNAPSHOT</version>
+    <version>0.7.2-Lithium-SR2</version>
     <relativePath />
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.usc</groupId>
   <artifactId>usc-channel-ui</artifactId>
-  <version>1.0.2-SNAPSHOT</version>
+  <version>1.0.2-Lithium-SR2</version>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
   <properties>
-    <dlux.version>0.2.2-SNAPSHOT</dlux.version>
+    <dlux.version>0.2.2-Lithium-SR2</dlux.version>
   </properties>
   <dependencies>
     <dependency>
