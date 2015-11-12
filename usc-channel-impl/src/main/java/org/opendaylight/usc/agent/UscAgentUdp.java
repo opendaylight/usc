@@ -24,6 +24,7 @@ import io.netty.handler.logging.LoggingHandler;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -55,9 +56,17 @@ public class UscAgentUdp implements Runnable, AutoCloseable {
 	private UscSecureService secureService = null;
 
 	public UscAgentUdp(boolean callHome) {
-        UscConfigurationServiceImpl.setDefaultPropertyFilePath("src/test/resources/etc/usc/usc.properties");
-        secureService = UscServiceUtils.getService(UscSecureService.class);
+		this(callHome,InetAddress.getLoopbackAddress());
+	}
+	
+	public UscAgentUdp(boolean callHome, InetAddress host) {
+		this(callHome, host, "src/test/resources/etc/usc/usc.properties");
+	}
+	
+	public UscAgentUdp(boolean callHome, InetAddress host, String propertyFile) {
 		final UscAgentUdp agent = this;
+        UscConfigurationServiceImpl.setDefaultPropertyFilePath(propertyFile);
+        secureService = UscServiceUtils.getService(UscSecureService.class);
 		b.group(bossGroup);
 		b.channel(NioDatagramChannel.class);
 		b.handler(new ChannelInitializer<NioDatagramChannel>() {
@@ -147,7 +156,7 @@ public class UscAgentUdp implements Runnable, AutoCloseable {
 
 			try {
 				InetSocketAddress recipient = new InetSocketAddress(
-						InetAddress.getLoopbackAddress(), 1069);
+						host, 1069);
 				cb.connect(recipient).sync().channel();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -192,6 +201,7 @@ public class UscAgentUdp implements Runnable, AutoCloseable {
 		// Start the server.
 		try {
 			ChannelFuture f = b.bind(PORT).sync();
+			LOG.trace("UscAgentUdp initialized");
 			// Wait until the server socket is closed.
 			f.channel().closeFuture().sync();
 		} catch (InterruptedException e) {
@@ -208,7 +218,20 @@ public class UscAgentUdp implements Runnable, AutoCloseable {
 	}
 
 	public static void main(String[] args) throws Exception {
-		try (UscAgentUdp agent = new UscAgentUdp(true)) {
+		boolean callHome = false;
+		InetAddress host = InetAddress.getLoopbackAddress();
+		if (args.length > 0) {
+			try {
+				InetAddress ip = InetAddress.getByName(args[0]);
+				callHome = true; 
+				host = ip;
+			}catch(UnknownHostException e) {
+				System.err.println("Argument " + args[0] + " must be an iP address (callhome IP).");
+        		System.exit(1);
+			}
+		}
+		
+		try (UscAgentUdp agent = new UscAgentUdp(callHome)) {
 			agent.run();
 		}
 	}

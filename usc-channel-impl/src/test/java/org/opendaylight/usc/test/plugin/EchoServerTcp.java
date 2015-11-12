@@ -34,6 +34,11 @@ public class EchoServerTcp implements Runnable, AutoCloseable {
     private UscSecureService secureService = null;
     
     public EchoServerTcp(final boolean enableEncryption) {
+    	this(enableEncryption, PORT);
+    }
+    
+    public EchoServerTcp(final boolean enableEncryption, int port) {
+    	PORT = port;
         UscConfigurationServiceImpl.setDefaultPropertyFilePath("src/test/resources/etc/usc/usc.properties");
         secureService = UscServiceUtils.getService(UscSecureService.class);
         b.group(bossGroup, workerGroup)
