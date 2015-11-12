@@ -8,6 +8,8 @@
 package org.opendaylight.usc;
 
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -31,7 +33,11 @@ import org.opendaylight.usc.manager.topology.UscTopologyFactory;
 import org.opendaylight.usc.plugin.UscPlugin;
 import org.opendaylight.usc.util.UscServiceUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.AddChannelInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.DeleteChannelInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.AddChannelOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.AddChannelOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.RemoveChannelInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.RemoveChannelOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.RemoveChannelOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.UscChannelService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.ViewChannelInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.ViewChannelOutput;
@@ -39,6 +45,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.chan
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.view.channel.output.Topology;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.view.channel.output.TopologyBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.view.channel.output.TopologyKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.SendMessageInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.SendMessageOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.SendMessageOutputBuilder;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
@@ -57,7 +66,6 @@ public class UscChannelServiceImpl implements UscChannelService {
     public static final AttributeKey<String> CLIENT_KEY = AttributeKey.valueOf("client_key");
     private Hashtable<String, Channel> connectList = new Hashtable<String, Channel>();
     private Hashtable<String, EventLoopGroup> groupList = new Hashtable<String, EventLoopGroup>();
-    private UscPlugin plugin = UscManagerService.getInstance().getPluginTcp();
 
     /**
      * Create a UscService and initialize the Shard Service
@@ -75,24 +83,30 @@ public class UscChannelServiceImpl implements UscChannelService {
      */
 
     @Override
-    public Future<RpcResult<Void>> addChannel(AddChannelInput input) {
-        String hostname = input.getChannel().getDestination().getDestNode().getValue();
-        int port = Integer.parseInt(input.getChannel().getSession().get(0).getTerminationPoint()
-                .getTerminationPointId().getValue());
-        boolean isCallhome = UscTopologyFactory.isCallHome(input.getChannel().getCallHome());
-        String result = connectNetconfDevice(hostname, port, isCallhome);
-        LOG.info("Add Channel result is " + result);
-        return null;
+    public Future<RpcResult<AddChannelOutput>> addChannel(AddChannelInput input) {
+    	String hostname = input.getChannel().getHostname();
+        int port = input.getChannel().getPort();
+        AddChannelOutputBuilder builder = new AddChannelOutputBuilder();
+        boolean isTcp = input.getChannel().isTcp();
+        String result = connectDevice(hostname, port, isTcp, input.getChannel().isRemote());
+        builder.setResult(result);
+        return RpcResultBuilder.success(builder.build()).buildFuture();
     }
 
-    private String connectNetconfDevice(String hostname, int port, boolean remote) {
+    private String connectDevice(String hostname, int port, boolean isTcp, boolean remote) {
         Bootstrap clientBootStrap = getNewBootstrap();
         InetSocketAddress address = new InetSocketAddress(hostname, port);
         try {
+        	UscPlugin plugin = null;
+        	if(isTcp)
+        		plugin = UscManagerService.getInstance().getPluginTcp();
+        	else
+        		plugin = UscManagerService.getInstance().getPluginUdp();
+        	
             Channel clientChannel = plugin.connect(clientBootStrap, address, remote).sync().channel();
-            clientChannel.attr(CLIENT_KEY).set(hostname + ":" + port);
-            connectList.put(hostname + ":" + port, clientChannel);
-            groupList.put(hostname + ":" + port, clientBootStrap.group());
+            clientChannel.attr(CLIENT_KEY).set(hostname + ":" + port + isTcp);
+            connectList.put(hostname + ":" + port + isTcp, clientChannel);
+            groupList.put(hostname + ":" + port + isTcp, clientBootStrap.group());
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -117,12 +131,40 @@ public class UscChannelServiceImpl implements UscChannelService {
         });
         return ret;
     }
+    
+    private void closeConnect(EventLoopGroup localGroup) {
+        localGroup.shutdownGracefully();
+
+        // allow some time for all ports to close;
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 
     @Override
-    public Future<RpcResult<Void>> deleteChannel(DeleteChannelInput input) {
-        String channelId = input.getChannelId().getValue();
-        LOG.info("Failed to delete channel, since don't has enough info!channelId is " + channelId);
-        return null;
+    public Future<RpcResult<RemoveChannelOutput>> removeChannel(RemoveChannelInput input) {
+        String hostname = input.getChannel().getHostname();
+        int port = input.getChannel().getPort();
+        boolean isTcp = input.getChannel().isTcp();
+        
+        Channel clientChannel = connectList.get(hostname + ":" + port + isTcp);
+        EventLoopGroup group = groupList.get(hostname + ":" + port + isTcp);
+        String result = "";
+        LOG.info("connectList number is " + connectList.size());
+
+        if (clientChannel == null) {
+            result = "Failed to remove channel(" + hostname + ":" + port + ")!";
+        } else {
+            // plugin.closeAgentInternalConnection(clientChannel);
+            closeConnect(group);
+            result = "Succeed to remove device(" + hostname + ":" + port + ")!";
+        }
+        RemoveChannelOutputBuilder builder = new RemoveChannelOutputBuilder();
+        builder.setResult(result);
+        return RpcResultBuilder.success(builder.build()).buildFuture();
     }
 
     @SuppressWarnings("unchecked")
@@ -153,5 +195,28 @@ public class UscChannelServiceImpl implements UscChannelService {
         ViewChannelOutput output = outputBuilder.build();
         // Return Results
         return RpcResultBuilder.success(output).buildFuture();
+    }
+    
+    @Override
+    public Future<RpcResult<SendMessageOutput>> sendMessage(SendMessageInput input){
+        String hostname = input.getChannel().getHostname();
+        int port = input.getChannel().getPort();
+        boolean isTcp = input.getChannel().isTcp();
+        
+        Channel clientChannel = connectList.get(hostname + ":" + port + isTcp);
+        String result = "";
+//        outputConnectList();
+        ByteBuf payload = Unpooled.buffer(10000);
+        payload.writeBytes(input.getChannel().getContent().getBytes());
+        if (clientChannel == null) {
+            result = "Failed to send request to device(" + hostname + ":" + port + "), since it is not found!";
+        } else {
+            clientChannel.writeAndFlush(payload);
+            result = "Succeed to send request to device(" + hostname + ":" + port + "),content is "
+                    + input.getChannel().getContent();
+        }
+        SendMessageOutputBuilder builder = new SendMessageOutputBuilder();
+        builder.setResult(result);
+        return RpcResultBuilder.success(builder.build()).buildFuture();
     }
 }
