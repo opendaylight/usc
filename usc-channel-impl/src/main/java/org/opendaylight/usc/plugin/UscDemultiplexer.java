@@ -7,6 +7,10 @@
  */
 package org.opendaylight.usc.plugin;
 
+import java.net.SocketAddress;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -40,7 +44,7 @@ import com.google.common.util.concurrent.SettableFuture;
 public class UscDemultiplexer extends SimpleChannelInboundHandler<UscFrame> {
 
     private static final Logger LOG = LoggerFactory.getLogger(UscDemultiplexer.class);
-    public final SettableFuture<Throwable> promise = SettableFuture.create();
+    public final ConcurrentMap<SocketAddress, SettableFuture<Throwable>> promiseMap = new ConcurrentHashMap<>();
     private final UscPlugin plugin;
 
     /**
@@ -61,8 +65,9 @@ public class UscDemultiplexer extends SimpleChannelInboundHandler<UscFrame> {
     	if(frame instanceof UscControl) {
         	UscControl controlMsg = (UscControl)frame;
         	if(controlMsg.getControlCode() == UscControl.ControlCode.ECHO) {
-        		LOG.trace("UscDemultiplexer: set ECHO promise to Success");
-        		promise.set(new Throwable("Success"));
+        		SocketAddress remoteAddress = ctx.channel().remoteAddress();
+            	promiseMap.get(remoteAddress).set(new Throwable("Success"));
+            	LOG.trace("channelRead0: promiseMap = " + promiseMap);
         		return;
         	}
         }
@@ -136,7 +141,9 @@ public class UscDemultiplexer extends SimpleChannelInboundHandler<UscFrame> {
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
 			throws Exception {
-		promise.set(cause);
+		SocketAddress remoteAddress = ctx.channel().remoteAddress();
+    	promiseMap.get(remoteAddress).set(cause);
+    	LOG.trace("exceptionCaught: promiseMap = " + promiseMap);
 		
 		if (cause instanceof UscChannelException) {
 			LOG.trace("UscDemultiplexer exceptionCaught()");

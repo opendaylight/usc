@@ -18,6 +18,7 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOutboundHandler;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.local.LocalAddress;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
@@ -74,7 +75,7 @@ public class UscPluginUdp extends UscPlugin {
      * Constructs a new UscPluginUdp
      */
     public UscPluginUdp() {
-        super();
+        super(new LocalAddress("usc-local-server-udp"));
 
         UscRouteBrokerService routeBroker = UscServiceUtils
                 .getService(UscRouteBrokerService.class);
