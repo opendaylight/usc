@@ -59,6 +59,10 @@ public class UscTopologyService {
      */
     public static final String NODE_TYPE_CONTROLLER = "Controller";
     /**
+     * channel type
+     */
+    public static final String Channel_TYPE = "type";
+    /**
      * channel channel type string
      */
     public static final String Channel_TYPE_CHANNEL = "channel";
@@ -66,6 +70,7 @@ public class UscTopologyService {
      * network device node type string
      */
     public static final String NODE_TYPE_NETWORK_DEVICE = "Device";
+    
     private static final Logger LOG = LoggerFactory.getLogger(UscTopologyService.class);
     private static UscTopologyService topoService = new UscTopologyService();
     private Node localController;

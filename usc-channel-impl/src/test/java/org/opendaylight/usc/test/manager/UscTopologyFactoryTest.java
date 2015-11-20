@@ -129,7 +129,8 @@ public class UscTopologyFactoryTest extends AbstractUscTest {
         Node deviceNode = UscTopologyFactory.createNode("Controller" + getRandomInt(),
                 UscTopologyService.NODE_TYPE_NETWORK_DEVICE);
         String key = UscTopologyService.NODE_TYPE_CONTROLLER + ":" + controllerNode.getNodeId().getValue() + "-"
-                + UscTopologyService.NODE_TYPE_NETWORK_DEVICE + ":" + deviceId;
+                + UscTopologyService.NODE_TYPE_NETWORK_DEVICE + ":" + deviceId + '-'
+                + UscTopologyService.Channel_TYPE + ":" + getRandomChannelType();
         Channel channel = UscTopologyFactory.createChannel(controllerNode, deviceNode, key, getRandomChannelType(),
                 getRandomCallHome());
         return channel;
@@ -139,7 +140,8 @@ public class UscTopologyFactoryTest extends AbstractUscTest {
         Node controllerNode = UscTopologyFactory.createNode(contollerId, UscTopologyService.NODE_TYPE_CONTROLLER);
         Node deviceNode = UscTopologyFactory.createNode(deviceId, UscTopologyService.NODE_TYPE_NETWORK_DEVICE);
         String key = UscTopologyService.NODE_TYPE_CONTROLLER + ":" + controllerNode.getNodeId().getValue() + "-"
-                + UscTopologyService.NODE_TYPE_NETWORK_DEVICE + ":" + deviceId;
+                + UscTopologyService.NODE_TYPE_NETWORK_DEVICE + ":" + deviceId + '-'
+                + UscTopologyService.Channel_TYPE + ":" + getRandomChannelType();
         Channel channel = UscTopologyFactory.createChannel(controllerNode, deviceNode, key, getRandomChannelType(),
                 getRandomCallHome());
         return channel;
