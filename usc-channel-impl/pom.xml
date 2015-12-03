@@ -10,13 +10,13 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>config-parent</artifactId>
-    <version>0.3.3-SNAPSHOT</version>
+    <version>0.3.3-Lithium-SR3</version>
     <relativePath />
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.usc</groupId>
   <artifactId>usc-channel-impl</artifactId>
-  <version>1.0.3-SNAPSHOT</version>
+  <version>1.0.3-Lithium-SR3</version>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
   <properties>
