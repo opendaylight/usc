@@ -350,29 +350,117 @@ module usc-channel {
             	description
                     "The channel to be added.";
 
-            	uses channel-attributes;
-
+            	leaf hostname{
+            		type string;
+            		description 
+            		            "The ip address of target Netconf device.";
+            	}
+            	leaf tcp{
+            		type boolean;
+            		description
+            					"true for tcp, false for udp";
+            	}
+            	leaf port{
+            		type int16;
+            		description 
+            		            "The port of target Netconf device.";
+            	}
+            	leaf remote{
+            		type boolean;
+            		description 
+            		            "true for remote,false for local.";
+            	}
             }
 
+        }
+        output{
+                leaf result{
+            		type string;
+            		description 
+            		            "The result message of rest request.";
+            	}
         }
 
     }
 
-    rpc delete-channel {
-
+	rpc remove-channel {
         description
-            "Remove a channel from the USC topology.";
-           
+            "remove a channel to the USC topology.";
+             
         input {
 
-			leaf channel-id {
-                type channel-id;
-                description
-                    "An identifier for a channel.";
-            }
+            container channel {
 
+            	description
+                    "The channel to be added.";
+
+            	leaf hostname{
+            		type string;
+            		description 
+            		            "The ip address of target Netconf device.";
+            	}
+            	leaf tcp{
+            		type boolean;
+            		description
+            					"true for tcp, false for udp";
+            	}
+            	leaf port{
+            		type int16;
+            		description 
+            		            "The port of target Netconf device.";
+            	}        	
+            }
+        }
+        output{
+                leaf result{
+            		type string;
+            		description 
+            		            "The result message of rest request.";
+            	}
         }
 
     }
+    
+	rpc send-message {
 
+        description
+            "send a text message to a USC Channel.";
+             
+        input {
+
+            container channel {
+
+            	description
+                    "The channel to be added.";
+
+            	leaf hostname{
+            		type string;
+            		description 
+            		            "The ip address of target device.";
+            	}
+            	leaf tcp{
+            		type boolean;
+            		description
+            					"true for tcp, false for udp";
+            	}
+            	leaf port{
+            		type int16;
+            		description 
+            		            "The port of target device.";
+            	}        	
+            	leaf content{
+            		type string;
+            		description 
+            		            "The content of text message";
+            	}
+            }
+        }
+        output{
+                leaf result{
+            		type string;
+            		description 
+            		            "The result message of rest request.";
+            	}
+        }
+	}
 }

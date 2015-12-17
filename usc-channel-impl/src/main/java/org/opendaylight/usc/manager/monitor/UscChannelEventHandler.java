@@ -49,7 +49,8 @@ public class UscChannelEventHandler implements UscEventHandler {
                     UscTopologyService.NODE_TYPE_NETWORK_DEVICE);
             String key = UscTopologyService.NODE_TYPE_CONTROLLER + ":"
                     + topoService.getLocalController().getNodeId().getValue() + "-"
-                    + UscTopologyService.NODE_TYPE_NETWORK_DEVICE + ":" + evt.getDeviceId();
+                    + UscTopologyService.NODE_TYPE_NETWORK_DEVICE + ":" + evt.getDeviceId() + '-'
+                    + UscTopologyService.Channel_TYPE + ":" + evt.getType();
             Channel channel = UscTopologyFactory.createChannel(topoService.getLocalController(), deviceNode, key,
                     evt.getType(), evt.isCallHome());
             topoService.addChannel(channel);

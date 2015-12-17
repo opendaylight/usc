@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.usc.test.plugin;
+package org.opendaylight.usc.test;
 
 import org.opendaylight.usc.manager.UscConfigurationServiceImpl;
 import org.opendaylight.usc.manager.api.UscSecureService;
@@ -39,7 +39,7 @@ public class EchoServerTcp implements Runnable, AutoCloseable {
     
     public EchoServerTcp(final boolean enableEncryption, int port) {
     	PORT = port;
-        UscConfigurationServiceImpl.setDefaultPropertyFilePath("src/test/resources/etc/usc/usc.properties");
+        UscConfigurationServiceImpl.setDefaultPropertyFilePath("resources/etc/usc/usc.properties");
         secureService = UscServiceUtils.getService(UscSecureService.class);
         b.group(bossGroup, workerGroup)
         .channel(NioServerSocketChannel.class)
@@ -48,6 +48,7 @@ public class EchoServerTcp implements Runnable, AutoCloseable {
         .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     public void initChannel(SocketChannel ch) throws Exception {
+                    	System.out.println("EchoServerTcp initChannel");
                         ChannelPipeline p = ch.pipeline();
                         if(enableEncryption) {
                         	p.addLast(new LoggingHandler("EchoServerTcp Handler 3", LogLevel.TRACE));
@@ -66,6 +67,7 @@ public class EchoServerTcp implements Runnable, AutoCloseable {
         // Start the server.
         try {
             ChannelFuture f = b.bind(PORT).sync();
+            System.out.println("EchoServerTcp initialized");
             // Wait until the server socket is closed.
             f.channel().closeFuture().sync();
         } catch (InterruptedException e) {

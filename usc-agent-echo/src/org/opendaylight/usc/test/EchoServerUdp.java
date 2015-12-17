@@ -5,68 +5,66 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.usc.test.plugin;
+package org.opendaylight.usc.test;
 
 import org.opendaylight.usc.manager.UscConfigurationServiceImpl;
 import org.opendaylight.usc.manager.api.UscSecureService;
 import org.opendaylight.usc.util.UscServiceUtils;
 
-import io.netty.bootstrap.ServerBootstrap;
+import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.channel.socket.DatagramChannel;
+import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
 /**
- * TCP echo server.
+ * UDP echo server.
  */
-public class EchoServerTcp implements Runnable, AutoCloseable {
+public class EchoServerUdp implements Runnable, AutoCloseable {
     static int PORT = Integer.parseInt(System.getProperty("port", "2007"));
     EventLoopGroup bossGroup = new NioEventLoopGroup(1);
-    EventLoopGroup workerGroup = new NioEventLoopGroup();
-    ServerBootstrap b = new ServerBootstrap();
+    Bootstrap b = new Bootstrap();
     private UscSecureService secureService = null;
-    
-    public EchoServerTcp(final boolean enableEncryption) {
+
+    public EchoServerUdp(final boolean enableEncryption) {
     	this(enableEncryption, PORT);
     }
     
-    public EchoServerTcp(final boolean enableEncryption, int port) {
+    public EchoServerUdp(final boolean enableEncryption, int port) {
     	PORT = port;
-        UscConfigurationServiceImpl.setDefaultPropertyFilePath("src/test/resources/etc/usc/usc.properties");
+    	UscConfigurationServiceImpl.setDefaultPropertyFilePath("resources/etc/usc/usc.properties");
         secureService = UscServiceUtils.getService(UscSecureService.class);
-        b.group(bossGroup, workerGroup)
-        .channel(NioServerSocketChannel.class)
-        .option(ChannelOption.SO_BACKLOG, 100)
-        .handler(new LoggingHandler("EchoServerTcp server handler", LogLevel.TRACE))
-        .childHandler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    public void initChannel(SocketChannel ch) throws Exception {
-                        ChannelPipeline p = ch.pipeline();
-                        if(enableEncryption) {
-                        	p.addLast(new LoggingHandler("EchoServerTcp Handler 3", LogLevel.TRACE));
-                        	p.addLast(secureService.getTcpServerHandler(ch));
-                        }
-                        p.addLast(new LoggingHandler("EchoServerTcp Handler 2", LogLevel.TRACE));
-                        p.addLast(new EchoServerTcpHandler());
-                        p.addLast(new LoggingHandler("EchoServerTcp Handler 1", LogLevel.TRACE));
-                    }
-                });
+
+        b.group(bossGroup)
+         .channel(NioDatagramChannel.class)
+         .handler(new ChannelInitializer<DatagramChannel>() {
+            @Override
+            public void initChannel(DatagramChannel ch) throws Exception {
+                ChannelPipeline p = ch.pipeline();
+                System.out.println("EchoServerUdp initChannel");
+                if(enableEncryption) {
+                	p.addLast(new LoggingHandler("EchoServerUdp Handler 3", LogLevel.TRACE));
+                	p.addLast(secureService.getUdpServerHandler(ch));
+                }
+                p.addLast(new LoggingHandler("EchoServerUdp Handler 2", LogLevel.TRACE));
+                p.addLast(new EchoServerUdpHandler());
+                p.addLast(new LoggingHandler("EchoServerUdp Handler 1", LogLevel.TRACE));
+            }
+        });
 
     }
 
     @Override
     public void run() {
-        // Start the server.
         try {
             ChannelFuture f = b.bind(PORT).sync();
             // Wait until the server socket is closed.
+            System.out.println("UscAgentUdp initialized");
             f.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
@@ -77,11 +75,10 @@ public class EchoServerTcp implements Runnable, AutoCloseable {
     @Override
     public void close() throws Exception {
         bossGroup.shutdownGracefully();
-        workerGroup.shutdownGracefully();
     }
 
     public static void main(String[] args) throws Exception {
-        if(args.length > 0) {
+    	if(args.length > 0) {
             try {
                 int port = Integer.parseInt(args[0]);
                 PORT = port;
@@ -90,8 +87,8 @@ public class EchoServerTcp implements Runnable, AutoCloseable {
                 System.exit(1);
             }
         }
-        
-        try (EchoServerTcp server = new EchoServerTcp(false)) {
+    	
+        try (EchoServerUdp server = new EchoServerUdp(false)) {
             server.run();
         }
     }

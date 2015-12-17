@@ -86,7 +86,7 @@ public abstract class UscPlugin implements AutoCloseable {
     public static final AttributeKey<LocalChannel> LOCAL_SERVER_CHANNEL = AttributeKey.valueOf("local_server_channel");
 
     private static final Logger LOG = LoggerFactory.getLogger(UscPlugin.class);
-    private static final LocalAddress localServerAddr = new LocalAddress("usc-local-server");
+    private LocalAddress localServerAddr;
     private final UscExceptionHandler uscExceptionHandler = new UscExceptionHandler(this);
 
     /**
@@ -103,8 +103,9 @@ public abstract class UscPlugin implements AutoCloseable {
     private final UscRemoteServerHandler remoteServerHandler = new UscRemoteServerHandler();
     private final UscMonitor monitor = new UscMonitorImpl();
 
-    protected UscPlugin() {
+    protected UscPlugin(LocalAddress localAddr) {
         LOG.debug("UscPlugin " + this + "started");
+        localServerAddr = localAddr;
 
         final ServerBootstrap localServerBootstrap = new ServerBootstrap();
         localServerBootstrap.group(localGroup);
@@ -124,7 +125,7 @@ public abstract class UscPlugin implements AutoCloseable {
                 LocalAddress localAddress = serverChannel.remoteAddress();
                 serverChannels.putIfAbsent(localAddress, SettableFuture.<LocalChannel> create());
                 serverChannels.get(localAddress).set(serverChannel);
-
+                
                 p.addLast(new LoggingHandler("localServerBootstrp Handler 3", LogLevel.TRACE));
 
                 // add remote device handler for route remote request
@@ -132,7 +133,6 @@ public abstract class UscPlugin implements AutoCloseable {
                 p.addLast(new LoggingHandler("localServerBootstrp Handler 2", LogLevel.TRACE));
                 p.addLast(getMultiplexer());
                 p.addLast(new LoggingHandler("localServerBootstrp Handler 1", LogLevel.TRACE));
-
             }
         });
 
@@ -265,36 +265,43 @@ public abstract class UscPlugin implements AutoCloseable {
                     LOG.error("Failed to get udp agent connection, try to directly connect.error is " + e.getMessage());
                     connectException = e;
                 }
+                
+				LOG.trace("Returned connection is " + connection);
+				Channel channel = connection.getChannel();
+				UscDemultiplexer handler = (UscDemultiplexer) channel
+						.pipeline().get("UscDemultiplexer");
+				SocketAddress remoteAddress = channel.remoteAddress();
+				if (!handler.promiseMap.containsKey(remoteAddress)) {
+					handler.promiseMap.putIfAbsent(remoteAddress, SettableFuture.<Throwable> create());
 
-                LOG.trace("Send a ECHO message to see if the usc agent port is reachable.");
-                Channel channel = connection.getChannel();
-                UscDemultiplexer handler = (UscDemultiplexer) channel.pipeline().get("UscDemultiplexer");
+					UscControl echoControl = new UscControl(address.getPort(), 1, UscControl.ControlCode.ECHO.getCode());
+					channel.writeAndFlush(echoControl);
+					LOG.trace("Send a ECHO message to see if the usc agent port is reachable.");
+				}
 
-                UscControl echoControl = new UscControl(address.getPort(), 1, UscControl.ControlCode.ECHO.getCode());
-                channel.writeAndFlush(echoControl);
+				Throwable e = null;
+				e = handler.promiseMap.get(remoteAddress).get(5000, TimeUnit.MILLISECONDS);
 
-                Throwable e = null;
-                e = handler.promise.get(500, TimeUnit.MILLISECONDS);
-
-                if (e != null) {
-                    LOG.trace("connect: handler.promise is " + e);
-                    if (e != null && e instanceof PortUnreachableException) {
-                        LOG.trace("connect: caught exception PortUnreachableException");
-                        channel.close();
-                        connectionManager.removeConnection(connection);
-                        connection = null;
-                        LOG.trace("connect: start connecting to " + address.getAddress() + (":") + address.getPort()
-                                + " directly.");
-                        try {
-                            directChannel = connectToDeviceDirectly(new UscDevice(address.getAddress(),
-                                    address.getPort()));
-                        } catch (Exception ex) {
-                            LOG.error("Failed to get direct connection, try to remote connect.error is "
-                                    + e.getMessage());
-                            connectException = ex;
-                        }
-                    }
-                }
+				if (e != null) {
+					LOG.trace("connect: handler.promise is " + e);
+					if (e != null && e instanceof PortUnreachableException) {
+						LOG.trace("connect: caught exception PortUnreachableException");
+						channel.close();
+						connectionManager.removeConnection(connection);
+						connection = null;
+						LOG.trace("connect: start connecting to "
+								+ address.getAddress() + (":")
+								+ address.getPort() + " directly.");
+						try {
+							directChannel = connectToDeviceDirectly(new UscDevice(
+									address.getAddress(), address.getPort()));
+						} catch (Exception ex) {
+							LOG.error("Failed to get direct connection, try to remote connect.error is "
+									+ e.getMessage());
+							connectException = ex;
+						}
+					}
+				}
             } else {
                 try {
                     connection = connectionManager.getConnection(
@@ -325,6 +332,7 @@ public abstract class UscPlugin implements AutoCloseable {
                 throw connectException;
             }
         }
+        
         final ChannelFuture clientChannelFuture = clientBootstrap.connect(localServerAddr);
         clientChannelFuture.channel().pipeline().addLast(uscExceptionHandler);
 

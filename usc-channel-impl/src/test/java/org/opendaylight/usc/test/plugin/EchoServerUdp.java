@@ -7,6 +7,7 @@
  */
 package org.opendaylight.usc.test.plugin;
 
+import org.opendaylight.usc.manager.UscConfigurationServiceImpl;
 import org.opendaylight.usc.manager.api.UscSecureService;
 import org.opendaylight.usc.util.UscServiceUtils;
 
@@ -25,12 +26,20 @@ import io.netty.handler.logging.LoggingHandler;
  * UDP echo server.
  */
 public class EchoServerUdp implements Runnable, AutoCloseable {
-    static final int PORT = Integer.parseInt(System.getProperty("port", "2007"));
+    static int PORT = Integer.parseInt(System.getProperty("port", "2007"));
     EventLoopGroup bossGroup = new NioEventLoopGroup(1);
     Bootstrap b = new Bootstrap();
-    private final UscSecureService secureService = UscServiceUtils.getService(UscSecureService.class);
+    private UscSecureService secureService = null;
 
     public EchoServerUdp(final boolean enableEncryption) {
+    	this(enableEncryption, PORT);
+    }
+    
+    public EchoServerUdp(final boolean enableEncryption, int port) {
+    	PORT = port;
+    	UscConfigurationServiceImpl.setDefaultPropertyFilePath("src/test/resources/etc/usc/usc.properties");
+        secureService = UscServiceUtils.getService(UscSecureService.class);
+        
         b.group(bossGroup)
          .channel(NioDatagramChannel.class)
          .handler(new ChannelInitializer<DatagramChannel>() {
@@ -68,6 +77,16 @@ public class EchoServerUdp implements Runnable, AutoCloseable {
     }
 
     public static void main(String[] args) throws Exception {
+    	if(args.length > 0) {
+            try {
+                int port = Integer.parseInt(args[0]);
+                PORT = port;
+            }catch (NumberFormatException e) {
+                System.err.println("Argument " + args[0] + " must be an integer (port #).");
+                System.exit(1);
+            }
+        }
+    	
         try (EchoServerUdp server = new EchoServerUdp(false)) {
             server.run();
         }

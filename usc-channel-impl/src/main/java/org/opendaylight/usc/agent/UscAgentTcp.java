@@ -60,8 +60,12 @@ public class UscAgentTcp implements Runnable, AutoCloseable {
 	}
 	
 	public UscAgentTcp(boolean callHome, InetAddress host) {
+	    this(callHome, host, "src/test/resources/etc/usc/usc.properties");
+	}
+	
+	public UscAgentTcp(boolean callHome, InetAddress host, String propertyFile) {
 		final UscAgentTcp agent = this;
-        UscConfigurationServiceImpl.setDefaultPropertyFilePath("src/test/resources/etc/usc/usc.properties");
+        UscConfigurationServiceImpl.setDefaultPropertyFilePath(propertyFile);
         secureService = UscServiceUtils.getService(UscSecureService.class);
 		b.group(bossGroup, workerGroup);
 		b.channel(NioServerSocketChannel.class);
@@ -116,7 +120,7 @@ public class UscAgentTcp implements Runnable, AutoCloseable {
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 			    
-			    System.err.println("USC Plugin call home port not available; call home disabled");
+			    LOG.error("USC Plugin call home port not available; call home disabled");
 				// e.printStackTrace();
 			}
 		}
@@ -155,7 +159,7 @@ public class UscAgentTcp implements Runnable, AutoCloseable {
 		// Start the server.
 		try {
 			ChannelFuture f = b.bind(PORT).sync();
-			System.out.println("UscAgentTcp initialized");
+			LOG.trace("UscAgentTcp initialized");
 			
 			// Wait until the server socket is closed.
 			f.channel().closeFuture().sync();

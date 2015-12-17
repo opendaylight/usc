@@ -14,7 +14,6 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.usc.manager.UscManagerService;
 import org.opendaylight.usc.manager.monitor.UscAsynchronousEventHandler;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.UscChannelService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.test.rev150101.UscTestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +25,6 @@ public class UscProvider implements BindingAwareProvider, AutoCloseable {
     private static final Logger LOG = LoggerFactory
             .getLogger(UscProvider.class);
     private RpcRegistration<UscChannelService> uscChannelService;
-    private RpcRegistration<UscTestService> uscTestService;
     private DataBroker dataService;
 
     public UscProvider(DataBroker dataService) {
@@ -44,9 +42,6 @@ public class UscProvider implements BindingAwareProvider, AutoCloseable {
         UscManagerService.getInstance().init(dataService);
         UscChannelServiceImpl service = new UscChannelServiceImpl();
         uscChannelService = session.addRpcImplementation(UscChannelService.class, service);
-        UscTestServiceImpl test = new UscTestServiceImpl();
-        uscTestService = session.addRpcImplementation(UscTestService.class,
-                test);
         LOG.info("UscProvider Session Initiated");
     }
 
@@ -54,7 +49,6 @@ public class UscProvider implements BindingAwareProvider, AutoCloseable {
     public void close() throws Exception {
         UscAsynchronousEventHandler.closeExecutorService();
         uscChannelService.close();
-        uscTestService.close();
         UscManagerService.getInstance().destroy();
         LOG.info("UscProvider Closed");
     }

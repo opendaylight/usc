@@ -72,6 +72,10 @@ public class UscManagerService {
             // monitor service depend on topology service
             monitorService = UscMonitorService.getInstance();
             UscServiceUtils.registerService(this, UscMonitorService.class, monitorService, null);
+            
+            getPluginTcp();
+            getPluginUdp();
+            
             LOG.info("Shard service ,Topology Service and Monitor service are initilzated!");
         } else {
             LOG.error("Since dataBroker is null,Shard service ,Topology Service and Monitor service are not initilzated!");

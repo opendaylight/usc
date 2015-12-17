@@ -59,6 +59,10 @@ public class UscTopologyService {
      */
     public static final String NODE_TYPE_CONTROLLER = "Controller";
     /**
+     * channel type
+     */
+    public static final String Channel_TYPE = "type";
+    /**
      * channel channel type string
      */
     public static final String Channel_TYPE_CHANNEL = "channel";
@@ -66,6 +70,7 @@ public class UscTopologyService {
      * network device node type string
      */
     public static final String NODE_TYPE_NETWORK_DEVICE = "Device";
+    
     private static final Logger LOG = LoggerFactory.getLogger(UscTopologyService.class);
     private static UscTopologyService topoService = new UscTopologyService();
     private Node localController;
@@ -569,9 +574,9 @@ public class UscTopologyService {
      * @return if find the session which has the session id, return the session
      *         other wise return null
      */
-    public synchronized Session getSession(String destinationId, String sessionId) {
+    public synchronized Session getSession(String destinationId, String sessionId, String type) {
         for (Channel channel : localTopology.getChannel()) {
-            if (channel.getDestination().getDestNode().getValue().equals(destinationId)) {
+            if (channel.getDestination().getDestNode().getValue().equals(destinationId) && channel.getChannelType().equals(type)) {
                 for (Session session : channel.getSession()) {
                     if (session.getSessionId().getValue().equals(sessionId)) {
                         return session;
@@ -605,7 +610,7 @@ public class UscTopologyService {
             LOG.warn("channel is not found for device({}),type({})", destinationId, type);
             return;
         }
-        Session session = getSession(destinationId, sessionId);
+        Session session = getSession(destinationId, sessionId, type);
         if (session == null) {
             LOG.warn("Session is not found for device[" + destinationId + "] and session[" + sessionId + "].");
             return;
@@ -692,7 +697,7 @@ public class UscTopologyService {
             LOG.warn("Channel is not found for device id = " + destinationId);
             return;
         }
-        Session session = getSession(destinationId, sessionId);
+        Session session = getSession(destinationId, sessionId, type);
         if (session == null) {
             LOG.warn("Session is not found for device[" + destinationId + "] and session[" + sessionId + "].");
             return;

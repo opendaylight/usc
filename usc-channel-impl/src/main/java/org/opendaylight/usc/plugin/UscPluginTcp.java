@@ -17,6 +17,7 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOutboundHandler;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.local.LocalAddress;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -51,7 +52,7 @@ public class UscPluginTcp extends UscPlugin {
      * Constructs a new UscPluginTcp
      */
     public UscPluginTcp() {
-        super();
+        super(new LocalAddress("usc-local-server-tcp"));
 
         UscRouteBrokerService routeBroker = UscServiceUtils
                 .getService(UscRouteBrokerService.class);
