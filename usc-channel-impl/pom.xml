@@ -20,7 +20,7 @@
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
   <properties>
-    <akka.version>2.3.9</akka.version>
+    <akka.version>2.3.14</akka.version>
     <scala.version>2.10</scala.version>
     <jacoco.version>0.7.2.201409121644</jacoco.version>
     <sonar.jacoco.reportPath>target/code-coverage/jacoco.exec</sonar.jacoco.reportPath>
