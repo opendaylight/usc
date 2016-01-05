@@ -29,7 +29,6 @@ import java.util.concurrent.Future;
 import org.opendaylight.usc.manager.UscManagerService;
 import org.opendaylight.usc.manager.UscTopologyService;
 import org.opendaylight.usc.manager.api.UscShardService;
-import org.opendaylight.usc.manager.topology.UscTopologyFactory;
 import org.opendaylight.usc.plugin.UscPlugin;
 import org.opendaylight.usc.util.UscServiceUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.AddChannelInput;
