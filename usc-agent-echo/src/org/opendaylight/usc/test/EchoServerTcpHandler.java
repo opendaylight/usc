@@ -15,22 +15,22 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
 /**
- * Handler implementation for the echo server.
+ * TCP handler implementation for the test Echo Sever.
  */
 @Sharable
 public class EchoServerTcpHandler extends ChannelInboundHandlerAdapter {
-	private static final Logger LOG = LoggerFactory.getLogger(EchoServerTcpHandler.class);
-	 
+    private static final Logger LOG = LoggerFactory.getLogger(EchoServerTcpHandler.class);
+
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-    	LOG.trace(msg.toString());
+        LOG.trace(msg.toString());
         ctx.write(msg);
     }
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-    	LOG.trace("channelReadComplete");
+        LOG.trace("channelReadComplete");
         ctx.flush();
     }
-    
+
 }

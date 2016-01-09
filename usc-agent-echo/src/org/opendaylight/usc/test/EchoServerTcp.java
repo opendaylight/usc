@@ -24,19 +24,28 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
 /**
- * TCP echo server.
+ * TCP Echo Server.
  */
 public class EchoServerTcp implements Runnable, AutoCloseable {
-    static int PORT = Integer.parseInt(System.getProperty("port", "2007"));
-    EventLoopGroup bossGroup = new NioEventLoopGroup(1);
-    EventLoopGroup workerGroup = new NioEventLoopGroup();
-    ServerBootstrap b = new ServerBootstrap();
+    private static int PORT = Integer.parseInt(System.getProperty("port", "2007"));
+    private EventLoopGroup bossGroup = new NioEventLoopGroup(1);
+    private EventLoopGroup workerGroup = new NioEventLoopGroup();
+    private ServerBootstrap b = new ServerBootstrap();
     private UscSecureService secureService = null;
-    
+
+    /**
+     * Initializes a TCP Based Echo Server with the default port 2007
+     * @param enableEncryption If true, then enable encryption.
+     */
     public EchoServerTcp(final boolean enableEncryption) {
     	this(enableEncryption, PORT);
     }
-    
+
+    /**
+     * Initializes a TCP Based Echo Server with the specified port
+     * @param enableEncryption If true, then enable encryption.
+     * @param port The port to bind to.
+     */
     public EchoServerTcp(final boolean enableEncryption, int port) {
     	PORT = port;
         UscConfigurationServiceImpl.setDefaultPropertyFilePath("resources/etc/usc/usc.properties");
@@ -59,7 +68,6 @@ public class EchoServerTcp implements Runnable, AutoCloseable {
                         p.addLast(new LoggingHandler("EchoServerTcp Handler 1", LogLevel.TRACE));
                     }
                 });
-
     }
 
     @Override
@@ -92,7 +100,6 @@ public class EchoServerTcp implements Runnable, AutoCloseable {
                 System.exit(1);
             }
         }
-        
         try (EchoServerTcp server = new EchoServerTcp(false)) {
             server.run();
         }

@@ -23,23 +23,31 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
 /**
- * UDP echo server.
+ * UDP Echo Server.
  */
 public class EchoServerUdp implements Runnable, AutoCloseable {
-    static int PORT = Integer.parseInt(System.getProperty("port", "2007"));
-    EventLoopGroup bossGroup = new NioEventLoopGroup(1);
-    Bootstrap b = new Bootstrap();
+    private static int PORT = Integer.parseInt(System.getProperty("port", "2007"));
+    private EventLoopGroup bossGroup = new NioEventLoopGroup(1);
+    private Bootstrap b = new Bootstrap();
     private UscSecureService secureService = null;
 
+    /**
+     * Initializes a UDP Based Echo Server with the default port 2007
+     * @param enableEncryption If true, then enable encryption.
+     */
     public EchoServerUdp(final boolean enableEncryption) {
     	this(enableEncryption, PORT);
     }
-    
+
+    /**
+     * Initializes a UDP Based Echo Server with the specified port
+     * @param enableEncryption If true, then enable encryption.
+     * @param port The port to bind to.
+     */
     public EchoServerUdp(final boolean enableEncryption, int port) {
     	PORT = port;
     	UscConfigurationServiceImpl.setDefaultPropertyFilePath("resources/etc/usc/usc.properties");
         secureService = UscServiceUtils.getService(UscSecureService.class);
-
         b.group(bossGroup)
          .channel(NioDatagramChannel.class)
          .handler(new ChannelInitializer<DatagramChannel>() {
@@ -56,7 +64,6 @@ public class EchoServerUdp implements Runnable, AutoCloseable {
                 p.addLast(new LoggingHandler("EchoServerUdp Handler 1", LogLevel.TRACE));
             }
         });
-
     }
 
     @Override
@@ -87,10 +94,9 @@ public class EchoServerUdp implements Runnable, AutoCloseable {
                 System.exit(1);
             }
         }
-    	
         try (EchoServerUdp server = new EchoServerUdp(false)) {
             server.run();
-        }
-    }
+		}
+	}
 
 }

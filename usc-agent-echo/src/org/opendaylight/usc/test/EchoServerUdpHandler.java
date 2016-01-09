@@ -16,7 +16,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
 
 /**
- * Handler implementation for the echo server.
+ * UDP handler implementation for the test Echo Sever.
  */
 @Sharable
 public class EchoServerUdpHandler extends SimpleChannelInboundHandler<DatagramPacket> {
@@ -27,7 +27,6 @@ public class EchoServerUdpHandler extends SimpleChannelInboundHandler<DatagramPa
     	LOG.trace("channelRead0: " + msg);
         DatagramPacket reply = new DatagramPacket(msg.content().copy(), msg.sender());
         ctx.writeAndFlush(reply);
-
     }
 
 }

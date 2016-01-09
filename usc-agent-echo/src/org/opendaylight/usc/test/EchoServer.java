@@ -7,18 +7,20 @@
  */
 package org.opendaylight.usc.test;
 
-
+/**
+ * Echo Server use for testing purposes. Returns bytes received over the same
+ * channel as specified by the configuration parameters.
+ */
 public class EchoServer {
-	
-	public static void main(String[] args) throws Exception {
-		int argsNumber = args.length;
+
+    public static void main(String[] args) throws Exception {
+        int argsNumber = args.length;
         int pos = 0;
         int port = 2007;
         boolean tcpFlag = true;
         boolean encryptFlag = false;
-
         while (argsNumber - pos > 0) {
-        	if (args[pos].equals("-t")) {
+            if (args[pos].equals("-t")) {
                 pos++;
                 if (pos > argsNumber) {
                     usage();
@@ -45,16 +47,15 @@ public class EchoServer {
             }
             pos++;
         }
-        
-		if (tcpFlag) {
-			try (EchoServerTcp server = new EchoServerTcp(encryptFlag, port)) {
-				server.run();
-			}
-		} else {
-			try (EchoServerUdp server = new EchoServerUdp(encryptFlag, port)) {
-				server.run();
-			}
-		}
+        if (tcpFlag) {
+            try (EchoServerTcp server = new EchoServerTcp(encryptFlag, port)) {
+                server.run();
+            }
+        } else {
+            try (EchoServerUdp server = new EchoServerUdp(encryptFlag, port)) {
+                server.run();
+            }
+        }
     }
 
     public static void usage() {
@@ -62,9 +63,8 @@ public class EchoServer {
         System.out.println("\t tcpFlag: 'true' for tcp (default), 'false' for udp");
         System.out.println("\t port: Application port,default is 2007");
         System.out.println("\t encryptFlag: if using secure channel,'true' for using, 'false'(default) for not using");
-        System.out
-                .println("\t fileName: the alternative reponse content file,default using the same content of request");
-        System.out
-                .println("\t rate: the rate of receive data, which will decide how many times of request data is the reponse data, it can be less than 1.");
+        System.out.println("\t fileName: the alternative reponse content file,default using the same content of request");
+        System.out.println("\t rate: the rate of receive data, which will decide how many times of request data is the reponse data, it can be less than 1.");
     }
+
 }
