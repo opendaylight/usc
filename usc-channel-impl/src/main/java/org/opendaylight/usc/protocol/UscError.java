@@ -7,6 +7,8 @@
  */
 package org.opendaylight.usc.protocol;
 
+import java.util.Arrays;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
@@ -67,14 +69,8 @@ public class UscError extends UscFrame {
     public UscError(int port, int sessionId, int errorCode) {
         super(OperationType.ERROR, port, sessionId, PAYLOAD_LENGTH);
 
-        ErrorCode ec = ErrorCode.E_OTHER;
-        for (ErrorCode e : ErrorCode.values()) {
-            if (e.code == errorCode) {
-                ec = e;
-                break;
-            }
-        }
-        this.errorCode = ec;
+        this.errorCode = Arrays.stream(ErrorCode.values()).filter(e -> e.code == errorCode).findAny()
+                .orElse(ErrorCode.E_OTHER);
     }
 
     @Override

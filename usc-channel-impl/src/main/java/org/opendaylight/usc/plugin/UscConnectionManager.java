@@ -118,11 +118,7 @@ public class UscConnectionManager {
 
     @VisibleForTesting
     public int getSessionCount() {
-        int count = 0;
-        for (UscChannelImpl connection : connections.values()) {
-            count += connection.getSessionCount();
-        }
-        return count;
+        return connections.values().stream().mapToInt(UscChannelImpl::getSessionCount).sum();
     }
 
     @Override

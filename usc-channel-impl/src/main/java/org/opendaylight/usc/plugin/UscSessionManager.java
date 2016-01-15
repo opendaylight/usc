@@ -82,9 +82,7 @@ public abstract class UscSessionManager {
      * Remove all sessions from this manager.
      */
     public void removeAllSessions() {
-        for (int sessionId : sessions.keySet()) {
-            removeSession(sessionId);
-        }
+        sessions.keySet().stream().forEach(this::removeSession);
     }
 
     public UscSession removeSession(int sessionId) {
