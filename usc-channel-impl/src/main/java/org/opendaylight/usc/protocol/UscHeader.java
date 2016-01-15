@@ -9,6 +9,7 @@ package org.opendaylight.usc.protocol;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 
 /**
  * The USC packet header.
@@ -49,12 +50,7 @@ public class UscHeader {
         }
 
         public static OperationType valueOf(int v) {
-            for (OperationType value : values()) {
-                if (value.value == v) {
-                    return value;
-                }
-            }
-            return null;
+            return Arrays.stream(values()).filter(value -> value.value == v).findAny().orElse(null);
         }
     }
 

@@ -7,6 +7,8 @@
  */
 package org.opendaylight.usc.protocol;
 
+import java.util.Arrays;
+
 import org.opendaylight.usc.protocol.UscHeader.OperationType;
 
 import io.netty.buffer.ByteBuf;
@@ -57,15 +59,8 @@ public class UscControl extends UscFrame {
 	public UscControl(int port, int sessionId, int operationCode) {
 		super(OperationType.CONTROL, port, sessionId, PAYLOAD_LENGTH);
 		
-		ControlCode cc = ControlCode.OTHER;
-		for(ControlCode c : ControlCode.values()) {
-			if(c.getCode() == operationCode) {
-				cc = c;
-				break;
-			}
-		}
-		
-		this.controlCode = cc;
+        this.controlCode = Arrays.stream(ControlCode.values()).filter(c -> c.getCode() == operationCode).findAny()
+                .orElse(ControlCode.OTHER);
 	}
 	
 
