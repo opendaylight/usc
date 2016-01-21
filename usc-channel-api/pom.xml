@@ -49,7 +49,7 @@
           <dependency>
             <groupId>org.opendaylight.mdsal</groupId>
             <artifactId>maven-sal-api-gen-plugin</artifactId>
-            <version>${yangtools.version}</version>
+            <version>${mdsal.model.version}</version>
             <type>jar</type>
           </dependency>
         </dependencies>
@@ -91,7 +91,7 @@
     									yang-maven-plugin
     								</artifactId>
     								<versionRange>
-    									[0.9.0-SNAPSHOT,)
+    									[1.0.0-SNAPSHOT,)
     								</versionRange>
     								<goals>
     									<goal>generate-sources</goal>
