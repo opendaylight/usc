@@ -114,7 +114,7 @@
                       yang-maven-plugin
                     </artifactId>
                     <versionRange>
-                      [0.9.0-SNAPSHOT,)
+                      [1.0.0-SNAPSHOT,)
                     </versionRange>
                     <goals>
                       <goal>generate-sources</goal>
