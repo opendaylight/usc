@@ -126,7 +126,7 @@ public class UscRouteBrokerService {
         List<String> actorList = new ArrayList<String>();
         ActorSelection remoteActorSelection = null;
         scala.collection.immutable.List<Address> seedNodeList = cluster.settings().SeedNodes().toList();
-        for (Address address : JavaConversions.asJavaList(seedNodeList)) {
+        for (Address address : JavaConversions.seqAsJavaList(seedNodeList)) {
             if (isLocalAddress(address)) {
                 continue;
             }
