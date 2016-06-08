@@ -83,6 +83,7 @@ public class UscChannelServiceImpl implements UscChannelService {
 
     @Override
     public Future<RpcResult<AddChannelOutput>> addChannel(AddChannelInput input) {
+        LOG.info("addChannel");
     	String hostname = input.getChannel().getHostname();
         int port = input.getChannel().getPort();
         AddChannelOutputBuilder builder = new AddChannelOutputBuilder();
