@@ -408,6 +408,44 @@ module usc-channel {
             		type int16;
             		description 
             		            "The port of target Netconf device.";
+            	}               	
+            }
+        }
+        output{
+                leaf result{
+            		type string;
+            		description 
+            		            "The result message of rest request.";
+            	}
+        }
+
+    }
+    
+	rpc remove-session {
+        description
+            "remove a session to the USC topology.";
+             
+        input {
+
+            container channel {
+
+            	description
+                    "The channel to be added.";
+
+            	leaf hostname{
+            		type string;
+            		description 
+            		            "The ip address of target Netconf device.";
+            	}
+            	leaf tcp{
+            		type boolean;
+            		description
+            					"true for tcp, false for udp";
+            	}
+            	leaf port{
+            		type int16;
+            		description 
+            		            "The port of target Netconf device.";
             	}        	
             }
         }

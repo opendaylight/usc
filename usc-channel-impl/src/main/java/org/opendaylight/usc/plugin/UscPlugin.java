@@ -460,4 +460,15 @@ public abstract class UscPlugin implements AutoCloseable {
             return false;
         }
     }
+    
+    public UscChannelImpl retrieveChannelImpl(InetSocketAddress address) {
+        try {
+            final UscChannelImpl connection = connectionManager.getConnection(new UscDevice(address.getAddress()),
+                    getChannelType());
+            return connection;
+        } catch (Exception e) {
+            LOG.warn("Unable to retrieve USC channel to " + address.getAddress());
+            return null;
+        }
+    }
 }

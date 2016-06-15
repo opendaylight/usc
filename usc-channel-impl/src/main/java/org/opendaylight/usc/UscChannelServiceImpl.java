@@ -22,14 +22,21 @@ import io.netty.util.AttributeKey;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
 
 import org.opendaylight.usc.manager.UscManagerService;
 import org.opendaylight.usc.manager.UscTopologyService;
 import org.opendaylight.usc.manager.api.UscShardService;
 import org.opendaylight.usc.plugin.UscPlugin;
+import org.opendaylight.usc.plugin.model.UscChannelImpl;
 import org.opendaylight.usc.util.UscServiceUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.AddChannelInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.AddChannelOutput;
@@ -37,6 +44,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.chan
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.RemoveChannelInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.RemoveChannelOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.RemoveChannelOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.RemoveSessionInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.RemoveSessionOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.RemoveSessionOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.UscChannelService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.ViewChannelInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.ViewChannelOutput;
@@ -63,8 +73,8 @@ public class UscChannelServiceImpl implements UscChannelService {
     private UscShardService shardService;
     private UscTopologyService topoService;
     public static final AttributeKey<String> CLIENT_KEY = AttributeKey.valueOf("client_key");
-    private Hashtable<String, Channel> connectList = new Hashtable<String, Channel>();
-    private Hashtable<String, EventLoopGroup> groupList = new Hashtable<String, EventLoopGroup>();
+    private ConcurrentMap<String, Channel> connectList = new ConcurrentHashMap<String, Channel>();
+    private ConcurrentMap<String, EventLoopGroup> groupList = new ConcurrentHashMap<String, EventLoopGroup>();
 
     /**
      * Create a UscService and initialize the Shard Service
@@ -145,6 +155,59 @@ public class UscChannelServiceImpl implements UscChannelService {
 
     @Override
     public Future<RpcResult<RemoveChannelOutput>> removeChannel(RemoveChannelInput input) {
+       String hostname = input.getChannel().getHostname();
+       boolean isTcp = input.getChannel().isTcp();
+       boolean isFound = false;
+       
+       String result = "Failed to remove channel(" + hostname + ": " + isTcp + ")!";
+       Iterator it = connectList.entrySet().iterator();
+       while(it.hasNext()) {
+    	   Map.Entry<String, Channel> item = (Map.Entry<String, Channel>)it.next();
+    	   String connectionName = item.getKey();
+        	if(connectionName.contains(hostname) && connectionName.contains(Boolean.toString(isTcp))) {
+        		Channel clientChannel = connectList.get(connectionName);
+        		clientChannel.close();
+        		it.remove();
+        		isFound = true;
+        	}
+       }
+        
+        it = groupList.entrySet().iterator();
+        while(it.hasNext()) {
+        	Map.Entry<String, EventLoopGroup> item = (Map.Entry<String, EventLoopGroup>)it.next();
+     	    String groupName = item.getKey();
+        	if(groupName.contains(hostname) && groupName.contains(Boolean.toString(isTcp))) {
+        		EventLoopGroup group = item.getValue();
+        		closeConnect(group);
+        		it.remove();
+        		isFound = true;
+        	}
+        }
+    
+        UscPlugin plugin = null;
+    	if(isTcp)
+    		plugin = UscManagerService.getInstance().getPluginTcp();
+    	else
+    		plugin = UscManagerService.getInstance().getPluginUdp();
+
+    	InetSocketAddress address = new InetSocketAddress(hostname, 9999);
+    	UscChannelImpl channelImpl = plugin.retrieveChannelImpl(address);
+    	LOG.info("address is" + address + ", Channel is " + channelImpl.getChannel());
+    	channelImpl.getChannel().close();
+    	
+    	
+        LOG.trace("connectList is " + connectList + "; groupList is " + groupList);
+        
+        if(isFound)
+            result = "Succeed to remove channel(" + hostname + ": " + isTcp + ")!";
+
+        RemoveChannelOutputBuilder builder = new RemoveChannelOutputBuilder();
+        builder.setResult(result);
+        return RpcResultBuilder.success(builder.build()).buildFuture();
+    }
+    
+    @Override
+    public Future<RpcResult<RemoveSessionOutput>> removeSession(RemoveSessionInput input) {
         String hostname = input.getChannel().getHostname();
         int port = input.getChannel().getPort();
         boolean isTcp = input.getChannel().isTcp();
@@ -161,7 +224,7 @@ public class UscChannelServiceImpl implements UscChannelService {
             closeConnect(group);
             result = "Succeed to remove device(" + hostname + ":" + port + ")!";
         }
-        RemoveChannelOutputBuilder builder = new RemoveChannelOutputBuilder();
+        RemoveSessionOutputBuilder builder = new RemoveSessionOutputBuilder();
         builder.setResult(result);
         return RpcResultBuilder.success(builder.build()).buildFuture();
     }
