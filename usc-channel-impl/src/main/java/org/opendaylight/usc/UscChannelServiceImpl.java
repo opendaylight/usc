@@ -157,9 +157,8 @@ public class UscChannelServiceImpl implements UscChannelService {
     public Future<RpcResult<RemoveChannelOutput>> removeChannel(RemoveChannelInput input) {
        String hostname = input.getChannel().getHostname();
        boolean isTcp = input.getChannel().isTcp();
-       boolean isFound = false;
-       
-       String result = "Failed to remove channel(" + hostname + ": " + isTcp + ")!";
+
+       LOG.debug("Beginning of removeChannel: connectList is " + connectList + "; groupList is " + groupList);
        Iterator it = connectList.entrySet().iterator();
        while(it.hasNext()) {
     	   Map.Entry<String, Channel> item = (Map.Entry<String, Channel>)it.next();
@@ -168,7 +167,6 @@ public class UscChannelServiceImpl implements UscChannelService {
         		Channel clientChannel = connectList.get(connectionName);
         		clientChannel.close();
         		it.remove();
-        		isFound = true;
         	}
        }
         
@@ -180,7 +178,6 @@ public class UscChannelServiceImpl implements UscChannelService {
         		EventLoopGroup group = item.getValue();
         		closeConnect(group);
         		it.remove();
-        		isFound = true;
         	}
         }
     
@@ -190,16 +187,16 @@ public class UscChannelServiceImpl implements UscChannelService {
     	else
     		plugin = UscManagerService.getInstance().getPluginUdp();
 
+        String result = "Failed to remove channel(" + hostname + ": " + isTcp + ")!";
     	InetSocketAddress address = new InetSocketAddress(hostname, 9999);
     	UscChannelImpl channelImpl = plugin.retrieveChannelImpl(address);
-    	LOG.info("address is" + address + ", Channel is " + channelImpl.getChannel());
-    	channelImpl.getChannel().close();
+    	if(channelImpl != null) {
+    		LOG.info("address is" + address + ", Channel is " + channelImpl.getChannel());
+    		channelImpl.getChannel().close();
+    		result = "Succeed to remove channel(" + hostname + ": " + isTcp + ")!";
+    	}
     	
-    	
-        LOG.trace("connectList is " + connectList + "; groupList is " + groupList);
-        
-        if(isFound)
-            result = "Succeed to remove channel(" + hostname + ": " + isTcp + ")!";
+        LOG.debug("End of removeChannel: connectList is " + connectList + "; groupList is " + groupList);
 
         RemoveChannelOutputBuilder builder = new RemoveChannelOutputBuilder();
         builder.setResult(result);
@@ -212,6 +209,7 @@ public class UscChannelServiceImpl implements UscChannelService {
         int port = input.getChannel().getPort();
         boolean isTcp = input.getChannel().isTcp();
         
+        LOG.debug("Beginning of removeSession: connectList is " + connectList + "; groupList is " + groupList);
         Channel clientChannel = connectList.get(hostname + ":" + port + isTcp);
         EventLoopGroup group = groupList.get(hostname + ":" + port + isTcp);
         String result = "";
@@ -222,8 +220,14 @@ public class UscChannelServiceImpl implements UscChannelService {
         } else {
             // plugin.closeAgentInternalConnection(clientChannel);
             closeConnect(group);
-            result = "Succeed to remove device(" + hostname + ":" + port + ")!";
+            clientChannel.close();
+            connectList.remove(hostname + ":" + port + isTcp);
+            groupList.remove(hostname + ":" + port + isTcp);
+            
+            result = "Succeed to remove session (" + hostname + ":" + port + ")!";
         }
+        
+        LOG.debug("End of removeSession: connectList is " + connectList + "; groupList is " + groupList);
         RemoveSessionOutputBuilder builder = new RemoveSessionOutputBuilder();
         builder.setResult(result);
         return RpcResultBuilder.success(builder.build()).buildFuture();
