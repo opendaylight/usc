@@ -1,0 +1,7 @@
+Code-Review+2: A H <an.ho@huawei.com>
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Submitted-by: Victor Xu <s.xu@huawei.com>
+Submitted-at: Tue, 28 Jun 2016 17:43:14 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/40898
+Project: usc
+Branch: refs/heads/stable/beryllium
