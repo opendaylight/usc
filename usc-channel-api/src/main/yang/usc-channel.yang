@@ -404,11 +404,6 @@ module usc-channel {
             		description
             					"true for tcp, false for udp";
             	}
-            	leaf port{
-            		type int16;
-            		description 
-            		            "The port of target Netconf device.";
-            	}               	
             }
         }
         output{
