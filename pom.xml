@@ -32,7 +32,6 @@
     <module>usc-features</module>
     <module>usc-artifacts</module>
   </modules>
-  <url>https://wiki.opendaylight.org/view/USC:Main</url>
   <licenses>
     <license>
       <name>Eclipse Public License v1.0</name>
@@ -48,10 +47,61 @@
       <organizationUrl>http://www.huawei.com</organizationUrl>
     </developer>
   </developers>
+
+  <profiles>
+    <profile>
+      <!--
+          This profile is to ensure we only build javadocs reports
+          when we plan to deploy Maven site for our project.
+      -->
+      <id>maven-site</id>
+      <activation>
+        <file>
+          <exists>${user.dir}/deploy-site.xml</exists>
+        </file>
+      </activation>
+
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <inherited>false</inherited>
+            <executions>
+              <execution>
+                <id>aggregate</id>
+                <goals>
+                  <goal>aggregate</goal>
+                </goals>
+                <phase>package</phase>
+            </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/usc.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/usc.git</developerConnection>
     <tag>HEAD</tag>
     <url>https://wiki.opendaylight.org/view/USC:Main</url>
   </scm>
+
+  <!--
+      Maven Site Configuration
+
+      The following configuration is necessary for maven-site-plugin to
+      correctly identify the correct deployment path for OpenDaylight Maven
+      sites.
+  -->
+  <url>${odl.site.url}/${project.groupId}/${stream}/</url>
+
+  <distributionManagement>
+    <site>
+      <id>opendaylight-site</id>
+      <url>${nexus.site.url}/</url>
+    </site>
+  </distributionManagement>
 </project>
