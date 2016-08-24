@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Victor Xu <s.xu@huawei.com>
+Submitted-by: Victor Xu <s.xu@huawei.com>
+Submitted-at: Wed, 24 Aug 2016 00:03:38 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/44581
+Project: usc
+Branch: refs/heads/stable/boron
