@@ -10,18 +10,18 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>karaf-parent</artifactId>
-    <version>1.7.0-SNAPSHOT</version>
+    <version>1.7.1-SNAPSHOT</version>
     <relativePath />
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.usc</groupId>
   <artifactId>usc-karaf</artifactId>
-  <version>1.2.0-SNAPSHOT</version>
+  <version>1.2.1-SNAPSHOT</version>
   <name>${project.artifactId}</name>
   <properties>
-    <feature.aaa.version>0.4.0-SNAPSHOT</feature.aaa.version>
-    <feature.mdsal.version>1.4.0-SNAPSHOT</feature.mdsal.version>
-    <feature.dlux.version>0.4.0-SNAPSHOT</feature.dlux.version>
+    <feature.aaa.version>0.4.1-SNAPSHOT</feature.aaa.version>
+    <feature.mdsal.version>1.4.1-SNAPSHOT</feature.mdsal.version>
+    <feature.dlux.version>0.4.1-SNAPSHOT</feature.dlux.version>
   </properties>
   <prerequisites>
     <maven>3.1.1</maven>
