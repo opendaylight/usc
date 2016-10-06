@@ -29,7 +29,7 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.netconf</groupId>
-      <artifactId>netconf-config-dispatcher</artifactId>
+      <artifactId>netconf-client</artifactId>
       <version>${usc.netconf.version}</version>
     </dependency>
     <dependency>
