@@ -93,7 +93,6 @@
   </configuration>
   <required-capabilities>
       <capability>urn:opendaylight:params:xml:ns:yang:usc:netconf:client:dispatcher?module=odl-usc-netconfig-client-cfg&amp;revision=2015-03-25</capability>
-      <capability>urn:opendaylight:params:xml:ns:yang:controller:config:netconf:client:dispatcher?module=odl-netconfig-client-cfg&amp;revision=2014-04-08</capability>
       <capability>urn:opendaylight:params:xml:ns:yang:controller:threadpool:impl?module=threadpool-impl&amp;revision=2013-04-05</capability>
       <capability>urn:opendaylight:params:xml:ns:yang:controller:threadpool:impl:flexible?module=threadpool-impl-flexible&amp;revision=2013-12-01</capability>
   </required-capabilities>
