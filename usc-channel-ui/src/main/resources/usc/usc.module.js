@@ -9,7 +9,8 @@ define(['angularAMD', 'app/routingConfig', 'app/core/core.services','Restangular
 
   var usc = angular.module('app.usc', ['ui.router.state','app.core','restangular', 'config']);
 
-  usc.config(function($stateProvider, $controllerProvider, $compileProvider, $provide, $translateProvider, NavHelperProvider) {
+  usc.config(function($stateProvider, $controllerProvider, $compileProvider, $provide, $translateProvider,
+                      $urlRouterProvider, NavHelperProvider) {
 
   usc.register = {
       controller : $controllerProvider.register,
@@ -22,6 +23,8 @@ define(['angularAMD', 'app/routingConfig', 'app/core/core.services','Restangular
       prefix: 'assets/data/locale-',
       suffix: '.json'
     });
+
+    $urlRouterProvider.otherwise('/usc');
 
     NavHelperProvider.addControllerUrl('app/usc/usc.controller');
     NavHelperProvider.addToMenu('usc', {
