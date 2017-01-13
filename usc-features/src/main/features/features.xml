@@ -38,7 +38,6 @@
   <feature name='odl-usc-channel-rest' version='${project.version}' description='OpenDaylight :: USC :: Channel :: REST'>
     <feature version="${restconf.version}">odl-restconf</feature>
     <feature version="${mdsal.version}">odl-mdsal-apidocs</feature>
-    <feature version="${mdsal.version}">odl-mdsal-xsql</feature>
     <feature version="${project.version}">odl-usc-channel</feature>
   </feature>
   <feature name='odl-usc-channel-ui' version='${project.version}' description='OpenDaylight :: USC :: Channel :: UI'>
