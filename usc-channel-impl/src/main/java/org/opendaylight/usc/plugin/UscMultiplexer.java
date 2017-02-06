@@ -58,26 +58,30 @@ public class UscMultiplexer extends ChannelInboundHandlerAdapter {
             } else
                 outboundChannel.write(msg);
         } else {
-            UscSessionImpl session = ch.attr(UscPlugin.SESSION).get().get();
-            outboundChannel = session.getChannel().getChannel();
+            try {
+                UscSessionImpl session = ch.attr(UscPlugin.SESSION).get().get();
+                outboundChannel = session.getChannel().getChannel();
 
-            UscData reply = null;
-            ByteBuf subPayload = null;
-            int length = payload.readableBytes();
-            int bytesOut = length;
-            int index = 0;
-            int realLength = 0;
-            while (length > 0) {
-                realLength = (length > MAX_PAYLOAD_SIZE) ? MAX_PAYLOAD_SIZE : length;
-                subPayload = payload.copy(index, realLength);
-                index += realLength;
-                length -= realLength;
+                UscData reply = null;
+                ByteBuf subPayload = null;
+                int length = payload.readableBytes();
+                int bytesOut = length;
+                int index = 0;
+                int realLength = 0;
+                while (length > 0) {
+                    realLength = (length > MAX_PAYLOAD_SIZE) ? MAX_PAYLOAD_SIZE : length;
+                    subPayload = payload.copy(index, realLength);
+                    index += realLength;
+                    length -= realLength;
 
-                reply = new UscData(session.getPort(), session.getSessionId(), subPayload);
-                LOG.trace("Send data to Java Agent " + reply);
-                outboundChannel.writeAndFlush(reply);
+                    reply = new UscData(session.getPort(), session.getSessionId(), subPayload);
+                    LOG.trace("Send data to Java Agent " + reply);
+                    outboundChannel.writeAndFlush(reply);
+                }
+                plugin.sendEvent(new UscSessionTransactionEvent(session, 0, bytesOut));
+            } finally {
+                payload.release();
             }
-            plugin.sendEvent(new UscSessionTransactionEvent(session, 0, bytesOut));
         }
     }
 
