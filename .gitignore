@@ -16,3 +16,7 @@ target/
 
 # ODL
 yang-gen-*/
+
+# IntelliJ
+.idea/
+*.iml
