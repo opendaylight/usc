@@ -27,6 +27,7 @@
     <feature version='${project.version}'>odl-usc-api</feature>
     <bundle>mvn:org.opendaylight.usc/usc-channel-impl/${project.version}</bundle>
     <bundle>mvn:org.opendaylight.usc/usc-netconf-client-dispatcher/${project.version}</bundle>
+    <bundle>mvn:org.bouncycastle/bcprov-jdk15on/{{VERSION}}</bundle>
     <configfile finalname='etc/usc/certificates/client.key.pem'>mvn:org.opendaylight.usc/usc-channel-impl/${project.version}/pem/clientkey</configfile>
     <configfile finalname='etc/usc/certificates/client.pem'>mvn:org.opendaylight.usc/usc-channel-impl/${project.version}/pem/client</configfile>
     <configfile finalname='etc/usc/certificates/rootCA.pem'>mvn:org.opendaylight.usc/usc-channel-impl/${project.version}/pem/rootCA</configfile>

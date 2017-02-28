@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright © 2017 Red Hat, Inc. and others.
+
+ This program and the accompanying materials are made available under the
+ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<features name="odl-usc-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0">
+    <feature name="odl-usc-channel" version="${project.version}">
+        <configfile finalname="etc/usc/certificates/client.key.pem">
+            mvn:org.opendaylight.usc/usc-channel-impl/${project.version}/pem/clientkey
+        </configfile>
+        <configfile finalname="etc/usc/certificates/client.pem">
+            mvn:org.opendaylight.usc/usc-channel-impl/${project.version}/pem/client
+        </configfile>
+        <configfile finalname="etc/usc/certificates/rootCA.pem">
+            mvn:org.opendaylight.usc/usc-channel-impl/${project.version}/pem/rootCA
+        </configfile>
+        <configfile finalname="etc/usc/usc.properties">
+            mvn:org.opendaylight.usc/usc-channel-impl/${project.version}/properties/usc
+        </configfile>
+        <configfile finalname="etc/usc/akka.conf">
+            mvn:org.opendaylight.usc/usc-channel-impl/${project.version}/conf/akka
+        </configfile>
+        <configfile finalname="etc/opendaylight/karaf/00-usc.xml">
+            mvn:org.opendaylight.usc/usc-channel-impl/${project.version}/xml/config
+        </configfile>
+        <configfile finalname="etc/opendaylight/karaf/01-usc-netconf.xml">
+            mvn:org.opendaylight.usc/usc-netconf-client-dispatcher/${project.version}/xml/config
+        </configfile>
+    </feature>
+</features>
