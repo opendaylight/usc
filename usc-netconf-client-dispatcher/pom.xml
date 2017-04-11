@@ -11,18 +11,18 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>config-parent</artifactId>
-    <version>0.6.0-SNAPSHOT</version>
+    <version>0.7.0-SNAPSHOT</version>
     <relativePath/>
   </parent>
   <groupId>org.opendaylight.usc</groupId>
   <artifactId>usc-netconf-client-dispatcher</artifactId>
-  <version>1.3.0-SNAPSHOT</version>
+  <version>1.4.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <!-- <name> formatting is used by autorelease to parse and notify projects on
        build failure. Please do not modify this unless you have a good reason. -->
   <name>ODL :: usc :: ${project.artifactId}</name>
   <properties>
-    <usc.netconf.version>1.2.0-SNAPSHOT</usc.netconf.version>
+    <usc.netconf.version>1.3.0-SNAPSHOT</usc.netconf.version>
   </properties>
   <dependencies>
     <dependency>
@@ -37,7 +37,7 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>usc-channel-impl</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
+      <version>1.4.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
@@ -116,7 +116,7 @@
                       yang-maven-plugin
                     </artifactId>
                     <versionRange>
-                      [1.1.0-SNAPSHOT,)
+                      [1.2.0-SNAPSHOT,)
                     </versionRange>
                     <goals>
                       <goal>generate-sources</goal>
