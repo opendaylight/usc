@@ -10,17 +10,17 @@
   <parent>
     <groupId>org.opendaylight.mdsal</groupId>
     <artifactId>binding-parent</artifactId>
-    <version>0.9.4-SNAPSHOT</version>
+    <version>0.9.5-SNAPSHOT</version>
     <relativePath />
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.usc</groupId>
   <artifactId>usc-channel-ui</artifactId>
-  <version>1.2.4-SNAPSHOT</version>
+  <version>1.2.5-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
   <properties>
-    <dlux.version>0.4.4-SNAPSHOT</dlux.version>
+    <dlux.version>0.4.5-SNAPSHOT</dlux.version>
   </properties>
   <dependencies>
     <dependency>
