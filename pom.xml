@@ -10,7 +10,7 @@
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>odlparent</artifactId>
-    <version>1.9.0</version>
+    <version>2.0.2</version>
     <relativePath></relativePath>
   </parent>
   <groupId>org.opendaylight.usc</groupId>
@@ -27,7 +27,6 @@
     <module>usc-channel-api</module>
     <module>usc-channel-impl</module>
     <module>usc-channel-ui</module>
-    <module>usc-netconf-client-dispatcher</module>
     <module>usc-karaf</module>
     <module>usc-features</module>
     <module>usc-artifacts</module>

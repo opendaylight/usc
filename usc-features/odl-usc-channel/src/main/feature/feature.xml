@@ -26,8 +26,5 @@
         <configfile finalname="etc/opendaylight/karaf/00-usc.xml">
             mvn:org.opendaylight.usc/usc-channel-impl/${project.version}/xml/config
         </configfile>
-        <configfile finalname="etc/opendaylight/karaf/01-usc-netconf.xml">
-            mvn:org.opendaylight.usc/usc-netconf-client-dispatcher/${project.version}/xml/config
-        </configfile>
     </feature>
 </features>
