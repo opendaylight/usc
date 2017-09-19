@@ -20,7 +20,7 @@
 
     <groupId>org.opendaylight.usc</groupId>
     <artifactId>usc-features</artifactId>
-    <version>1.4.0-SNAPSHOT</version>
+    <version>1.4.0</version>
     <packaging>feature</packaging>
     <!-- <name> formatting is used by autorelease to parse and notify projects on
          build failure. Please do not modify this unless you have a good reason. -->
