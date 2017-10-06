@@ -23,8 +23,5 @@
         <configfile finalname="etc/usc/akka.conf">
             mvn:org.opendaylight.usc/usc-channel-impl/${project.version}/conf/akka
         </configfile>
-        <configfile finalname="etc/opendaylight/karaf/00-usc.xml">
-            mvn:org.opendaylight.usc/usc-channel-impl/${project.version}/xml/config
-        </configfile>
     </feature>
 </features>

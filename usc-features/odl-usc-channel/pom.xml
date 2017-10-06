@@ -94,13 +94,5 @@
             <type>conf</type>
             <classifier>akka</classifier>
         </dependency>
-        <dependency>
-            <!-- finalname="etc/opendaylight/karaf/00-usc.xml" -->
-            <groupId>${project.groupId}</groupId>
-            <artifactId>usc-channel-impl</artifactId>
-            <version>${project.version}</version>
-            <type>xml</type>
-            <classifier>config</classifier>
-        </dependency>
     </dependencies>
 </project>
