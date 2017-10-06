@@ -8,24 +8,19 @@
 package org.opendaylight.usc;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistration;
-import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.usc.manager.UscManagerService;
 import org.opendaylight.usc.manager.monitor.UscAsynchronousEventHandler;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.usc.channel.rev150101.UscChannelService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * USC Provider registers and offers channel related services
  */
-public class UscProvider implements BindingAwareProvider, AutoCloseable {
+public class UscProvider implements AutoCloseable {
 
     private static final Logger LOG = LoggerFactory
             .getLogger(UscProvider.class);
-    private RpcRegistration<UscChannelService> uscChannelService;
-    private DataBroker dataService;
+    private final DataBroker dataService;
 
     public UscProvider(DataBroker dataService) {
         if (dataService == null) {
@@ -34,21 +29,17 @@ public class UscProvider implements BindingAwareProvider, AutoCloseable {
         this.dataService = dataService;
     }
 
-    @Override
-    public void onSessionInitiated(ProviderContext session) {
+    public void init() {
         if (dataService == null) {
             LOG.error("Shard data service is null!");
         }
         UscManagerService.getInstance().init(dataService);
-        UscChannelServiceImpl service = new UscChannelServiceImpl();
-        uscChannelService = session.addRpcImplementation(UscChannelService.class, service);
-        LOG.info("UscProvider Session Initiated");
+        LOG.info("UscProvider Initiated");
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         UscAsynchronousEventHandler.closeExecutorService();
-        uscChannelService.close();
         UscManagerService.getInstance().destroy();
         LOG.info("UscProvider Closed");
     }
