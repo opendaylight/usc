@@ -21,7 +21,6 @@
        build failure. Please do not modify this unless you have a good reason. -->
   <name>ODL :: usc :: ${project.artifactId}</name>
   <properties>
-    <feature.aaa.version>0.7.0-SNAPSHOT</feature.aaa.version>
     <feature.mdsal.version>1.7.0-SNAPSHOT</feature.mdsal.version>
     <feature.dlux.version>0.7.0-SNAPSHOT</feature.dlux.version>
   </properties>
@@ -57,14 +56,6 @@
       <groupId>org.opendaylight.dlux</groupId>
       <artifactId>features-dlux</artifactId>
       <version>${feature.dlux.version}</version>
-      <classifier>features</classifier>
-      <type>xml</type>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.aaa</groupId>
-      <artifactId>features-aaa</artifactId>
-      <version>${feature.aaa.version}</version>
       <classifier>features</classifier>
       <type>xml</type>
       <scope>runtime</scope>
