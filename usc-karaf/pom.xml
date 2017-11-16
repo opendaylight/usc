@@ -63,7 +63,7 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.aaa</groupId>
-      <artifactId>features-aaa</artifactId>
+      <artifactId>features-aaa-shiro</artifactId>
       <version>${feature.aaa.version}</version>
       <classifier>features</classifier>
       <type>xml</type>
