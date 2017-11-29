@@ -1,8 +1,4 @@
-# UUID                                  	Group Name
+# UUID                                                        	Group Name
 #
-2c1082352db513c14f958da17a7387e4763a83e9	Non-Interactive usc users
-c9025ab9ddc1e3171919e085449f22c54f8f7b54	GitHub Replication
-global:Anonymous-Users                  	Anonymous Users
-global:Registered-Users                 	Registered Users
-ldap:cn=gerrit-aaa-committers,ou=Groups,dc=opendaylight,dc=org	ldap/gerrit-aaa-committers
+c9025ab9ddc1e3171919e085449f22c54f8f7b54                      	GitHub Replication
 ldap:cn=gerrit-usc-committers,ou=Groups,dc=opendaylight,dc=org	ldap/gerrit-usc-committers
