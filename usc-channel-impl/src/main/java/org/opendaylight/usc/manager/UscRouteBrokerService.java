@@ -8,6 +8,18 @@
 
 package org.opendaylight.usc.manager;
 
+import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
+import akka.actor.ActorSystem;
+import akka.actor.Address;
+import akka.cluster.Cluster;
+import akka.cluster.Member;
+import akka.osgi.BundleDelegatingClassLoader;
+import com.google.common.base.Preconditions;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.local.LocalChannel;
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -16,10 +28,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
-
-import io.netty.buffer.Unpooled;
-import io.netty.channel.local.LocalChannel;
-
 import org.opendaylight.usc.manager.api.UscConfigurationService;
 import org.opendaylight.usc.manager.api.UscMonitor;
 import org.opendaylight.usc.manager.cluster.UscCommunicatorActor;
@@ -51,20 +59,7 @@ import org.opendaylight.usc.util.UscServiceUtils;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import scala.collection.JavaConversions;
-
-import com.google.common.base.Preconditions;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
-
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.ActorSystem;
-import akka.actor.Address;
-import akka.cluster.Cluster;
-import akka.cluster.Member;
-import akka.osgi.BundleDelegatingClassLoader;
 
 /**
  * the route broker service, create the actor system and manage all of route
@@ -76,18 +71,18 @@ public class UscRouteBrokerService {
     private static final String COMMUNICATOR_ACTOR_NAME = "UscCommunicator";
     private static final Logger LOG = LoggerFactory.getLogger(UscRouteBrokerService.class);
     private UscDeviceMountTable deviceTable;
-    private UscRoutedRemoteSessionManager remoteSessionManager = new UscRoutedRemoteSessionManager();
-    private UscRoutedLocalSessionManager localSessionManager = new UscRoutedLocalSessionManager();
-    private ConcurrentHashMap<String, UscConnectionManager> connectionManagerMap = new ConcurrentHashMap<String, UscConnectionManager>();
-    private ConcurrentHashMap<UscRemoteChannelIdentifier, Integer> sessionIdMap = new ConcurrentHashMap<UscRemoteChannelIdentifier, Integer>();
+    private final UscRoutedRemoteSessionManager remoteSessionManager = new UscRoutedRemoteSessionManager();
+    private final UscRoutedLocalSessionManager localSessionManager = new UscRoutedLocalSessionManager();
+    private final ConcurrentHashMap<String, UscConnectionManager> connectionManagerMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UscRemoteChannelIdentifier, Integer> sessionIdMap = new ConcurrentHashMap<>();
     private ActorRef communicator;
     private static UscRouteBrokerService service = new UscRouteBrokerService();
     private final int MAX_FIXED_SESSION_ID = Character.MAX_VALUE - 1000;
     private ActorSystem actorSystem = null;
-    private Set<ActorSelection> remoteActors = new CopyOnWriteArraySet<ActorSelection>();
+    private final Set<ActorSelection> remoteActors = new CopyOnWriteArraySet<>();
     private Config actorSystemConfig = null;
     private Cluster cluster = null;
-    private UscMonitor monitor = new UscMonitorImpl();
+    private final UscMonitor monitor = new UscMonitorImpl();
 
     private UscRouteBrokerService() {
 
@@ -123,7 +118,7 @@ public class UscRouteBrokerService {
     }
 
     private void updateActorListFromCluster() {
-        List<String> actorList = new ArrayList<String>();
+        List<String> actorList = new ArrayList<>();
         ActorSelection remoteActorSelection = null;
         scala.collection.immutable.List<Address> seedNodeList = cluster.settings().SeedNodes().toList();
         for (Address address : JavaConversions.seqAsJavaList(seedNodeList)) {
@@ -250,8 +245,9 @@ public class UscRouteBrokerService {
      * @return true for remote route identifier, false for others
      */
     public boolean isRemoteSession(UscRouteIdentifier routeId) {
-        if (routeId == null)
+        if (routeId == null) {
             return false;
+        }
         return remoteSessionManager.isRemoteSession(routeId);
     }
 
@@ -624,7 +620,7 @@ public class UscRouteBrokerService {
      */
     public void destroy() {
         if (actorSystem != null) {
-            actorSystem.shutdown();
+            actorSystem.terminate();
         }
     }
 
