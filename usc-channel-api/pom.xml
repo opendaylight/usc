@@ -10,13 +10,13 @@
   <parent>
     <groupId>org.opendaylight.mdsal</groupId>
     <artifactId>binding-parent</artifactId>
-    <version>0.12.0-SNAPSHOT</version>
+    <version>0.13.0-SNAPSHOT</version>
     <relativePath />
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.usc</groupId>
   <artifactId>usc-channel-api</artifactId>
-  <version>1.5.0-SNAPSHOT</version>
+  <version>1.6.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <!-- <name> formatting is used by autorelease to parse and notify projects on
        build failure. Please do not modify this unless you have a good reason. -->
@@ -51,7 +51,7 @@
           <dependency>
             <groupId>org.opendaylight.mdsal</groupId>
             <artifactId>maven-sal-api-gen-plugin</artifactId>
-            <version>0.12.0-SNAPSHOT</version>
+            <version>0.13.0-SNAPSHOT</version>
             <type>jar</type>
           </dependency>
         </dependencies>
@@ -93,7 +93,7 @@
     									yang-maven-plugin
     								</artifactId>
     								<versionRange>
-    									[1.3.0-SNAPSHOT,)
+    									[1.4.0-SNAPSHOT,)
     								</versionRange>
     								<goals>
     									<goal>generate-sources</goal>
