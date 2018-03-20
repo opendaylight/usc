@@ -20,7 +20,7 @@
 
     <groupId>org.opendaylight.usc</groupId>
     <artifactId>odl-usc-channel-rest</artifactId>
-    <version>1.5.0-SNAPSHOT</version>
+    <version>1.5.0</version>
     <packaging>feature</packaging>
 
     <!-- <name> formatting is used by autorelease to parse and notify projects on
@@ -31,14 +31,14 @@
         <dependency>
             <groupId>org.opendaylight.netconf</groupId>
             <artifactId>odl-restconf</artifactId>
-            <version>1.7.0-SNAPSHOT</version>
+            <version>1.7.0</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.netconf</groupId>
             <artifactId>odl-mdsal-apidocs</artifactId>
-            <version>1.7.0-SNAPSHOT</version>
+            <version>1.7.0</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>

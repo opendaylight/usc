@@ -16,13 +16,13 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.usc</groupId>
   <artifactId>usc-karaf</artifactId>
-  <version>1.5.0-SNAPSHOT</version>
+  <version>1.5.0</version>
   <!-- <name> formatting is used by autorelease to parse and notify projects on
        build failure. Please do not modify this unless you have a good reason. -->
   <name>ODL :: usc :: ${project.artifactId}</name>
   <properties>
-    <feature.mdsal.version>1.7.0-SNAPSHOT</feature.mdsal.version>
-    <feature.dlux.version>0.7.0-SNAPSHOT</feature.dlux.version>
+    <feature.mdsal.version>1.7.0</feature.mdsal.version>
+    <feature.dlux.version>0.7.0</feature.dlux.version>
   </properties>
   <prerequisites>
     <maven>3.1.1</maven>
