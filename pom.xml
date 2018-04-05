@@ -22,16 +22,17 @@
   <prerequisites>
     <maven>3.1.1</maven>
   </prerequisites>
+
   <modules>
     <module>usc-agent</module>
     <module>usc-channel-api</module>
     <module>usc-channel-impl</module>
     <module>usc-channel-ui</module>
     <module>usc-netconf-client-dispatcher</module>
-    <module>usc-karaf</module>
     <module>usc-features</module>
     <module>usc-artifacts</module>
   </modules>
+
   <licenses>
     <license>
       <name>Eclipse Public License v1.0</name>
@@ -47,6 +48,19 @@
       <organizationUrl>http://www.huawei.com</organizationUrl>
     </developer>
   </developers>
+
+  <profiles>
+    <profile>
+      <id>karaf</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+
+      <modules>
+        <module>usc-karaf</module>
+      </modules>
+    </profile>
+  </profiles>
 
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/usc.git</connection>
