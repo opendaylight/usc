@@ -18,7 +18,7 @@
 
     <groupId>org.opendaylight.usc</groupId>
     <artifactId>odl-usc-agent</artifactId>
-    <version>1.4.3-SNAPSHOT</version>
+    <version>1.4.3</version>
     <packaging>feature</packaging>
 
     <!-- <name> formatting is used by autorelease to parse and notify projects on
