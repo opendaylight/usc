@@ -15,7 +15,7 @@
   </parent>
   <groupId>org.opendaylight.usc</groupId>
   <artifactId>usc-aggregator</artifactId>
-  <version>1.5.4-SNAPSHOT</version>
+  <version>1.5.5-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>usc</name>
   <description>OpenDaylight Unified Secure Channel</description>
