@@ -1,0 +1,43 @@
+---
+project: 'usc'
+project_creation_date: '2014-12-11'
+project_category: ''
+lifecycle_state: 'Incubation'
+project_lead: &odl_usc_ptl
+    name: 'A H'
+    email: 'an.ipbu@gmail.com'
+    company: ''
+    id: 'anipbu'
+    timezone: 'Unknown/Unknown'
+primary_contact: *odl_usc_ptl
+issue_tracking:
+    type: 'jira'
+    url: 'https://jira.opendaylight.org/projects/'
+    key: 'usc'
+mailing_list:
+    type: 'groups.io'
+    url: 'app-dev@lists.opendaylight.org'
+    tag: '[]'
+realtime_discussion:
+    type: 'irc'
+    server: 'freenode.net'
+    channel: '#opendaylight'
+meetings:
+    - type: 'gotomeeting+irc'
+      agenda: 'https://wiki.opendaylight.org'
+      url: ''
+      server: 'freenode.net'
+      channel: '#opendaylight'
+      repeats: ''
+      time: ''
+repositories:
+    - usc
+committers:
+    - <<: *odl_usc_ptl
+tsc:
+    # yamllint disable rule:line-length
+    approval: ''
+    changes:
+        - type: ''
+          name: ''
+          link: ''
