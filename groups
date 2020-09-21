@@ -1,4 +1,5 @@
 # UUID                                                             	Group Name
 #
+901618e20f192fd9d1eee6c27315dd2430e9fbf4                           	saml/odl-gerrit-usc-committers
 c9025ab9ddc1e3171919e085449f22c54f8f7b54                           	GitHub Replication
 ldap:cn=odl-gerrit-usc-committers,ou=Groups,dc=freestandards,dc=org	ldap/odl-gerrit-usc-committers
